@@ -514,10 +514,6 @@ def lambda_handler(event, context):
 - Enhanced VPC endpoint policies
 ```
 
-![glue](https://docs.aws.amazon.com/images/glue/latest/dg/images/HowItWorks-overview.png)
-
-> Image from: https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html
-
 Now that you understand how data flows through the system - from collection through streaming and into storage - you're ready to build the analytics capabilities in the next task! You'll create crawlers to catalog this data, develop ETL jobs to transform it, and ultimately load it into Redshift for analysis.
 
 ```{note}
@@ -532,90 +528,95 @@ Now that you understand how data flows through the system - from collection thro
 
 > In this task, we'll first use AWS Glue to automatically discover and catalog our data structure, then use Athena to query this cataloged data. This represents best practice for data lake exploration, ensuring consistent schema management across your analytics services.
 
+![glue](https://docs.aws.amazon.com/images/glue/latest/dg/images/HowItWorks-overview.png)
+
+> Image from: https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html
+
+
 ### 📋 Set Up Glue Crawler:
 
-1. **Navigate to AWS Glue**:
+- **Step 1: Set crawler properties**:
    - In the AWS Console, search for `Glue` and open it
    - In the left navigation menu, expand `Data Catalog` and select `Crawlers`.
    - Click the `Create crawler` button on the right.
-
-2. **Configure the Crawler**:
    - Name: `weather-data-crawler`
    - Click `Next`
 
-3. **Specify Data Source**:
+- **Step 2: Choose data sources and classifiers**:
    - Click on `Add a data source`.
    - Leave the default settings of `S3` as the data source and the location of the S3 data as `In this account`.
    - For the S3 path click  `Browse S3` and click on
      `s3://weather-analytics-data-lake-dev-[YOUR-ACCOUNT-ID]/weather-data/`
-   ![alt text](image.png)
-   - Select `Crawl all sub-folders`
+   ![GlueS3path](./images/GlueS3path.png)<br>
+   - Even though you have added the S3 path to be crawled, the box may show a message in red of `This is a required field`. Just hit the tab key and it will be accepted.
+   - Leave the default setting of `Crawl all sub-folders`
+   - Click `Add an S3 data source`
+   ![GlueNext](./images/GlueNext.png)<br>
    - Click `Next`
 
-4. **Add Another Data Store**:
-   - Select `No`
+- **Step 3: Configure security settings**:
+   - From the IAM role drop down menu select the role already created for you, `weather-analytics-glue-role-dev`
    - Click `Next`
-
-5. **Choose IAM Role**:
-   - Select the existing role: `weather-analytics-glue-role-dev`
-   - Click `Next`
-
+   ![GlueRoleSelect](./images/GlueRoleSelect.png)<br>
+   
 ```{note}
 🔐 The CloudFormation template already created this role with appropriate permissions for the crawler to access S3 and create catalog entries.
 ```
-
-6. **Configure Schedule**:
-   - Frequency:  `Run on demand`
-   - Click `Next`
-
-7. **Configure Output**:
-   - Database: Select `weather_analytics_dev_db`
+- **Step 4 Set output and scheduling**:
+   - Target Database: Select `weather_analytics_dev_db`
    - For table prefix, enter: `raw_`
+   - Crawler schedule Frequency:  `On demand`
    - Click `Next`
-
-8. **Review and Create**:
+   ![GlueOutput](./images/GlueOutput.png)<br>
+   
+- **Step 5: Review and create**:
    - Review your settings
    - Click `Create crawler`
 
 ### 🏃‍♂️ Run the Crawler:
 
 1. **Start Crawler**:
-   - Select your new crawler
+   - Ensuring your new crawler is showing..
    - Click `Run crawler`
-   - Wait for completion (usually 1-2 minutes)
+   - Wait for completion (usually around 2 minutes)
 
 2. **Verify Results**:
-   - Go to `Databases` -> `weather_analytics_dev_db`
-   - You should see a new table like `raw_weather_data`
-   - Click on the table to examine the schema
+   - From the left hand navigation menu, expand `Data Catalog` and click on `Tables`, then select the table name created by the carwerly you implicity named with the `raw_` prefix eealire that should be called `raw_weather_data`
+   - Click on the table to examine its schema
+   ![GlueTableSchema](./images/GlueTableSchema.png)<br>
 
 ```{note}
 📚 Notice how Glue automatically:
 - Detected the JSON structure
 - Identified data types
-- Recognized the partitioning scheme (location/year/month/day)
+- Recognised the partitioning scheme (location/year/month/day)
 ```
 
 ###  ⚙️ Set Up Athena Query Environment:
 
 1. **Configure Athena Settings**:
    - In the AWS Console, search for `Athena` and open it in a new tab
-   - If this is your first time using Athena, click on `Edit Settings`
-   - For `Query result location`, enter:
-     s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/
+   - Then using the defauult option select `Launch query editor`<br>
+   ![AthenaQuery](./images/AthenaQuery.png)<br>
+   
+   - You will and on the `Editor` tab of Athena. Click on the `Settings` tab the click the `Manage` button.
+   - For `Query result location`, click `Browse S3` and select the bucket: `s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/`
    - Click `Save`
+   ![AthenaSettings](./images/AthenaSettings.png)<br>
 
 ```{note}
 📁 We already created this results bucket in our CloudFormation template with appropriate lifecycle rules to clean up old query results automatically. This helps manage storage costs while maintaining useful query history.
 ```
 
-2. **Create a Workgroup**:
-   - In the left navigation, click `Workgroups`
-   - Click `Create workgroup`
-   - Name: `weather-analytics-workgroup`
-   - Choose the same query result location as above
-   - Under `Additional configurations`, enable `Override client-side settings`
-   - Click `Create workgroup`
+2. **Choose Your Workgroup**:
+   - You can use the default "primary" workgroup for this workshop
+
+```{note}
+Note: In production environments, creating separate workgroups is recommended for:
+- Cost tracking and control
+- Team-specific configurations
+- Usage attribution
+```
 
 ### 📊 Query Your Weather Data:
 
@@ -766,12 +767,12 @@ Even if you don't complete them, consider reviewing what they cover in your own 
 
 ## 🚀 Going Further
 
-### Going Further 1: description
+### Going Further 1: Data architecture diagram
 
-In this exercise, we’ll enhance the pipeline by 
+Mike's idea about learners creating one....
 
-### Going Further 2: description
+### Going Further 2: Streaming in Glue
 
-### Going Further 3: description
+### Going Further 3: Something else...
 
 

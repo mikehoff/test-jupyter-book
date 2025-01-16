@@ -343,9 +343,9 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-description">Going Further 1: description</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-description">Going Further 2: description</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-description">Going Further 3: description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-data-architecture-diagram">Going Further 1: Data architecture diagram</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-streaming-in-glue">Going Further 2: Streaming in Glue</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-something-else">Going Further 3: Something else…</a></li>
 </ul>
 </li>
 </ul>
@@ -983,10 +983,6 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p>Enhanced VPC endpoint policies</p></li>
 </ul>
 </div>
-<p><img alt="glue" src="https://docs.aws.amazon.com/images/glue/latest/dg/images/HowItWorks-overview.png" /></p>
-<blockquote>
-<div><p>Image from: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html">https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html</a></p>
-</div></blockquote>
 <p>Now that you understand how data flows through the system - from collection through streaming and into storage - you’re ready to build the analytics capabilities in the next task! You’ll create crawlers to catalog this data, develop ETL jobs to transform it, and ultimately load it into Redshift for analysis.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1005,86 +1001,81 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <blockquote>
 <div><p>In this task, we’ll first use AWS Glue to automatically discover and catalog our data structure, then use Athena to query this cataloged data. This represents best practice for data lake exploration, ensuring consistent schema management across your analytics services.</p>
 </div></blockquote>
+<p><img alt="glue" src="https://docs.aws.amazon.com/images/glue/latest/dg/images/HowItWorks-overview.png" /></p>
+<blockquote>
+<div><p>Image from: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html">https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html</a></p>
+</div></blockquote>
 <section id="set-up-glue-crawler">
 <h3>📋 Set Up Glue Crawler:<a class="headerlink" href="#set-up-glue-crawler" title="Link to this heading">#</a></h3>
-<ol class="arabic simple">
-<li><p><strong>Navigate to AWS Glue</strong>:</p>
 <ul class="simple">
+<li><p><strong>Step 1: Set crawler properties</strong>:</p>
+<ul>
 <li><p>In the AWS Console, search for <code class="docutils literal notranslate"><span class="pre">Glue</span></code> and open it</p></li>
-<li><p>In the left navigation, select <code class="docutils literal notranslate"><span class="pre">Crawlers</span></code></p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">crawler</span></code></p></li>
-</ul>
-</li>
-<li><p><strong>Configure the Crawler</strong>:</p>
-<ul class="simple">
+<li><p>In the left navigation menu, expand <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">Catalog</span></code> and select <code class="docutils literal notranslate"><span class="pre">Crawlers</span></code>.</p></li>
+<li><p>Click the <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">crawler</span></code> button on the right.</p></li>
 <li><p>Name: <code class="docutils literal notranslate"><span class="pre">weather-data-crawler</span></code></p></li>
 <li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
 </ul>
 </li>
-<li><p><strong>Specify Data Source</strong>:</p>
-<ul class="simple">
-<li><p>Choose <code class="docutils literal notranslate"><span class="pre">S3</span></code> as the data source</p></li>
-<li><p>Select <code class="docutils literal notranslate"><span class="pre">In</span> <span class="pre">this</span> <span class="pre">account</span></code></p></li>
-<li><p>For the S3 path, enter:
-<code class="docutils literal notranslate"><span class="pre">s3://weather-analytics-data-lake-dev-[YOUR-ACCOUNT-ID]/weather-data/</span></code></p></li>
-<li><p>Select <code class="docutils literal notranslate"><span class="pre">Crawl</span> <span class="pre">all</span> <span class="pre">sub-folders</span></code></p></li>
+<li><p><strong>Step 2: Choose data sources and classifiers</strong>:</p>
+<ul>
+<li><p>Click on <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">a</span> <span class="pre">data</span> <span class="pre">source</span></code>.</p></li>
+<li><p>Leave the default settings of <code class="docutils literal notranslate"><span class="pre">S3</span></code> as the data source and the location of the S3 data as <code class="docutils literal notranslate"><span class="pre">In</span> <span class="pre">this</span> <span class="pre">account</span></code>.</p></li>
+<li><p>For the S3 path click  <code class="docutils literal notranslate"><span class="pre">Browse</span> <span class="pre">S3</span></code> and click on
+<code class="docutils literal notranslate"><span class="pre">s3://weather-analytics-data-lake-dev-[YOUR-ACCOUNT-ID]/weather-data/</span></code>
+<img alt="GlueS3path" src="_images/GlueS3path.png" /><br></p></li>
+<li><p>Even though you have added the S3 path to be crawled, the box may show a message in red of <code class="docutils literal notranslate"><span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">required</span> <span class="pre">field</span></code>. Just hit the tab key and it will be accepted.</p></li>
+<li><p>Leave the default setting of <code class="docutils literal notranslate"><span class="pre">Crawl</span> <span class="pre">all</span> <span class="pre">sub-folders</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">an</span> <span class="pre">S3</span> <span class="pre">data</span> <span class="pre">source</span></code>
+<img alt="GlueNext" src="_images/GlueNext.png" /><br></p></li>
 <li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
 </ul>
 </li>
-<li><p><strong>Add Another Data Store</strong>:</p>
-<ul class="simple">
-<li><p>Select <code class="docutils literal notranslate"><span class="pre">No</span></code></p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
+<li><p><strong>Step 3: Configure security settings</strong>:</p>
+<ul>
+<li><p>From the IAM role drop down menu select the role already created for you, <code class="docutils literal notranslate"><span class="pre">weather-analytics-glue-role-dev</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code>
+<img alt="GlueRoleSelect" src="_images/GlueRoleSelect.png" /><br></p></li>
 </ul>
 </li>
-<li><p><strong>Choose IAM Role</strong>:</p>
-<ul class="simple">
-<li><p>Select the existing role: <code class="docutils literal notranslate"><span class="pre">weather-analytics-glue-role-dev</span></code></p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
 </ul>
-</li>
-</ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>🔐 The CloudFormation template already created this role with appropriate permissions for the crawler to access S3 and create catalog entries.</p>
 </div>
-<ol class="arabic simple" start="6">
-<li><p><strong>Configure Schedule</strong>:</p>
 <ul class="simple">
-<li><p>Frequency:  <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">on</span> <span class="pre">demand</span></code></p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
-</ul>
-</li>
-<li><p><strong>Configure Output</strong>:</p>
-<ul class="simple">
-<li><p>Database: Select <code class="docutils literal notranslate"><span class="pre">weather_analytics_dev_db</span></code></p></li>
+<li><p><strong>Step 4 Set output and scheduling</strong>:</p>
+<ul>
+<li><p>Target Database: Select <code class="docutils literal notranslate"><span class="pre">weather_analytics_dev_db</span></code></p></li>
 <li><p>For table prefix, enter: <code class="docutils literal notranslate"><span class="pre">raw_</span></code></p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
+<li><p>Crawler schedule Frequency:  <code class="docutils literal notranslate"><span class="pre">On</span> <span class="pre">demand</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code>
+<img alt="GlueOutput" src="_images/GlueOutput.png" /><br></p></li>
 </ul>
 </li>
-<li><p><strong>Review and Create</strong>:</p>
-<ul class="simple">
+<li><p><strong>Step 5: Review and create</strong>:</p>
+<ul>
 <li><p>Review your settings</p></li>
 <li><p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">crawler</span></code></p></li>
 </ul>
 </li>
-</ol>
+</ul>
 </section>
 <section id="run-the-crawler">
 <h3>🏃‍♂️ Run the Crawler:<a class="headerlink" href="#run-the-crawler" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
 <li><p><strong>Start Crawler</strong>:</p>
 <ul class="simple">
-<li><p>Select your new crawler</p></li>
+<li><p>Ensuring your new crawler is showing…</p></li>
 <li><p>Click <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">crawler</span></code></p></li>
-<li><p>Wait for completion (usually 1-2 minutes)</p></li>
+<li><p>Wait for completion (usually around 2 minutes)</p></li>
 </ul>
 </li>
 <li><p><strong>Verify Results</strong>:</p>
 <ul class="simple">
-<li><p>Go to <code class="docutils literal notranslate"><span class="pre">Databases</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">weather_analytics_dev_db</span></code></p></li>
-<li><p>You should see a new table like <code class="docutils literal notranslate"><span class="pre">raw_weather_data</span></code></p></li>
-<li><p>Click on the table to examine the schema</p></li>
+<li><p>From the left hand navigation menu, expand <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">Catalog</span></code> and click on <code class="docutils literal notranslate"><span class="pre">Tables</span></code>, then select the table name created by the carwerly you implicity named with the <code class="docutils literal notranslate"><span class="pre">raw_</span></code> prefix eealire that should be called <code class="docutils literal notranslate"><span class="pre">raw_weather_data</span></code></p></li>
+<li><p>Click on the table to examine its schema
+<img alt="GlueTableSchema" src="_images/GlueTableSchema.png" /><br></p></li>
 </ul>
 </li>
 </ol>
@@ -1094,7 +1085,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <ul class="simple">
 <li><p>Detected the JSON structure</p></li>
 <li><p>Identified data types</p></li>
-<li><p>Recognized the partitioning scheme (location/year/month/day)</p></li>
+<li><p>Recognised the partitioning scheme (location/year/month/day)</p></li>
 </ul>
 </div>
 </section>
@@ -1104,10 +1095,12 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p><strong>Configure Athena Settings</strong>:</p>
 <ul class="simple">
 <li><p>In the AWS Console, search for <code class="docutils literal notranslate"><span class="pre">Athena</span></code> and open it in a new tab</p></li>
-<li><p>If this is your first time using Athena, click on <code class="docutils literal notranslate"><span class="pre">Edit</span> <span class="pre">Settings</span></code></p></li>
-<li><p>For <code class="docutils literal notranslate"><span class="pre">Query</span> <span class="pre">result</span> <span class="pre">location</span></code>, enter:
-s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/</p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Save</span></code></p></li>
+<li><p>Then using the defauult option select <code class="docutils literal notranslate"><span class="pre">Launch</span> <span class="pre">query</span> <span class="pre">editor</span></code><br>
+<img alt="AthenaQuery" src="_images/AthenaQuery.png" /><br></p></li>
+<li><p>You will and on the <code class="docutils literal notranslate"><span class="pre">Editor</span></code> tab of Athena. Click on the <code class="docutils literal notranslate"><span class="pre">Settings</span></code> tab the click the <code class="docutils literal notranslate"><span class="pre">Manage</span></code> button.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">Query</span> <span class="pre">result</span> <span class="pre">location</span></code>, click <code class="docutils literal notranslate"><span class="pre">Browse</span> <span class="pre">S3</span></code> and select the bucket: <code class="docutils literal notranslate"><span class="pre">s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Save</span></code>
+<img alt="AthenaSettings" src="_images/AthenaSettings.png" /><br></p></li>
 </ul>
 </li>
 </ol>
@@ -1292,15 +1285,15 @@ ORDER BY location, year, month, day DESC;</p>
 </section>
 <section id="going-further">
 <h2>🚀 Going Further<a class="headerlink" href="#going-further" title="Link to this heading">#</a></h2>
-<section id="going-further-1-description">
-<h3>Going Further 1: description<a class="headerlink" href="#going-further-1-description" title="Link to this heading">#</a></h3>
-<p>In this exercise, we’ll enhance the pipeline by</p>
+<section id="going-further-1-data-architecture-diagram">
+<h3>Going Further 1: Data architecture diagram<a class="headerlink" href="#going-further-1-data-architecture-diagram" title="Link to this heading">#</a></h3>
+<p>Mike’s idea about learners creating one…</p>
 </section>
-<section id="going-further-2-description">
-<h3>Going Further 2: description<a class="headerlink" href="#going-further-2-description" title="Link to this heading">#</a></h3>
+<section id="going-further-2-streaming-in-glue">
+<h3>Going Further 2: Streaming in Glue<a class="headerlink" href="#going-further-2-streaming-in-glue" title="Link to this heading">#</a></h3>
 </section>
-<section id="going-further-3-description">
-<h3>Going Further 3: description<a class="headerlink" href="#going-further-3-description" title="Link to this heading">#</a></h3>
+<section id="going-further-3-something-else">
+<h3>Going Further 3: Something else…<a class="headerlink" href="#going-further-3-something-else" title="Link to this heading">#</a></h3>
 </section>
 </section>
 </section>
@@ -1391,9 +1384,9 @@ ORDER BY location, year, month, day DESC;</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-description">Going Further 1: description</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-description">Going Further 2: description</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-description">Going Further 3: description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-data-architecture-diagram">Going Further 1: Data architecture diagram</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-streaming-in-glue">Going Further 2: Streaming in Glue</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-something-else">Going Further 3: Something else…</a></li>
 </ul>
 </li>
 </ul>
