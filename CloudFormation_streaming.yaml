@@ -1,0 +1,1079 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  Weather Data Analytics Workshop with Data Lake Architecture
+  
+  This template deploys a data streaming and analytics solution for weather data processing.
+  
+  Architecture Overview:
+  - Data Ingestion Layer:
+    * Lambda function collects weather data from Open-Meteo API every minute
+    * Data flows through Kinesis Stream for real-time processing
+    * Kinesis Firehose handles data transformation and routing
+  
+  - Storage Layer:
+    * S3-based data lake with intelligent partitioning (by city/year/month/day)
+    * Lifecycle policies for cost optimisation
+  
+  - Analytics Layer:
+    * Redshift cluster for data warehousing and complex analytics
+    * AWS Glue for data cataloging and ETL processes
+    * Support for both batch and real-time analytics
+  
+  Security Note: This template uses permissive security settings for workshop purposes.
+  Production deployments should implement:
+  - Private subnets with NAT Gateways
+  - More restrictive security group rules
+  - AWS Secrets Manager for credentials
+  - Enhanced VPC endpoint policies
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Network Configuration"
+        Parameters:
+          - VpcCidr
+          - PublicSubnet1Cidr
+          - PublicSubnet2Cidr
+      - Label:
+          default: "Redshift Configuration"
+        Parameters:
+          - RedshiftUsername
+          - RedshiftPassword
+          - RedshiftNodeType
+      - Label:
+          default: "Application Configuration"
+        Parameters:
+          - Environment
+          - ProjectName
+
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: CIDR block for the VPC (Must be /16 to accommodate subnets)
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/16)$
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/16
+
+  PublicSubnet1Cidr:
+    Type: String
+    Default: 10.0.1.0/24
+    Description: CIDR block for Public Subnet 1
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/24)$
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/24
+
+  PublicSubnet2Cidr:
+    Type: String
+    Default: 10.0.2.0/24
+    Description: CIDR block for Public Subnet 2
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/24)$
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/24
+
+  RedshiftUsername:
+    Type: String
+    Default: corndeladmin
+    Description: Username for Redshift cluster administrator
+    MinLength: 1
+    MaxLength: 128
+    AllowedPattern: ^[a-zA-Z][a-zA-Z0-9_]*$
+    ConstraintDescription: Must start with a letter. Only letters, numbers, and underscore allowed.
+
+  RedshiftPassword:
+    Type: String
+    Default: Password01
+    NoEcho: true
+    Description: Password for Redshift cluster administrator (For workshop only - use AWS Secrets Manager in production)
+    MinLength: 8
+    MaxLength: 64
+    AllowedPattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,64}$
+    ConstraintDescription: Must be 8-64 characters, containing at least one uppercase letter, one lowercase letter, and one number.
+
+  RedshiftNodeType:
+    Type: String
+    Default: dc2.large
+    Description: Node type for Redshift cluster
+    AllowedValues:
+      - dc2.large
+      - dc2.8xlarge
+      - ra3.xlplus
+      - ra3.4xlarge
+    ConstraintDescription: Must be a valid Redshift node type.
+
+  Environment:
+    Type: String
+    Default: dev
+    Description: Environment name - used for resource tagging
+    AllowedValues:
+      - dev
+      - test
+      - prod
+    ConstraintDescription: Must be one of - dev, test, prod
+
+  ProjectName:
+    Type: String
+    Default: weather-analytics
+    Description: Project name - used for resource naming and tagging
+    AllowedPattern: ^[a-zA-Z0-9\-]+$
+    ConstraintDescription: Only alphanumeric characters and hyphens allowed
+
+Resources:
+  #############################################
+  # Network Infrastructure
+  #############################################
+  # The network architecture consists of:
+  # - VPC with DNS support and hostnames enabled
+  # - Two public subnets across different AZs for high availability
+  # - Internet Gateway for public internet access
+  # - Route table for public subnets
+  # Note: For workshop purposes, we're using public subnets. 
+  # Production environments should consider private subnets with NAT Gateways.
+
+  VPCNetwork:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-vpc-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-igw-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCNetwork
+      InternetGatewayId: !Ref InternetGateway
+
+  # Public Subnet 1 in first AZ
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCNetwork
+      CidrBlock: !Ref PublicSubnet1Cidr
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs ''
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-public-subnet-1-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Network
+          Value: Public
+
+  # Public Subnet 2 in second AZ
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCNetwork
+      CidrBlock: !Ref PublicSubnet2Cidr
+      AvailabilityZone: !Select 
+        - 1
+        - !GetAZs ''
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-public-subnet-2-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Network
+          Value: Public
+
+  # Route Table for Public Subnets
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCNetwork
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-public-rt-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Network
+          Value: Public
+
+  # Route to Internet Gateway
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway  # Explicit dependency to ensure IGW is attached first
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  # Associate Route Table with Public Subnet 1
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  # Associate Route Table with Public Subnet 2
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # S3 VPC Endpoint for efficient S3 access
+  S3VPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    DependsOn: [WeatherDataLake, AthenaQueryResults]
+    Properties:
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref VPCNetwork
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref PublicRouteTable
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - s3:*
+            Resource:
+              - '*'
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-s3-endpoint-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName    
+
+  #############################################
+  # Security Groups and IAM Roles
+  #############################################
+  # Security Groups control network access between components
+  # IAM Roles define service-level permissions
+  # Note: Security group rules are intentionally permissive for workshop purposes
+  # Production environments should implement principle of least privilege
+
+  ###################
+  # Security Groups #
+  ###################
+
+  GlueSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for AWS Glue services
+      VpcId: !Ref VPCNetwork
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-glue-sg-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  GlueSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref GlueSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GlueSecurityGroup
+
+  RedshiftSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Redshift cluster access
+      VpcId: !Ref VPCNetwork  # Note: Changed from VPC to VPCNetwork
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic for workshop purposes. Production should restrict this.
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-redshift-sg
+
+  # Security Group Rules for Redshift and Glue interaction
+  RedshiftIngressFromGlue:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RedshiftSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5439
+      ToPort: 5439
+      SourceSecurityGroupId: !Ref GlueSecurityGroup
+      Description: Allow Glue jobs to connect to Redshift
+
+  RedshiftIngressPublic:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RedshiftSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5439
+      ToPort: 5439
+      CidrIp: 0.0.0.0/0
+      Description: Allow public access to Redshift for workshop purposes. Production should restrict this.
+
+  RedshiftVPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.redshift
+      VpcId: !Ref VPCNetwork
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroupIds:
+        - !Ref GlueSecurityGroup
+      PrivateDnsEnabled: true
+
+  SecretsManagerVPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.secretsmanager
+      VpcId: !Ref VPCNetwork
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroupIds:
+        - !Ref GlueSecurityGroup
+      PrivateDnsEnabled: true
+
+  #############
+  # IAM Roles #
+  #############
+
+  WeatherDataProducerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-producer-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: WeatherDataProducerPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
+                Resource: !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${ProjectName}-stream-${Environment}
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-producer-role-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  FirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-firehose-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FirehoseS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                Resource:
+                  - !Sub arn:aws:s3:::${ProjectName}-data-lake-${Environment}-${AWS::AccountId}
+                  - !Sub arn:aws:s3:::${ProjectName}-data-lake-${Environment}-${AWS::AccountId}/*
+              - Effect: Allow
+                Action:
+                  - kinesis:DescribeStream
+                  - kinesis:GetShardIterator
+                  - kinesis:GetRecords
+                  - kinesis:ListShards
+                Resource: !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${ProjectName}-stream-${Environment}
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}/*
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-firehose-role-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  GlueServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-glue-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - glue.amazonaws.com
+                - redshift.amazonaws.com
+                - secretsmanager.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonRedshiftFullAccess
+      Policies:
+        - PolicyName: GlueCustomPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:*
+                  - s3:*
+                  - redshift:*
+                  - redshift-data:*
+                  - kinesis:GetShardIterator
+                  - kinesis:GetRecords
+                  - kinesis:DescribeStream
+                  - kinesis:ListShards
+                Resource: '*'
+                # Note: Resource access is intentionally broad for workshop
+                # Production should restrict to specific resources
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-glue-role-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName          
+
+  RedshiftQueryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: redshift.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RedshiftQueryPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - redshift:*
+                  - redshift-data:*
+                  - sqlworkbench:*
+                Resource: '*'
+
+  #############################################
+  # Data Ingestion Layer
+  #############################################
+  # This layer is responsible for:
+  # 1. Collecting weather data via Lambda function
+  # 2. Streaming data through Kinesis
+  # 3. Managing the flow of data into the processing pipeline
+  # 
+  # Data Flow:
+  # Weather API -> Lambda -> Kinesis Stream -> Kinesis Firehose -> S3
+  # The Lambda function runs every minute to collect current weather data
+  # from multiple cities and publishes it to the Kinesis stream.
+
+  #####################
+  # Kinesis Resources #
+  #####################
+
+  WeatherDataStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub ${ProjectName}-stream-${Environment}
+      ShardCount: 1  # Single shard is sufficient for workshop data volumes
+      RetentionPeriodHours: 24  # Retain data for 24 hours
+      StreamModeDetails:
+        StreamMode: PROVISIONED  # Using provisioned mode for predictable workshop costs
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-stream-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Purpose
+          Value: Weather Data Streaming
+
+  WeatherDataFirehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    DependsOn: WeatherDataStream
+    Properties:
+      DeliveryStreamName: !Sub ${ProjectName}-firehose-${Environment}
+      DeliveryStreamType: KinesisStreamAsSource
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt WeatherDataStream.Arn
+        RoleARN: !GetAtt FirehoseRole.Arn
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !Sub arn:aws:s3:::${ProjectName}-data-lake-${Environment}-${AWS::AccountId}
+        BufferingHints:
+          IntervalInSeconds: 60  # Buffer for 1 minute
+          SizeInMBs: 64         # Or until 64MB is reached
+        CompressionFormat: GZIP  # Compress data for efficient storage
+        Prefix: !Sub weather-data/location=!{partitionKeyFromQuery:city}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/
+        ErrorOutputPrefix: errors/!{firehose:error-output-type}/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/
+        RoleARN: !GetAtt FirehoseRole.Arn
+        ProcessingConfiguration:
+          Enabled: true
+          Processors:
+            - Type: MetadataExtraction
+              Parameters:
+                - ParameterName: MetadataExtractionQuery
+                  ParameterValue: '{city: .city}'
+                - ParameterName: JsonParsingEngine
+                  ParameterValue: JQ-1.6
+        DynamicPartitioningConfiguration:
+          Enabled: true  # Enable dynamic partitioning based on city
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Sub /aws/kinesisfirehose/${ProjectName}-${Environment}
+          LogStreamName: S3Delivery
+
+  ####################
+  # Lambda Resources #
+  ####################
+  WeatherDataProducer:
+    Type: AWS::Lambda::Function
+    DependsOn: WeatherDataStream
+    Properties:
+      FunctionName: !Sub ${ProjectName}-producer-${Environment}
+      Description: Collects weather data from multiple UK cities and publishes to Kinesis stream for real-time analytics
+      MemorySize: 128
+      Timeout: 10
+      Handler: index.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt WeatherDataProducerRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import urllib.request
+          import os
+          from datetime import datetime
+
+          def lambda_handler(event, context):
+              """
+              Lambda handler that fetches weather data from Open-Meteo API and streams it to Kinesis.
+              The function processes multiple UK cities and structures the data for downstream analytics.
+              
+              Args:
+                  event: AWS Lambda event trigger data
+                  context: AWS Lambda runtime information
+              
+              Returns:
+                  dict: Response containing execution status and processing summary
+              """
+              # Initialize Kinesis client - Lambda automatically uses the correct region
+              kinesis_client = boto3.client('kinesis')
+              
+              # Reference the Kinesis stream created by CloudFormation
+              stream_name = f"{os.environ['PROJECT_NAME']}-stream-{os.environ['ENVIRONMENT']}"
+
+              # Define UK cities to monitor - structured for potential expansion
+              locations = [
+                  {"city": "London", "latitude": 51.5072, "longitude": -0.1276},
+                  {"city": "Manchester", "latitude": 53.4808, "longitude": -2.2426},
+                  {"city": "Edinburgh", "latitude": 55.9533, "longitude": -3.1883}
+              ]
+
+              def fetch_weather_data(location):
+                  """
+                  Fetches current weather data for a given location using Open-Meteo API.
+                  
+                  Args:
+                      location (dict): Dictionary containing city name, latitude, and longitude
+                  
+                  Returns:
+                      dict: Weather data including city, temperature, measurement time, and collection time
+                            Returns None if data fetch fails
+                  """
+                  base_url = "https://api.open-meteo.com/v1/forecast"
+                  params = f"?latitude={location['latitude']}&longitude={location['longitude']}&current_weather=true"
+                  
+                  try:
+                      response = urllib.request.urlopen(base_url + params)
+                      data = json.load(response)
+                      
+                      return {
+                          "city": location["city"],
+                          "temperature": data["current_weather"]["temperature"],
+                          "measurement_time": data["current_weather"]["time"],
+                          "collection_time": datetime.utcnow().isoformat(),
+                          "source": "open-meteo"
+                      }
+                  except Exception as e:
+                      print(f"Error fetching data for {location['city']}: {str(e)}")
+                      return None
+
+              # Process each city and send data to Kinesis
+              successfully_processed = 0
+              failed_cities = []
+              
+              for location in locations:
+                  try:
+                      weather_data = fetch_weather_data(location)
+                      if weather_data:
+                          # Log the data being sent for monitoring and debugging
+                          print(f"Processing data for {location['city']}: {json.dumps(weather_data)}")
+                          
+                          # Send to Kinesis stream with city as partition key
+                          kinesis_client.put_record(
+                              StreamName=stream_name,
+                              Data=json.dumps(weather_data),
+                              PartitionKey=weather_data["city"]
+                          )
+                          successfully_processed += 1
+                      else:
+                          failed_cities.append(location["city"])
+                  except Exception as e:
+                      error_message = f"Failed to process {location['city']}: {str(e)}"
+                      print(error_message)
+                      failed_cities.append(location["city"])
+
+              # Prepare detailed execution summary
+              response = {
+                  "statusCode": 200,
+                  "body": {
+                      "message": f"Processed {successfully_processed} of {len(locations)} cities",
+                      "successful_count": successfully_processed,
+                      "total_cities": len(locations),
+                      "execution_time": datetime.utcnow().isoformat()
+                  }
+              }
+              
+              if failed_cities:
+                  response["body"]["failed_cities"] = failed_cities
+                  
+              return response
+      Environment:
+        Variables:
+          PROJECT_NAME: !Ref ProjectName
+          ENVIRONMENT: !Ref Environment        
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-producer-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Purpose
+          Value: Weather Data Collection
+        - Key: Component
+          Value: Data Ingestion
+
+  # EventBridge trigger for Lambda function
+  WeatherDataEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${ProjectName}-producer-trigger-${Environment}
+      Description: Triggers the weather data producer Lambda function every minute
+      ScheduleExpression: rate(1 minute)
+      State: ENABLED
+      Targets:
+        - Id: WeatherDataProducerTarget
+          Arn: !GetAtt WeatherDataProducer.Arn
+
+  WeatherDataEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref WeatherDataProducer
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt WeatherDataEventRule.Arn
+
+  #############################################
+  # Storage Layer - S3 Data Lake
+  #############################################
+  # This layer implements a data lake architecture using S3 buckets.
+  # The design follows modern data lake best practices with:
+  # - Partitioned storage for efficient querying
+  # - Separate buckets for different data purposes
+  # - Lifecycle policies for cost optimization
+  # - Comprehensive access controls
+  #
+  # The storage layer consists of two main buckets:
+  # 1. Data Lake Bucket: Stores weather data in a structured hierarchy
+  # 2. Query Results Bucket: Stores temporary Athena query results
+
+  #####################
+  # Data Lake Bucket  #
+  #####################
+  
+  WeatherDataLake:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain  # Preserves data even if stack is deleted
+    UpdateReplacePolicy: Retain  # Prevents accidental data loss during updates
+    Properties:
+      BucketName: !Sub ${ProjectName}-data-lake-${Environment}-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled  # Maintains history of all object versions
+      
+      # Implement lifecycle rules for cost optimization
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToInfrequentAccess
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: STANDARD_IA
+            # Move older data to cheaper storage
+          - Id: TransitionToGlacier
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 180
+                StorageClass: GLACIER
+            # Archive very old data
+      
+      # Enable server-side encryption by default
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      
+      # Block all public access for security
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      
+      # Enable logging for audit purposes
+      LoggingConfiguration:
+        DestinationBucketName: !Ref WeatherDataLakeLogging
+        LogFilePrefix: data-lake-logs/
+      
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-data-lake-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Purpose
+          Value: Weather Data Storage
+        - Key: DataClassification
+          Value: Weather Metrics
+
+  # Bucket Policy for Data Lake
+  WeatherDataLakeBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: WeatherDataLake
+    Properties:
+      Bucket: !Ref WeatherDataLake
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowFirehoseAccess
+            Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: 
+              - s3:PutObject
+              - s3:GetObject
+            Resource: !Sub ${WeatherDataLake.Arn}/*
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+          - Sid: AllowGlueAccess
+            Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub ${WeatherDataLake.Arn}/*
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+
+  ##########################
+  # Query Results Bucket   #
+  ##########################
+
+  AthenaQueryResults:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete  # Query results can be recreated
+    Properties:
+      BucketName: !Sub ${ProjectName}-athena-results-${Environment}-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
+      
+      # Implement lifecycle rules for query results
+      LifecycleConfiguration:
+        Rules:
+          - Id: CleanupOldResults
+            Status: Enabled
+            ExpirationInDays: 7  # Remove old query results after a week
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+      
+      # Enable server-side encryption
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      
+      # Block all public access
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-athena-results-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Purpose
+          Value: Athena Query Results Storage
+
+  #########################
+  # Logging Bucket        #
+  #########################
+
+  WeatherDataLakeLogging:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub ${ProjectName}-logs-${Environment}-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
+      
+      # Implement lifecycle rules for logs
+      LifecycleConfiguration:
+        Rules:
+          - Id: CleanupOldLogs
+            Status: Enabled
+            ExpirationInDays: 90  # Keep logs for 90 days
+      
+      # Enable server-side encryption
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      
+      # Block all public access
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-logs-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Purpose
+          Value: S3 Access Logging     
+
+  #############################################
+  # Analytics Layer - Core Components
+  #############################################
+  # This layer provides the foundational analytics infrastructure that
+  # workshop participants will use to build their ETL processes.
+  # The core components are:
+  # 1. Redshift cluster for data warehousing
+  # 2. Glue database for data cataloging
+  # 
+  # Workshop participants will learn to:
+  # - Create and configure Glue crawlers
+  # - Develop ETL jobs
+  # - Connect Redshift to the data lake
+  # These hands-on exercises will provide practical experience with AWS analytics services.
+
+  ######################
+  # Redshift Cluster   #
+  ######################
+
+  RedshiftClusterSubnetGroup:
+    Type: AWS::Redshift::ClusterSubnetGroup
+    Properties:
+      Description: !Sub ${ProjectName} cluster subnet group for ${Environment}
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-redshift-subnet-group-${Environment}
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  RedshiftCluster:
+      Type: AWS::Redshift::Cluster
+      DependsOn: 
+        - RedshiftSecurityGroup
+        - RedshiftClusterSubnetGroup
+      Properties:
+        ClusterIdentifier: !Sub 'weather-${AWS::StackName}'
+        ClusterType: single-node
+        NodeType: dc2.large
+        NumberOfNodes: 1
+        DBName: weather
+        MasterUsername: corndeladmin
+        MasterUserPassword: Password01
+        VpcSecurityGroupIds: 
+          - !Ref RedshiftSecurityGroup
+        ClusterSubnetGroupName: !Ref RedshiftClusterSubnetGroup
+        PubliclyAccessible: true
+        IamRoles: 
+          - !GetAtt RedshiftQueryRole.Arn
+        Tags:
+          - Key: Environment
+            Value: dev
+
+  ###################
+  # Glue Database   #
+  ###################
+
+  WeatherGlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub ${ProjectName}_${Environment}_db
+        Description: Database for workshop participants to catalog weather data
+        LocationUri: !Sub s3://${WeatherDataLake}/weather-data/
+        Parameters:
+          classification: weather-data
+          purpose: workshop-analytics
+
+  # Glue Connection for Redshift - This provides the foundation for workshop ETL exercises
+  GlueRedshiftConnection:
+      Type: AWS::Glue::Connection
+      Properties:
+        CatalogId: !Ref AWS::AccountId
+        ConnectionInput:
+          Name: !Sub ${ProjectName}-redshift-connection-${Environment}
+          Description: Connection template for workshop ETL exercises
+          ConnectionType: JDBC
+          ConnectionProperties:
+            JDBC_CONNECTION_URL: !Sub 
+              - jdbc:redshift://${EndpointAddress}:${EndpointPort}/weather
+              - EndpointAddress: !GetAtt RedshiftCluster.Endpoint.Address
+                EndpointPort: !GetAtt RedshiftCluster.Endpoint.Port
+            USERNAME: !Ref RedshiftUsername
+            PASSWORD: !Ref RedshiftPassword
+            JDBC_ENFORCE_SSL: false  # Simplified for workshop purposes
+          PhysicalConnectionRequirements:
+            SecurityGroupIdList: 
+              - !Ref GlueSecurityGroup
+            SubnetId: !Ref PublicSubnet1
+            AvailabilityZone: !Select [0, !GetAZs '']
+
+Outputs:
+  VPCId:
+    Description: VPC ID for the workshop environment
+    Value: !Ref VPCNetwork
+    Export:
+      Name: !Sub ${AWS::StackName}-VpcId
+
+  LambdaFunctionURL:
+    Description: URL to access the Lambda function in AWS Console
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/lambda/home?region=${AWS::Region}#/functions/${WeatherDataProducer}
+
+  KinesisStreamURL:
+    Description: URL to access the Kinesis stream in AWS Console
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/kinesis/home?region=${AWS::Region}#/streams/details/${WeatherDataStream}/monitoring
+
+  KinesisFirehoseURL:
+    Description: URL to access the Kinesis Firehose in AWS Console
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/firehose/home?region=${AWS::Region}#/details/${WeatherDataFirehose}
+
+  DataLakeBucketURL:
+    Description: URL to access the data lake bucket in AWS Console
+    Value: !Sub https://s3.console.aws.amazon.com/s3/buckets/${WeatherDataLake}?region=${AWS::Region}
+  
+  DataLakeBucketName:
+    Description: Name of the S3 data lake bucket
+    Value: !Ref WeatherDataLake
+
+  AthenaResultsBucketURL:
+    Description: URL to access the Athena results bucket in AWS Console
+    Value: !Sub https://s3.console.aws.amazon.com/s3/buckets/${AthenaQueryResults}?region=${AWS::Region}
+
+  RedshiftClusterEndpoint:
+    Description: Endpoint for connecting to the Redshift cluster
+    Value: !Sub ${RedshiftCluster.Endpoint.Address}:${RedshiftCluster.Endpoint.Port}
+
+  RedshiftClusterURL:
+    Description: URL to access the Redshift cluster in AWS Console
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/redshiftv2/home?region=${AWS::Region}#/cluster-details?cluster=${RedshiftCluster}
+
+  GlueDatabaseURL:
+    Description: URL to access the Glue database in AWS Console
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/glue/home?region=${AWS::Region}#/v2/data-catalog/databases/view/${ProjectName}_${Environment}_db?catalogId=${AWS::AccountId}
+
+  CloudWatchLogsURL:
+    Description: URL to access CloudWatch Logs for the Lambda function
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${WeatherDataProducer}
+
+  RedshiftConnectionInfo:
+    Description: Connection information for Redshift (for workshop reference)
+    Value: !Sub |
+      Database: weather
+      Port: 5439
+      Username: ${RedshiftUsername}
+      Host: ${RedshiftCluster.Endpoint.Address}

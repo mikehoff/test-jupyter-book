@@ -1,0 +1,1456 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Data Engineer Workshop 9: Advanced Stream Processing Pipelines &#8212; DE Workshop 5</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'intro';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/Corndel_Logos_RGB_Logo.png" class="logo__image only-light" alt="DE Workshop 5 - Home"/>
+    <img src="_static/Corndel_Logos_RGB_Logo.png" class="logo__image only-dark pst-js-only" alt="DE Workshop 5 - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/intro.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Data Engineer Workshop 9: Advanced Stream Processing Pipelines</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Data Engineer Workshop 9: Advanced Stream Processing Pipelines</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reminder-of-workshop-5-data-integration-with-cloud-services">Reminder of Workshop 5 - Data Integration with Cloud Services</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-real-time-or-near-real-time-what-s-the-difference">Streaming, real time or near real time? What’s the difference?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#applying-each-workshop-to-your-project">Applying Each Workshop to Your Project</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-forward-with-your-project">Moving Forward With Your Project</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alignment-with-data-engineer-pass-descriptors">Alignment with Data Engineer Pass Descriptors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#today-s-workshop-scenario-and-objectives">Today’s Workshop Scenario and Objectives</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#note">Note</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-1-configuring-the-development-environment">⚙️ Task 1: Configuring the Development Environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-2-explore-and-understand-your-streaming-application-so-far">🗺️ Task 2: Explore and understand your streaming application so far</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#producer-explore-the-data-producer-lambda-function">✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#broker-view-data-in-the-data-stream-kinesis">🗃️ 2 BROKER: View data in the Data Stream (Kinesis):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#consumer-examine-the-data-transformation-kinesis-firehose">📩 3 CONSUMER: Examine the Data Transformation (Kinesis Firehose):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#storage-inspect-the-data-lake-s3">📂 4 STORAGE: Inspect the Data Lake (S3):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytics-serving-preview-the-analytics-foundation">📈 5 ANALYTICS / SERVING: Preview the Analytics Foundation:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-3-data-lake-exploration-with-glue-and-athena">🔎 Task 3: Data Lake Exploration with Glue and Athena</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-glue-crawler">📋 Set Up Glue Crawler:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-crawler">🏃‍♂️ Run the Crawler:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-athena-query-environment">⚙️ Set Up Athena Query Environment:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#query-your-weather-data">📊 Query Your Weather Data:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-analytics">📈 3.5 Advanced Analytics:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#challenge-exercises">🎯 Challenge Exercises:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cost-management-best-practices">Cost Management Best Practices:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapping-up-and-reflecting-on-your-project">Wrapping Up and Reflecting on Your Project</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#real-time-vs">Real Time vs…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#another-topic">Another topic</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#this-afternoon-reflecting-on-your-project">This afternoon - reflecting on your project</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-description">Going Further 1: description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-description">Going Further 2: description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-description">Going Further 3: description</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="data-engineer-workshop-9-advanced-stream-processing-pipelines">
+<h1>Data Engineer Workshop 9: Advanced Stream Processing Pipelines<a class="headerlink" href="#data-engineer-workshop-9-advanced-stream-processing-pipelines" title="Link to this heading">#</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<section id="reminder-of-workshop-5-data-integration-with-cloud-services">
+<h3>Reminder of Workshop 5 - Data Integration with Cloud Services<a class="headerlink" href="#reminder-of-workshop-5-data-integration-with-cloud-services" title="Link to this heading">#</a></h3>
+<p>In Workshop 5, we explored … Let’s recap what we did:</p>
+<ol class="arabic simple">
+<li><p><strong>Environment Setup</strong></p></li>
+</ol>
+<ul class="simple">
+<li></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p><strong>Data Transformation</strong></p></li>
+</ol>
+<ul class="simple">
+<li></li>
+<li><p>In today’s workshop, we’ll build on this foundation by implementing …</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In Workshop 5, the …</p>
+</div>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">For more detail on …, click here</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">In Workshop 5, the …</p>
+<p class="sd-card-text">Today, we’ll build on this to demonstrate …</p>
+</div>
+</details></section>
+<section id="streaming-real-time-or-near-real-time-what-s-the-difference">
+<h3>Streaming, real time or near real time? What’s the difference?<a class="headerlink" href="#streaming-real-time-or-near-real-time-what-s-the-difference" title="Link to this heading">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While our focus today is on …</p>
+</div>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">For more detail on …, click here</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">In this workshop, …</p>
+</div>
+</details><div class="admonition-question admonition">
+<p class="admonition-title">Question</p>
+<p>Can you remember the difference between A and B?</p>
+</div>
+<div class="dropdown admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Think about …</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">For the solution, click here</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">The answer is …</p>
+</div>
+</details></div>
+</section>
+<section id="applying-each-workshop-to-your-project">
+<h3>Applying Each Workshop to Your Project<a class="headerlink" href="#applying-each-workshop-to-your-project" title="Link to this heading">#</a></h3>
+<p>Let’s consider again how each workshop’s approach might fit your specific needs, regardless of the data source type or format:</p>
+<div class="admonition-reflect-on-your-journey admonition">
+<p class="admonition-title">Reflect on Your Journey</p>
+<p>Think about which patterns could work for you:</p>
+<ol class="arabic simple">
+<li><p><strong>Workshop 3: Initial Star Schema</strong></p>
+<ul class="simple">
+<li><p><strong>What we did</strong>: Built a static dimensional model.</p></li>
+<li><p><strong>Practical takeaway</strong>: While a one-off load isn’t suitable for production, you might refresh your entire model periodically. Either way, getting your star schema design right is essential before adding automation.</p></li>
+<li><p><strong>Project question</strong>: Could periodic full refreshes work for your data, or do you need more frequent updates? Does the format of your source (e.g., OLTP database, API, or flat file) affect your approach?</p></li>
+</ul>
+</li>
+<li><p><strong>Workshop 4: Denormalised Data with Full Refresh</strong></p>
+<ul class="simple">
+<li><p><strong>What we did</strong>: Loaded Companies House CSV data (already denormalised) into a simple table.</p></li>
+<li><p><strong>Practical takeaway</strong>: Many data sources provide ready-to-load flat files, unlike the normalised Sakila database we’re using today.</p></li>
+<li><p><strong>Project question</strong>: Is your source data already flattened like Companies House, or do you need to transform a normalised or semi-structured source (e.g., JSON or XML)?</p></li>
+</ul>
+</li>
+<li><p><strong>Workshop 5: Serverless File Analysis</strong></p>
+<ul class="simple">
+<li><p><strong>What we did</strong>: Direct querying of S3 files through AWS Athena.</p></li>
+<li><p><strong>Practical takeaway</strong>: Sometimes maintaining a database is overkill when you can query files directly.</p></li>
+<li><p><strong>Project question</strong>: Is your data best managed in a database, or could a serverless query approach suffice? For instance, does your source format (e.g., log files, IoT data) favour file-based analysis?</p></li>
+</ul>
+</li>
+<li><p><strong>Workshop 6: Detailed Design</strong></p>
+<ul class="simple">
+<li><p><strong>What we did</strong>: Specifications for dimensions and ETL processes.</p></li>
+<li><p><strong>Practical takeaway</strong>: Planning your data flows and transformation rules saves major headaches later.</p></li>
+<li><p><strong>Project question</strong>: Have you documented how your data flows and transformations will handle different source formats (e.g., structured databases, semi-structured APIs)?</p></li>
+</ul>
+</li>
+<li><p><strong>Workshop 7: Automated Updates</strong></p>
+<ul class="simple">
+<li><p><strong>What we did</strong>: Incremental dimension updates in Azure Synapse.</p></li>
+<li><p><strong>Practical takeaway</strong>: Processing only what’s changed is efficient for frequently updated data.</p></li>
+<li><p><strong>Project question</strong>: What is your strategy for handling data changes from diverse sources (e.g., timestamp tracking in databases, new files in a directory, or API data deltas)? We’ll explore this today.</p></li>
+</ul>
+</li>
+</ol>
+<p>Looking ahead, we’ll explore more patterns such as:</p>
+<ol class="arabic simple" start="6">
+<li><p><strong>Workshop 9 (Today): Stream Processing</strong></p>
+<ul class="simple">
+<li><p><strong>What we’ll cover</strong>: Processing data in real-time as it arrives.</p></li>
+<li><p><strong>Project relevance</strong>: If batch updates aren’t fast enough, streaming might be appropriate for certain sources, like IoT sensors or transactional events.</p></li>
+</ul>
+</li>
+<li><p><strong>Workshop 13: API Integration</strong></p>
+<ul class="simple">
+<li><p><strong>What we’ll cover</strong>: Pulling data directly from one or more API sources.</p></li>
+<li><p><strong>Project relevance</strong>: When your data lives in cloud services or external systems rather than the databases or files we’ve focused on so far.</p></li>
+</ul>
+</li>
+</ol>
+</div>
+</section>
+<section id="moving-forward-with-your-project">
+<h3>Moving Forward With Your Project<a class="headerlink" href="#moving-forward-with-your-project" title="Link to this heading">#</a></h3>
+<p>As you now consider the stream processing:</p>
+<ol class="arabic simple">
+<li><p><strong>Choose Your Pattern</strong>: Is your use case best served by:</p></li>
+</ol>
+<ul class="simple">
+<li><p>Regular full refreshes (like Workshop 4’s Companies House approach)?</p></li>
+<li><p>Direct file querying (like Workshop 5’s serverless pattern)?</p></li>
+<li><p>Incremental updates (like Workshop 7’s Type 1 SCD implementation)?</p></li>
+<li><p>Or perhaps streaming as in today’s workshop 9.</p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p><strong>Stream Appropriately</strong>: Remember that complex solutions aren’t always better:</p></li>
+</ol>
+<ul class="simple">
+<li><p>A simple near real time…</p></li>
+<li><p>This morning’s exercise demonstrates one approach, but your project might need something simpler or more complex. We’ll discuss the approaches after lunch, focusing on finding the right fit for your specific business needs!</p></li>
+<li><p>Fo instance, in this Tweet, it is suggested that… <a class="reference external" href="https://x.com/EcZachly/status/1875002741711626444">https://x.com/EcZachly/status/1875002741711626444</a></p></li>
+</ul>
+</section>
+<section id="alignment-with-data-engineer-pass-descriptors">
+<h3>Alignment with Data Engineer Pass Descriptors<a class="headerlink" href="#alignment-with-data-engineer-pass-descriptors" title="Link to this heading">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This workshop aligns with several IFATE Data Engineer Pass Descriptors: <a class="reference external" href="https://www.instituteforapprenticeships.org/apprenticeship-standards/data-engineer-v1-0">https://www.instituteforapprenticeships.org/apprenticeship-standards/data-engineer-v1-0</a></p>
+</div>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Click here to review more detail</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<ul class="simple">
+<li><p class="sd-card-text"><strong>Explains techniques such as star schemas, data lakes and data marts and the impact they have on data warehousing principles. (K15)</strong><br />
+This workshop directly demonstrates this by showing how a star schema can be implemented and maintained in a data warehouse, specifically focusing on dimension table updates using SCD Type 1.</p></li>
+<li><p class="sd-card-text"><strong>Describes the types and uses of data engineering tools in their own organisation and how they apply them. (K20)</strong><br />
+The workshop covers multiple Azure data engineering tools (Azure SQL, Azure Synapse, Dedicated SQL Pools) and shows their practical application in building a data warehouse update pipeline, demonstrating how each tool serves a specific purpose in the overall architecture.</p></li>
+<li><p class="sd-card-text"><strong>Explains the deployment approaches processes for new data pipelines and automated processes. (K8)</strong><br />
+We walk through the complete deployment of a new data pipeline in Azure Synapse, from setting up the infrastructure to implementing and testing the automated update process.</p></li>
+<li><p class="sd-card-text"><strong>Explains how they monitor different types of data store to optimise system management, performance and availability. (K1, S7)</strong><br />
+We will implement audit logging tables to track pipeline success, and consideration of table distribution and udpate methods in Azure Synapse for optimised performance.</p></li>
+<li><p class="sd-card-text"><strong>Describes how they use data ingestion frameworks such as streaming, batching and on demand services to move data from one location to another in order to optimise data ingestion processes. (K18, S15)</strong><br />
+We focus on batch processing and this workshop demonstrates an optimised ingestion process using staging tables and audit logging to ensure reliable data movement from OLTP to OLAP systems.</p></li>
+</ul>
+</div>
+</details></section>
+<section id="today-s-workshop-scenario-and-objectives">
+<h3>Today’s Workshop Scenario and Objectives<a class="headerlink" href="#today-s-workshop-scenario-and-objectives" title="Link to this heading">#</a></h3>
+<p>In this workshop, you’ll implement a streaming process to …</p>
+<p>Using AWS… By the end of this workshop, you will have:</p>
+<ul class="simple">
+<li><p>Set up …</p></li>
+<li><p>Created …</p></li>
+<li><p>Built a …</p></li>
+<li><p>Developed a streamin pipeline that:</p>
+<ul>
+<li><p>…</p></li>
+<li><p>…</p></li>
+</ul>
+</li>
+<li><p>Tested the pipeline by:</p>
+<ul>
+<li><p>…</p></li>
+<li><p>…</p></li>
+<li><p>…</p></li>
+</ul>
+</li>
+</ul>
+<p>This workshop will provide practical experience with:</p>
+<ul class="simple">
+<li><p>…</p></li>
+<li><p>…</p></li>
+<li><p>…</p></li>
+<li><p>…</p></li>
+<li><p>…</p></li>
+</ul>
+<p>In this setup, your pipeline will perform … main operations:</p>
+<ol class="arabic simple">
+<li><p><strong>…</strong>: …</p></li>
+<li><p><strong>…</strong>: A …</p></li>
+</ol>
+<p>By the end of the workshop, you will have built this architecture:</p>
+<p><img alt="architecture" src="images/architecture.png" /></p>
+</section>
+</section>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="note">
+<h1>Note<a class="headerlink" href="#note" title="Link to this heading">#</a></h1>
+<blockquote>
+<div><p>Review the Glue Streaming guidance patterns starting here: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/streaming-tutorial-studio.html">https://docs.aws.amazon.com/glue/latest/dg/streaming-tutorial-studio.html</a></p>
+</div></blockquote>
+<section id="task-1-configuring-the-development-environment">
+<h2>⚙️ Task 1: Configuring the Development Environment<a class="headerlink" href="#task-1-configuring-the-development-environment" title="Link to this heading">#</a></h2>
+<blockquote>
+<div><p>In Task 1, you will set up a development environment where weather data streaming and analytics can take place. This involves deploying a comprehensive AWS infrastructure using CloudFormation, which will create multiple interconnected services including a data ingestion pipeline (Lambda and Kinesis), storage layer (S3 data lake), and foundational analytics services (Redshift cluster and Glue database).</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><p><strong>Start an ACG AWS sandbox:</strong></p></li>
+</ol>
+<ul class="simple">
+<li><p>Use this link and start <code class="docutils literal notranslate"><span class="pre">AWS</span> <span class="pre">Sandbox</span> <span class="pre">-</span> <span class="pre">Default</span></code> and log in: <a class="reference external" href="https://learn.acloud.guru/cloud-playground/cloud-sandboxes">https://learn.acloud.guru/cloud-playground/cloud-sandboxes</a> <br>
+<img alt="AWS_ACG_start" src="_images/AWS_ACG_start.png" /></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>⌛ Your ACG Azure sandbox will automatically shut down and its data will be deleted after four hours. You will receive a notification one hour before the sandbox expires, allowing you to extend it for an additional four hours. Please plan your work accordingly to avoid disruptions.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🔃 If you encounter deployment issues or want to start fresh, we recommend deleting the entire sandbox from the ACG playground rather than individual resources or the CloudFormation stack. This is faster and ensures a clean slate for redeployment.</p>
+<p>The CloudFormation stack includes retention settings for resources like S3 buckets to avoid accidental data loss, and deletion can take 15–20 minutes due to dependencies between components (e.g., Lambda, Kinesis, Redshift). If you must delete the stack, empty S3 buckets manually first, as their deletion protection will block the process.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>⛔ When using AWS Glue, your ACG sandbox may shut down due to exceeding Glue DPU (Data Processing Unit) limits. You’ll receive an email titled “Your Hands-On Lab or Cloud Playground has been shut down,” explaining the suspension due to excessive DPU usage.</p>
+<p>AWS Glue jobs, being Spark-based, provision distributed computing environments even for small tasks, which can quickly hit ACG’s limits designed to prevent runaway costs. This restriction is a helpful reminder of resource management in data processing.</p>
+<p>If your sandbox is suspended, don’t worry, this is part of learning to use powerful tools like AWS Glue. Simply start a new sandbox and redeploy the CloudFormation template, which will be ready in 3–4 minutes. Learn more about Glue DPUs and optimisation here: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html">https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html</a></p>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>Deploy AWS CloudFormation template:</strong></p></li>
+</ol>
+<ul class="simple">
+<li><p>Once logged in search for <code class="docutils literal notranslate"><span class="pre">CloudFormation</span></code>.</p></li>
+<li><p>At the top, click on the far right drop down <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">stack</span></code> and select <code class="docutils literal notranslate"><span class="pre">With</span> <span class="pre">new</span> <span class="pre">resources</span> <span class="pre">(standard)</span></code></p></li>
+<li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">1:</span> <span class="pre">Create</span> <span class="pre">Stack</span></code> copy and paste this URL <code class="docutils literal notranslate"><span class="pre">https://da5corndel.s3.eu-west-2.amazonaws.com/CloudFormation_streaming.yaml</span></code> into the <code class="docutils literal notranslate"><span class="pre">Amazon</span> <span class="pre">S3</span> <span class="pre">URL</span></code> box and click <code class="docutils literal notranslate"><span class="pre">Next</span></code>.
+<img alt="CloudFormation_S3_URL" src="_images/CloudFormation_S3_URL.png" /><br><br></p></li>
+<li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">2:</span> <span class="pre">Specify</span> <span class="pre">stack</span> <span class="pre">details</span></code> notice how may of the parameters are pre-completed for you and don’t need to be changed. The only task here is to complete <code class="docutils literal notranslate"><span class="pre">Provide</span> <span class="pre">a</span> <span class="pre">stack</span> <span class="pre">name</span></code>. As this name is used to create resources a simple name is recommended such as <code class="docutils literal notranslate"><span class="pre">stream</span></code>. Then click <code class="docutils literal notranslate"><span class="pre">Next</span></code>.
+<img alt="CloudFormation_step2" src="_images/CloudFormation_step2.png" /><br><br></p></li>
+<li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">3:</span> <span class="pre">Configure</span> <span class="pre">stack</span> <span class="pre">options</span></code> scroll down to the bottom of the page then simply tick the check box next to the statement: <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">acknowledge</span> <span class="pre">that</span> <span class="pre">AWS</span> <span class="pre">CloudFormation</span> <span class="pre">might</span> <span class="pre">create</span> <span class="pre">IAM</span> <span class="pre">resources</span> <span class="pre">with</span> <span class="pre">customised</span> <span class="pre">names.</span></code> then click <code class="docutils literal notranslate"><span class="pre">Next</span></code>.</p></li>
+<li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">4:</span> <span class="pre">Configure</span> <span class="pre">stack</span> <span class="pre">options</span></code>, scroll to the bottom of the page and click the <code class="docutils literal notranslate"><span class="pre">Submit</span></code> button. Your stack (we called <code class="docutils literal notranslate"><span class="pre">stream</span></code>) will now deploy and will show <code class="docutils literal notranslate"><span class="pre">ℹ</span> <span class="pre">CREATE_IN_PROGRESS</span></code> while it deploys. After about 3 minutes it should show the message <code class="docutils literal notranslate"><span class="pre">ℹ</span> <span class="pre">CREATE_COMPLETE</span></code>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>⌚ Using an AWS CloudFormation template in this workshop saves time by automating resource setup, avoiding manual clicks in the AWS Portal.</p>
+<p>CloudFormation templates are common in DevOps for creating consistent environments across development, testing, and production. In this workshop, the template sets up a single-node Redshift cluster (dc2.large) with basic authentication and permissive security settings to simplify access and experimentation.</p>
+<p>This setup is for learning purposes and does not include production-grade features like private endpoints or stricter security controls. Learn more about CloudFormation templates here: <a class="reference external" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html</a></p>
+</div>
+<ol class="arabic simple" start="3">
+<li><p><strong>How to explore your stack <code class="docutils literal notranslate"><span class="pre">Outputs</span></code></strong></p></li>
+</ol>
+<ul class="simple">
+<li><p>Once your stack shows <code class="docutils literal notranslate"><span class="pre">ℹ</span> <span class="pre">CREATE_COMPLETE</span></code>, click on the <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab. This is a set of URLs created by the deployment for the key resources you will use in this workshop. Ideally keep this page open during the workhsop so you can come back here and easily navigate to different parts of the application.</p></li>
+<li><p>Let’s start by simply opening the S3 bucket that will be our data lake. Right click on the URL  to the right of the key <code class="docutils literal notranslate"><span class="pre">DataLakeBucketURL</span></code> and select <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">link</span> <span class="pre">in</span> <span class="pre">new</span> <span class="pre">tab</span></code>. This will open the S3 bucket used to store streamed weather data in this application.
+<img alt="CloudFormation_datalake" src="_images/CloudFormation_datalake.png" /><br></p></li>
+<li><p>Great, now that you know how to quickly navigate key resources in this data streaming application, in the next section we will open and explore key resources in a logical order across this architecture, beginning with the Producer!!</p></li>
+</ul>
+</section>
+<section id="task-2-explore-and-understand-your-streaming-application-so-far">
+<h2>🗺️ Task 2: Explore and understand your streaming application so far<a class="headerlink" href="#task-2-explore-and-understand-your-streaming-application-so-far" title="Link to this heading">#</a></h2>
+<blockquote>
+<div><p>In this task, we will systematically explore the core data processing pipeline that has been provisioned for you. You’ll examine how weather data flows through the ingestion layer (Lambda and Kinesis), into the storage layer (S3 data lake), creating the foundation for analytics workloads.</p>
+</div></blockquote>
+<p>✨ 1. PRODUCER (Lambda)<br>
+⬇️ <br>
+🗃️ 2. BROKER (Kinesis Data Stream)<br>
+⬇️<br>
+📩 3. CONSUMER (Kinesis Firehose)<br>
+⬇️<br>
+📂 4. STORAGE (S3)<br>
+⬇️<br>
+📈 5. ANALYTICS / SERVING (Athena &amp; Redshift)<br></p>
+<section id="producer-explore-the-data-producer-lambda-function">
+<h3>✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):<a class="headerlink" href="#producer-explore-the-data-producer-lambda-function" title="Link to this heading">#</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>- This represents the start where real-time weather data enters our system. The combination of Lambda and EventBridge creates a reliable, serverless data collection mechanism that will continuously feed data into our streaming pipeline. Let&#39;s explore them.
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>First, from your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab, locate the <code class="docutils literal notranslate"><span class="pre">LambdaFunctionURL</span></code> and open it in a new tab.</p></li>
+<li><p>This Lambda function serves as our data producer - think of it as an automated weather station that collects and reports data every minute.</p></li>
+</ul>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>![Lambda](./images/Lambda.png)&lt;br&gt;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🌦️ Before we explore the code, let’s understand our data source. We’re using the Open-Meteo Weather API (<a class="reference external" href="https://open-meteo.com/">https://open-meteo.com/</a>), which provides free weather data for educational and development purposes. We chose this API deliberately for our workshop because its both free and doesn’t require any authentication or API keys, eliminating the complexity of credential management. This means the application starts calling the API immediately without you needing to register and manage access tokens.</p>
+<p>In a production environment, you’d typically need to handle API authentication, rate limiting, and usage tracking, but by removing these complexities here, we can focus purely on building our data pipeline and analytics capabilities. We will explore these important production considerations in Workshop 13: ‘Integrating  API Data Sources’.</p>
+<p>You can explore the API documentation at <a class="reference external" href="https://open-meteo.com/en/docs">https://open-meteo.com/en/docs</a> to understand all the available weather parameters. For our workshop, we’re using just a subset of the available data (current temperature) to keep things focused, but in a real-world application, you might want to collect additional parameters like humidity, wind speed, or precipitation.</p>
+</div>
+<ul class="simple">
+<li><p>Let’s examine how the Lambda function collects and streams weather data bey reviewing its Python code shown below.</p></li>
+<li><p>The Lambda handler function manages the flow of data flow by pulling from the weather API to a Kinesis data stream. It uses <code class="docutils literal notranslate"><span class="pre">boto3</span></code> to connect to Kinesis, with the stream name configured through environment variables from our CloudFormation template.</p></li>
+<li><p>The process follows a logical flow of:</p>
+<ul>
+<li><p>The code stores coordinates for three UK cities (London, Manchester, Edinburgh) in a list called <code class="docutils literal notranslate"><span class="pre">locations</span></code>.</p></li>
+<li><p>A helper function called <code class="docutils literal notranslate"> <span class="pre">def</span> <span class="pre">fetch_weather_data()</span></code> handles the API interaction, transforming raw weather data into a structured format with city name, temperature, and timestamps</p></li>
+<li><p>The main processing loop (that begins with <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">location</span> <span class="pre">in</span> <span class="pre">locations:</span></code>) collects data for each city from the API and streams it to a Kinesis data stream, using the city name as the partition key for organised downstream processing we will look at shortly.</p></li>
+<li><p>Logging tracks successes and failures and can be seen below as the <code class="docutils literal notranslate"><span class="pre">response</span></code> object finally retunred by the overall Lambda handler function.</p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">boto3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lambda handler that fetches weather data from Open-Meteo API and streams it to Kinesis.</span>
+<span class="sd">    The function processes multiple UK cities and structures the data for downstream analytics.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        event: AWS Lambda event trigger data</span>
+<span class="sd">        context: AWS Lambda runtime information</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Response containing execution status and processing summary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Initialize Kinesis client - Lambda automatically uses the correct region</span>
+    <span class="n">kinesis_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;kinesis&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Reference the Kinesis stream created by CloudFormation</span>
+    <span class="n">stream_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PROJECT_NAME&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-stream-</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;ENVIRONMENT&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Define UK cities to monitor - structured for potential expansion</span>
+    <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;city&quot;</span><span class="p">:</span> <span class="s2">&quot;London&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">51.5072</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.1276</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;city&quot;</span><span class="p">:</span> <span class="s2">&quot;Manchester&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">53.4808</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.2426</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;city&quot;</span><span class="p">:</span> <span class="s2">&quot;Edinburgh&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">55.9533</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.1883</span><span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fetch_weather_data</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches current weather data for a given location using Open-Meteo API.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            location (dict): Dictionary containing city name, latitude, and longitude</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Weather data including city, temperature, measurement time, and collection time</span>
+<span class="sd">                  Returns None if data fetch fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;https://api.open-meteo.com/v1/forecast&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;?latitude=</span><span class="si">{</span><span class="n">location</span><span class="p">[</span><span class="s1">&#39;latitude&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;longitude=</span><span class="si">{</span><span class="n">location</span><span class="p">[</span><span class="s1">&#39;longitude&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;current_weather=true&quot;</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">base_url</span> <span class="o">+</span> <span class="n">params</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;city&quot;</span><span class="p">:</span> <span class="n">location</span><span class="p">[</span><span class="s2">&quot;city&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;current_weather&quot;</span><span class="p">][</span><span class="s2">&quot;temperature&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;measurement_time&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;current_weather&quot;</span><span class="p">][</span><span class="s2">&quot;time&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;collection_time&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;open-meteo&quot;</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error fetching data for </span><span class="si">{</span><span class="n">location</span><span class="p">[</span><span class="s1">&#39;city&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Process each city and send data to Kinesis</span>
+    <span class="n">successfully_processed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">failed_cities</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">weather_data</span> <span class="o">=</span> <span class="n">fetch_weather_data</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">weather_data</span><span class="p">:</span>
+                <span class="c1"># Log the data being sent for monitoring and debugging</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing data for </span><span class="si">{</span><span class="n">location</span><span class="p">[</span><span class="s1">&#39;city&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">weather_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Send to Kinesis stream with city as partition key</span>
+                <span class="n">kinesis_client</span><span class="o">.</span><span class="n">put_record</span><span class="p">(</span>
+                    <span class="n">StreamName</span><span class="o">=</span><span class="n">stream_name</span><span class="p">,</span>
+                    <span class="n">Data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">weather_data</span><span class="p">),</span>
+                    <span class="n">PartitionKey</span><span class="o">=</span><span class="n">weather_data</span><span class="p">[</span><span class="s2">&quot;city&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">successfully_processed</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">failed_cities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">location</span><span class="p">[</span><span class="s2">&quot;city&quot;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Failed to process </span><span class="si">{</span><span class="n">location</span><span class="p">[</span><span class="s1">&#39;city&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="n">failed_cities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">location</span><span class="p">[</span><span class="s2">&quot;city&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Prepare detailed execution summary</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Processed </span><span class="si">{</span><span class="n">successfully_processed</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span><span class="si">}</span><span class="s2"> cities&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;successful_count&quot;</span><span class="p">:</span> <span class="n">successfully_processed</span><span class="p">,</span>
+            <span class="s2">&quot;total_cities&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">locations</span><span class="p">),</span>
+            <span class="s2">&quot;execution_time&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="k">if</span> <span class="n">failed_cities</span><span class="p">:</span>
+        <span class="n">response</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">][</span><span class="s2">&quot;failed_cities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">failed_cities</span>
+        
+    <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Now, let’s understand how this lambda function gets triggered automatically by an Amazon EventBridge rule:</p>
+<ul>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">Function</span> <span class="pre">overview</span></code> section, in the diagram click on the <code class="docutils literal notranslate"><span class="pre">EventBridge</span> <span class="pre">(CloudWatch</span> <span class="pre">Events)</span></code> then right click on the URL that now appears in the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> section as shown below. (You could also simply search for <code class="docutils literal notranslate"><span class="pre">EventBridge</span></code> at the top of the page).
+<img alt="EventBridge" src="_images/EventBridge.png" /><br></p></li>
+<li><p>Notice in the <code class="docutils literal notranslate"><span class="pre">Event</span> <span class="pre">schedule</span></code> the text <code class="docutils literal notranslate"><span class="pre">Fixed</span> <span class="pre">rate</span> <span class="pre">of</span> <span class="pre">1</span> <span class="pre">minute</span></code>. Click on the <code class="docutils literal notranslate"><span class="pre">Edit</span></code> button to the right and notice how in the <code class="docutils literal notranslate"><span class="pre">Schedule</span> <span class="pre">pattern</span></code> you could change the rate unit to be any number of <code class="docutils literal notranslate"><span class="pre">Minutes</span></code>, <code class="docutils literal notranslate"><span class="pre">Hours</span></code> or <code class="docutils literal notranslate"><span class="pre">Days</span></code>. Or, you could also change the schedule type to be a cron expression for specific minutes, hours, day of month, month, day of week and year.
+<img alt="EventBridgeRate" src="_images/EventBridgeRate.png" /><br></p></li>
+<li><p>This rule acts like an automated timer, invoking our Lambda function every minute.</p></li>
+<li><p>You can verify this by watching the CloudWatch logs for this rule where will see new entries appearing every minute. To do this:</p>
+<ul>
+<li><p>In the search bar at the top type <code class="docutils literal notranslate"><span class="pre">CloudWatch</span></code>,</p></li>
+<li><p>Then in the left hand menu of CloudWatch select from within <code class="docutils literal notranslate"><span class="pre">Logs</span></code>, <code class="docutils literal notranslate"><span class="pre">Log</span> <span class="pre">groups</span></code> then click on the Log group called <code class="docutils literal notranslate"><span class="pre">/aws/lambda/weather-analytics-producer-dev</span></code>
+<img alt="CloudWatchLogGroups" src="_images/CloudWatchLogGroups.png" /><br></p></li>
+<li><p>From the list of <code class="docutils literal notranslate"><span class="pre">Log</span> <span class="pre">streams</span></code> click on the container with the most recent <code class="docutils literal notranslate"><span class="pre">Last</span> <span class="pre">event</span> <span class="pre">time</span></code>. Expand some log entries and see if you can find entries from the <code class="docutils literal notranslate"><span class="pre">START</span></code> and <code class="docutils literal notranslate"><span class="pre">END</span></code> of one run of the Lambda function that has been triggered by the EventBridge rule you explored earlier. These markers wrap each function execution and between them you’ll see log messages showing weather data for each city. By checking the timestamps between different START entries, you can verify the function is running every minute as configured.
+<img alt="CloudWatchLogEntries" src="_images/CloudWatchLogEntries.png" /><br></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🔎 Keep an eye on the CloudWatch logs as you proceed through the workshop. They provide valuable insights into the data being collected and can help you troubleshoot any issues that arise.</p>
+</div>
+</section>
+<section id="broker-view-data-in-the-data-stream-kinesis">
+<h3>🗃️ 2 BROKER: View data in the Data Stream (Kinesis):<a class="headerlink" href="#broker-view-data-in-the-data-stream-kinesis" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We saw that the lambda function pulled weather data for three cities from the weather API and streamed those to a Kinesis data stream with the following code: <code class="docutils literal notranslate"><span class="pre">kinesis_client.put_record(StreamName=stream_name,</span> <span class="pre">Data=json.dumps(weather_data),</span> <span class="pre">PartitionKey=weather_data[&quot;city&quot;])</span></code> Let’s now explore that resource to understand how this broker works.</p></li>
+<li><p>From your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab, locate <code class="docutils literal notranslate"><span class="pre">KinesisStreamURL</span></code> and open in a new tab.</p></li>
+<li><p>This Kinesis stream acts as our real-time data buffer, receiving weather data from the Lambda function and temporarily storing it for downstream consumers like Kinesis Firehose. Think of it as a moving window of data that maintains records for 24 hours.</p></li>
+<li><p>The stream uses the city name as a partition key, helping organize data for downstream processing. This partitioning ensures data from the same city goes to the same shard, maintaining order within each city’s data stream. This was achieved in the Python code shown above where we set <code class="docutils literal notranslate"><span class="pre">PartitionKey=weather_data[&quot;city&quot;]</span></code>.</p></li>
+<li><p>Let’s now use the Data Viewer to inspect data in our Kinesis Stream:</p>
+<ol class="arabic simple">
+<li><p>Select the <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">Viewer</span></code> tab</p></li>
+<li><p>Choose the single shard available from the <code class="docutils literal notranslate"><span class="pre">Shard</span></code> drop-down</p></li>
+<li><p>From <code class="docutils literal notranslate"><span class="pre">Starting</span> <span class="pre">Position</span></code> drop-down, select <code class="docutils literal notranslate"><span class="pre">Trim</span> <span class="pre">horizon</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Get</span> <span class="pre">records</span></code> to view the most recent weather data from our cities
+<img alt="KinesisDataStreamDataViewer" src="_images/KinesisDataStreamDataViewer.png" /><br></p></li>
+</ol>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>📁 Our stream uses one shard because our data volume (3 cities × 1 record/minute = 3 records/minute) is well within a single shard’s capacity of 1,000 records/second. This is perfect for workshop purposes and cost-efficient. VALIDATE WITH DOCS IN GEMINI</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>⌚<code class="docutils literal notranslate"><span class="pre">Trim</span> <span class="pre">horizon</span></code> works because it shows all records in the stream’s 24-hour retention window, letting you see historical data. <code class="docutils literal notranslate"><span class="pre">Latest</span></code> might not show records immediately because it only shows data that arrives after you start viewing. Since our Lambda writes once per minute, you might need to wait for the next data collection cycle to see new records.</p>
+</div>
+</section>
+<section id="consumer-examine-the-data-transformation-kinesis-firehose">
+<h3>📩 3 CONSUMER: Examine the Data Transformation (Kinesis Firehose):<a class="headerlink" href="#consumer-examine-the-data-transformation-kinesis-firehose" title="Link to this heading">#</a></h3>
+<ul>
+<li><p>From your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab, locate <code class="docutils literal notranslate"><span class="pre">KinesisFirehoseURL</span></code> and open in a new tab.</p>
+<ul>
+<li><p>Kinesis Firehose acts as our delivery service, taking data from the Kinesis stream and preparing it for long-term storage in S3. Let’s explore its key configurations:</p>
+<ul class="simple">
+<li><p>Click on the <code class="docutils literal notranslate"><span class="pre">weather-analytics-firehose-dev</span></code> delivery stream</p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">Edit</span> <span class="pre">destination</span> <span class="pre">settings</span></code> to view the configuration details
+<img alt="KinesisFirehoseDestination" src="_images/KinesisFirehoseDestination.png" /><br></p></li>
+</ul>
+</li>
+<li><p>Examine these important settings:</p>
+<ul>
+<li><p><strong>Dynamic Partitioning</strong>: Notice how this feature is enabled in the <code class="docutils literal notranslate"><span class="pre">Dynamic</span> <span class="pre">partitioning</span></code> section. It automatically organises our data in S3:</p>
+<ul>
+<li><p>Enabled with a partition key based on <code class="docutils literal notranslate"><span class="pre">city</span></code> using the JQ expression <code class="docutils literal notranslate"><span class="pre">.city</span></code></p></li>
+<li><p>Creates a logical hierarchy in S3 using the prefix pattern you can see of:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>weather-data/location=!{partitionKeyFromQuery:city}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/
+</pre></div>
+</div>
+</li>
+<li><p>This pattern means data is automatically organised by city, year, month, and day</p></li>
+</ul>
+</li>
+<li><p><strong>Error Handling</strong>: Notice the error output prefix:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>errors/!{firehose:error-output-type}/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/
+</pre></div>
+</div>
+<p>This helps track and debug any processing issues by organising any error logs in a similar hierarchical structure</p>
+</li>
+<li><p><strong>Buffering</strong>: Scroll to the bottom of the page and expand the section <code class="docutils literal notranslate"><span class="pre">Buffer</span> <span class="pre">hints,</span> <span class="pre">compression,</span> <span class="pre">file</span> <span class="pre">extension</span> <span class="pre">and</span> <span class="pre">encryption</span></code>. Notice how Firehose buffers data for either:</p>
+<ul class="simple">
+<li><p>60 seconds (time-based buffer) OR</p></li>
+<li><p>64MB (size-based buffer)</p></li>
+<li><p>Whichever threshold is met first triggers a write to S3</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>📦 The buffering configuration balances between data freshness and storage efficiency. Smaller buffers mean fresher data but more S3 write operations, while larger buffers are more cost-effective but introduce more latency. Our 60-second buffer is ideal for our workshop environment where we want to see results quickly.</p>
+<p>🗂️ The dynamic partitioning structure provides efficient querying later. By organising data by city and time components, we can quickly locate specific data subsets without scanning the entire dataset. For example, finding all London temperatures for a specific month becomes a targeted operation.</p>
+</div>
+</section>
+<section id="storage-inspect-the-data-lake-s3">
+<h3>📂 4 STORAGE: Inspect the Data Lake (S3):<a class="headerlink" href="#storage-inspect-the-data-lake-s3" title="Link to this heading">#</a></h3>
+<ul>
+<li><p>From your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab, locate <code class="docutils literal notranslate"><span class="pre">DataLakeBucketURL</span></code> and open in a new tab.</p></li>
+<li><p>This S3 bucket serves as our data lake, providing long-term storage of our weather data in an organised and cost-effective way. Let’s explore its structure:</p>
+<ol class="arabic simple">
+<li><p>Click into the <code class="docutils literal notranslate"><span class="pre">weather-data</span></code> folder</p></li>
+<li><p>Notice the hierarchical organisation created by Kinesis Firehose we explored previously:</p>
+<ul class="simple">
+<li><p>First level: <code class="docutils literal notranslate"><span class="pre">location=cityname</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">location=London</span></code>)</p></li>
+<li><p>Second level: <code class="docutils literal notranslate"><span class="pre">year=YYYY</span></code></p></li>
+<li><p>Third level: <code class="docutils literal notranslate"><span class="pre">month=MM</span></code></p></li>
+<li><p>Fourth level: <code class="docutils literal notranslate"><span class="pre">day=DD</span></code></p></li>
+</ul>
+</li>
+<li><p>Navigate down through these levels to find the actual data files</p></li>
+<li><p>Notice the <code class="docutils literal notranslate"><span class="pre">.gz</span></code> extension on the files - this indicates GZIP compression</p></li>
+</ol>
+</li>
+<li><p>Key features to observe:</p>
+<ul>
+<li><p><strong>Partitioning Structure</strong>: The folder hierarchy directly matches the Firehose prefix pattern we examined earlier:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">weather</span><span class="o">-</span><span class="n">data</span><span class="o">/</span><span class="n">location</span><span class="o">=</span><span class="n">city</span><span class="o">/</span><span class="n">year</span><span class="o">=</span><span class="n">YYYY</span><span class="o">/</span><span class="n">month</span><span class="o">=</span><span class="n">MM</span><span class="o">/</span><span class="n">day</span><span class="o">=</span><span class="n">DD</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>This isn’t just tidy organisation, it supports  efficient querying</p>
+</li>
+<li><p><strong>File Formats</strong>:</p>
+<ul class="simple">
+<li><p>Files are automatically compressed using GZIP</p></li>
+<li><p>Each file contains multiple weather records collected during the 60-second buffer window</p></li>
+<li><p>File names include timestamp information for easy tracking</p></li>
+</ul>
+</li>
+<li><p><strong>Lifecycle Management</strong>: The bucket has intelligent lifecycle rules that were defined in the CloudFormation template you deployed:</p>
+<ul class="simple">
+<li><p>Data moves to Infrequent Access (IA) storage after 90 days</p></li>
+<li><p>Archives to Glacier storage after 180 days</p></li>
+<li><p>This tiered approach optimises storage costs</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>💾 The combination of GZIP compression and intelligent lifecycle policies helps manage storage costs as your data grows. For examle, in a production environment, with years of historical weather data for many more locations the savings could become significant.</p>
+<p>🎯 The partitioned structure isn’t just for organisation, it enables targeted data access. When you later query this data with Athena or process it with Glue, it can efficiently access specific time periods or locations without scanning the entire dataset.</p>
+</div>
+</section>
+<section id="analytics-serving-preview-the-analytics-foundation">
+<h3>📈 5 ANALYTICS / SERVING: Preview the Analytics Foundation:<a class="headerlink" href="#analytics-serving-preview-the-analytics-foundation" title="Link to this heading">#</a></h3>
+<ul>
+<li><p>Let’s explore the analytical and data serving layer that will help us derive insights from our weather data. We’ll examine both components:</p>
+<ul class="simple">
+<li><p>AWS Glue for data cataloging and ETL</p></li>
+<li><p>Amazon Redshift for data warehousing</p></li>
+</ul>
+</li>
+<li><p>First, let’s look at our AWS Glue setup:</p>
+<ul>
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">GlueDatabaseURL</span></code> from your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab in a new tab</p></li>
+<li><p>Click into the database named <code class="docutils literal notranslate"><span class="pre">weather-analytics-dev-db</span></code></p></li>
+<li><p>Notice it’s currently empty - we’ll populate it in the next task</p></li>
+<li><p>Observe the database location points to our S3 data lake:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">s3</span><span class="p">:</span><span class="o">//</span><span class="n">weather</span><span class="o">-</span><span class="n">analytics</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="n">lake</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="p">[</span><span class="n">YOUR</span><span class="o">-</span><span class="n">ACCOUNT</span><span class="o">-</span><span class="n">ID</span><span class="p">]</span><span class="o">/</span><span class="n">processed</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p><img alt="GlueDatabase" src="_images/GlueDatabase.png" /><br></p>
+</li>
+<li><p>Next, examine the Redshift configuration:</p>
+<ul class="simple">
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">RedshiftClusterURL</span></code> from your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab in a new tab</p></li>
+<li><p>Notice the cluster configuration:</p>
+<ul>
+<li><p>Single-node cluster (<code class="docutils literal notranslate"><span class="pre">dc2.large</span></code>) suitable for workshop volumes</p></li>
+<li><p>Publicly accessible for workshop simplicity</p></li>
+<li><p>Located in the same VPC as other components</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Key architectural features:</p>
+<ul class="simple">
+<li><p><strong>Data Catalog Integration</strong>:</p>
+<ul>
+<li><p>Glue database is pre-configured to work with our S3 data lake</p></li>
+<li><p>Supports both batch and streaming analytics (we will do both later)</p></li>
+<li><p>Will enable schema discovery and ETL job creation (which we will do later)</p></li>
+</ul>
+</li>
+<li><p><strong>Warehouse Configuration</strong>:</p>
+<ul>
+<li><p>Redshift cluster sized appropriately for workshop loads</p></li>
+<li><p>VPC security groups allow necessary access</p></li>
+<li><p>Set up for both direct queries and ETL operations</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🏗️ This foundation sets us up for both batch and real-time analytics. The combination of Glue (for ETL and cataloging) and Redshift (for warehousing) provides a robust platform for deriving insights from our weather data.</p>
+<p>🔐 While this setup uses simplified security for workshop purposes (public access, basic credentials), production environments should implement:</p>
+<ul class="simple">
+<li><p>Private subnets with NAT Gateways</p></li>
+<li><p>AWS Secrets Manager for credentials</p></li>
+<li><p>More restrictive security group rules</p></li>
+<li><p>Enhanced VPC endpoint policies</p></li>
+</ul>
+</div>
+<p><img alt="glue" src="https://docs.aws.amazon.com/images/glue/latest/dg/images/HowItWorks-overview.png" /></p>
+<blockquote>
+<div><p>Image from: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html">https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html</a></p>
+</div></blockquote>
+<p>Now that you understand how data flows through the system - from collection through streaming and into storage - you’re ready to build the analytics capabilities in the next task! You’ll create crawlers to catalog this data, develop ETL jobs to transform it, and ultimately load it into Redshift for analysis.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🪟 Keep the CloudFormation Outputs tab open as you continue working - you’ll frequently refer back to these resources throughout the workshop.</p>
+</div>
+</section>
+</section>
+<section id="task-3-data-lake-exploration-with-glue-and-athena">
+<h2>🔎 Task 3: Data Lake Exploration with Glue and Athena<a class="headerlink" href="#task-3-data-lake-exploration-with-glue-and-athena" title="Link to this heading">#</a></h2>
+<blockquote>
+<div><p>We’ve been asked to create a dashboard of… updated… real time up</p>
+</div></blockquote>
+<blockquote>
+<div><p>Remember to make point can now stream into Redshift <a class="reference external" href="https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion.html">https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion.html</a></p>
+</div></blockquote>
+<blockquote>
+<div><p>In this task, we’ll first use AWS Glue to automatically discover and catalog our data structure, then use Athena to query this cataloged data. This represents best practice for data lake exploration, ensuring consistent schema management across your analytics services.</p>
+</div></blockquote>
+<section id="set-up-glue-crawler">
+<h3>📋 Set Up Glue Crawler:<a class="headerlink" href="#set-up-glue-crawler" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Navigate to AWS Glue</strong>:</p>
+<ul class="simple">
+<li><p>In the AWS Console, search for <code class="docutils literal notranslate"><span class="pre">Glue</span></code> and open it</p></li>
+<li><p>In the left navigation, select <code class="docutils literal notranslate"><span class="pre">Crawlers</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">crawler</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Configure the Crawler</strong>:</p>
+<ul class="simple">
+<li><p>Name: <code class="docutils literal notranslate"><span class="pre">weather-data-crawler</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Specify Data Source</strong>:</p>
+<ul class="simple">
+<li><p>Choose <code class="docutils literal notranslate"><span class="pre">S3</span></code> as the data source</p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">In</span> <span class="pre">this</span> <span class="pre">account</span></code></p></li>
+<li><p>For the S3 path, enter:
+<code class="docutils literal notranslate"><span class="pre">s3://weather-analytics-data-lake-dev-[YOUR-ACCOUNT-ID]/weather-data/</span></code></p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">Crawl</span> <span class="pre">all</span> <span class="pre">sub-folders</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Add Another Data Store</strong>:</p>
+<ul class="simple">
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">No</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Choose IAM Role</strong>:</p>
+<ul class="simple">
+<li><p>Select the existing role: <code class="docutils literal notranslate"><span class="pre">weather-analytics-glue-role-dev</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🔐 The CloudFormation template already created this role with appropriate permissions for the crawler to access S3 and create catalog entries.</p>
+</div>
+<ol class="arabic simple" start="6">
+<li><p><strong>Configure Schedule</strong>:</p>
+<ul class="simple">
+<li><p>Frequency:  <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">on</span> <span class="pre">demand</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Configure Output</strong>:</p>
+<ul class="simple">
+<li><p>Database: Select <code class="docutils literal notranslate"><span class="pre">weather_analytics_dev_db</span></code></p></li>
+<li><p>For table prefix, enter: <code class="docutils literal notranslate"><span class="pre">raw_</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Next</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Review and Create</strong>:</p>
+<ul class="simple">
+<li><p>Review your settings</p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">crawler</span></code></p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="run-the-crawler">
+<h3>🏃‍♂️ Run the Crawler:<a class="headerlink" href="#run-the-crawler" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Start Crawler</strong>:</p>
+<ul class="simple">
+<li><p>Select your new crawler</p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">crawler</span></code></p></li>
+<li><p>Wait for completion (usually 1-2 minutes)</p></li>
+</ul>
+</li>
+<li><p><strong>Verify Results</strong>:</p>
+<ul class="simple">
+<li><p>Go to <code class="docutils literal notranslate"><span class="pre">Databases</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">weather_analytics_dev_db</span></code></p></li>
+<li><p>You should see a new table like <code class="docutils literal notranslate"><span class="pre">raw_weather_data</span></code></p></li>
+<li><p>Click on the table to examine the schema</p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>📚 Notice how Glue automatically:</p>
+<ul class="simple">
+<li><p>Detected the JSON structure</p></li>
+<li><p>Identified data types</p></li>
+<li><p>Recognized the partitioning scheme (location/year/month/day)</p></li>
+</ul>
+</div>
+</section>
+<section id="set-up-athena-query-environment">
+<h3>⚙️ Set Up Athena Query Environment:<a class="headerlink" href="#set-up-athena-query-environment" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Configure Athena Settings</strong>:</p>
+<ul class="simple">
+<li><p>In the AWS Console, search for <code class="docutils literal notranslate"><span class="pre">Athena</span></code> and open it in a new tab</p></li>
+<li><p>If this is your first time using Athena, click on <code class="docutils literal notranslate"><span class="pre">Edit</span> <span class="pre">Settings</span></code></p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">Query</span> <span class="pre">result</span> <span class="pre">location</span></code>, enter:
+s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/</p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Save</span></code></p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>📁 We already created this results bucket in our CloudFormation template with appropriate lifecycle rules to clean up old query results automatically. This helps manage storage costs while maintaining useful query history.</p>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>Create a Workgroup</strong>:</p>
+<ul class="simple">
+<li><p>In the left navigation, click <code class="docutils literal notranslate"><span class="pre">Workgroups</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">workgroup</span></code></p></li>
+<li><p>Name: <code class="docutils literal notranslate"><span class="pre">weather-analytics-workgroup</span></code></p></li>
+<li><p>Choose the same query result location as above</p></li>
+<li><p>Under <code class="docutils literal notranslate"><span class="pre">Additional</span> <span class="pre">configurations</span></code>, enable <code class="docutils literal notranslate"><span class="pre">Override</span> <span class="pre">client-side</span> <span class="pre">settings</span></code></p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">workgroup</span></code></p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="query-your-weather-data">
+<h3>📊 Query Your Weather Data:<a class="headerlink" href="#query-your-weather-data" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Basic Data Exploration</strong>:</p></li>
+</ol>
+<p>SELECT *
+FROM raw_weather_data
+ORDER BY measurement_time DESC
+LIMIT 10;</p>
+<ol class="arabic simple" start="2">
+<li><p><strong>Leverage Partitioning</strong>:</p></li>
+</ol>
+<p>SELECT
+city,
+AVG(temperature) as avg_temp,
+MIN(temperature) as min_temp,
+MAX(temperature) as max_temp,
+DATE(measurement_time) as date
+FROM raw_weather_data
+WHERE location = ‘London’
+AND year = ‘2025’
+AND month = ‘01’
+GROUP BY city, DATE(measurement_time)
+ORDER BY date DESC;</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>💡 Notice how we use partition columns (location, year, month) in the WHERE clause. Athena uses these to read only relevant data files, making queries more efficient and cost-effective.</p>
+</div>
+<ol class="arabic simple" start="3">
+<li><p><strong>City Comparison Analysis</strong>:</p></li>
+</ol>
+<p>SELECT
+city,
+COUNT(*) as measurements,
+ROUND(AVG(temperature), 2) as avg_temp,
+ROUND(STDDEV(temperature), 2) as temp_stddev
+FROM raw_weather_data
+WHERE year = ‘2025’
+AND month = ‘01’
+GROUP BY city
+ORDER BY avg_temp DESC;</p>
+</section>
+<section id="advanced-analytics">
+<h3>📈 3.5 Advanced Analytics:<a class="headerlink" href="#advanced-analytics" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Temperature Trends</strong>:</p></li>
+</ol>
+<p>WITH hourly_temps AS (
+SELECT
+city,
+DATE_TRUNC(‘hour’, measurement_time) as hour,
+AVG(temperature) as avg_temp
+FROM raw_weather_data
+WHERE year = ‘2025’ AND month = ‘01’
+GROUP BY city, DATE_TRUNC(‘hour’, measurement_time)
+)
+SELECT
+city,
+hour,
+avg_temp,
+LAG(avg_temp) OVER (PARTITION BY city ORDER BY hour) as prev_hour_temp,
+ROUND(avg_temp - LAG(avg_temp) OVER (PARTITION BY city ORDER BY hour), 2) as temp_change
+FROM hourly_temps
+ORDER BY city, hour DESC;</p>
+<ol class="arabic simple" start="2">
+<li><p><strong>Data Quality Checks</strong>:</p></li>
+</ol>
+<p>SELECT
+location,
+year,
+month,
+day,
+COUNT(*) as record_count,
+COUNT(DISTINCT EXTRACT(hour FROM measurement_time)) as unique_hours,
+MIN(measurement_time) as first_record,
+MAX(measurement_time) as last_record
+FROM raw_weather_data
+WHERE year = ‘2025’ AND month = ‘01’
+GROUP BY location, year, month, day
+ORDER BY location, year, month, day DESC;</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>✅ These quality checks help identify any gaps in data collection. In a production environment, you might set up alerts based on these metrics to monitor data pipeline health.</p>
+</div>
+</section>
+<section id="challenge-exercises">
+<h3>🎯 Challenge Exercises:<a class="headerlink" href="#challenge-exercises" title="Link to this heading">#</a></h3>
+<p>Try writing queries to answer these questions:</p>
+<ol class="arabic simple">
+<li><p>Which city has the most variable temperature (highest standard deviation)?</p></li>
+<li><p>What time of day typically records the highest temperatures?</p></li>
+<li><p>Calculate the rolling 3-hour average temperature for each city.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>💡 Hint: Look up Athena’s window functions documentation for the rolling average calculation.</p>
+</div>
+</section>
+<section id="cost-management-best-practices">
+<h3>Cost Management Best Practices:<a class="headerlink" href="#cost-management-best-practices" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Optimize Your Queries</strong>:</p>
+<ul class="simple">
+<li><p>Always use partition filtering when possible</p></li>
+<li><p>Select only needed columns instead of SELECT *</p></li>
+<li><p>Use appropriate data types and compression</p></li>
+</ul>
+</li>
+<li><p><strong>Monitor Query Metrics</strong>:</p>
+<ul class="simple">
+<li><p>Click “Recent queries” to view:</p>
+<ul>
+<li><p>Data scanned per query</p></li>
+<li><p>Execution time</p></li>
+<li><p>Cost implications</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>💰 Athena pricing is based on data scanned. Well-structured queries on partitioned data help minimise costs. The partitioning scheme we implemented (by city and date) helps optimise both query performance and cost.</p>
+</div>
+<p>Now that you’ve explored your weather data lake with Athena, you’re ready to move on to more advanced analytics using AWS Glue and Redshift. In the next task, you’ll learn how to:</p>
+<ul class="simple">
+<li><p>Create and run Glue crawlers</p></li>
+<li><p>Build ETL jobs for data transformation</p></li>
+<li><p>Load processed data into Redshift for high-performance querying</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🗒️ Keep your Athena queries handy - you’ll use them to validate your ETL results and compare query performance between Athena and Redshift.</p>
+</div>
+</section>
+</section>
+<section id="wrapping-up-and-reflecting-on-your-project">
+<h2>Wrapping Up and Reflecting on Your Project<a class="headerlink" href="#wrapping-up-and-reflecting-on-your-project" title="Link to this heading">#</a></h2>
+<section id="real-time-vs">
+<h3>Real Time vs…<a class="headerlink" href="#real-time-vs" title="Link to this heading">#</a></h3>
+</section>
+<section id="another-topic">
+<h3>Another topic<a class="headerlink" href="#another-topic" title="Link to this heading">#</a></h3>
+</section>
+<hr class="docutils" />
+<section id="this-afternoon-reflecting-on-your-project">
+<h3>This afternoon - reflecting on your project<a class="headerlink" href="#this-afternoon-reflecting-on-your-project" title="Link to this heading">#</a></h3>
+<p>With this morning’s workshop exercise completed, you have now explored key processes for…</p>
+<p>This afternoon, we will consider how your project and its potential …</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🎉 Congratulations - you’ve completed today’s main exercise!</p>
+<p>Below are three optional exercises that extend what you’ve learned. Choose any that:</p>
+<ul class="simple">
+<li><p>Are relevant to your current role</p></li>
+<li><p>Match your project’s needs</p></li>
+<li><p>Interest you technically</p></li>
+</ul>
+<p>Even if you don’t complete them, consider reviewing what they cover in your own time, they demonstrate common patterns you might need later in your data engineering career.</p>
+</div>
+</section>
+</section>
+<section id="going-further">
+<h2>🚀 Going Further<a class="headerlink" href="#going-further" title="Link to this heading">#</a></h2>
+<section id="going-further-1-description">
+<h3>Going Further 1: description<a class="headerlink" href="#going-further-1-description" title="Link to this heading">#</a></h3>
+<p>In this exercise, we’ll enhance the pipeline by</p>
+</section>
+<section id="going-further-2-description">
+<h3>Going Further 2: description<a class="headerlink" href="#going-further-2-description" title="Link to this heading">#</a></h3>
+</section>
+<section id="going-further-3-description">
+<h3>Going Further 3: description<a class="headerlink" href="#going-further-3-description" title="Link to this heading">#</a></h3>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Data Engineer Workshop 9: Advanced Stream Processing Pipelines</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reminder-of-workshop-5-data-integration-with-cloud-services">Reminder of Workshop 5 - Data Integration with Cloud Services</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-real-time-or-near-real-time-what-s-the-difference">Streaming, real time or near real time? What’s the difference?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#applying-each-workshop-to-your-project">Applying Each Workshop to Your Project</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-forward-with-your-project">Moving Forward With Your Project</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alignment-with-data-engineer-pass-descriptors">Alignment with Data Engineer Pass Descriptors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#today-s-workshop-scenario-and-objectives">Today’s Workshop Scenario and Objectives</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#note">Note</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-1-configuring-the-development-environment">⚙️ Task 1: Configuring the Development Environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-2-explore-and-understand-your-streaming-application-so-far">🗺️ Task 2: Explore and understand your streaming application so far</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#producer-explore-the-data-producer-lambda-function">✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#broker-view-data-in-the-data-stream-kinesis">🗃️ 2 BROKER: View data in the Data Stream (Kinesis):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#consumer-examine-the-data-transformation-kinesis-firehose">📩 3 CONSUMER: Examine the Data Transformation (Kinesis Firehose):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#storage-inspect-the-data-lake-s3">📂 4 STORAGE: Inspect the Data Lake (S3):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytics-serving-preview-the-analytics-foundation">📈 5 ANALYTICS / SERVING: Preview the Analytics Foundation:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-3-data-lake-exploration-with-glue-and-athena">🔎 Task 3: Data Lake Exploration with Glue and Athena</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-glue-crawler">📋 Set Up Glue Crawler:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-crawler">🏃‍♂️ Run the Crawler:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-athena-query-environment">⚙️ Set Up Athena Query Environment:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#query-your-weather-data">📊 Query Your Weather Data:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-analytics">📈 3.5 Advanced Analytics:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#challenge-exercises">🎯 Challenge Exercises:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cost-management-best-practices">Cost Management Best Practices:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapping-up-and-reflecting-on-your-project">Wrapping Up and Reflecting on Your Project</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#real-time-vs">Real Time vs…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#another-topic">Another topic</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#this-afternoon-reflecting-on-your-project">This afternoon - reflecting on your project</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-description">Going Further 1: description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-description">Going Further 2: description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-description">Going Further 3: description</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Corndel
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

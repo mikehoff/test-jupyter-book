@@ -1,0 +1,20 @@
+{
+    "name": "Python 3 with useful data libraries",
+    "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "ms-python.vscode-pylance",
+        "donjayamanne.python-extension-pack",
+        "streetsidesoftware.code-spell-checker",
+        "george-alisson.html-preview-vscode",
+        "mechatroner.rainbow-csv",
+        "ms-toolsai.datawrangler"
+    ],
+    "postCreateCommand": "pip install -r .devcontainer/requirements.txt",
+    "remoteUser": "vscode"
+  }
+  
