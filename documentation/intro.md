@@ -180,6 +180,25 @@ By the end of the workshop, you will have built this architecture:
   - Use this link and start `AWS Sandbox - Default` and log in: https://learn.acloud.guru/cloud-playground/cloud-sandboxes <br>
   ![AWS_ACG_start](./images/AWS_ACG_start.png)
 
+2. **Deploy AWS CloudFormation template:** 
+  - Once logged in search for `CloudFormation`. 
+  - At the top, click on the far right drop down `Create stack` and select `With new resources (standard)`
+  - At `Step 1: Create Stack` copy and paste this URL `https://da5corndel.s3.eu-west-2.amazonaws.com/CloudFormation_streaming.yaml` into the `Amazon S3 URL` box and click `Next`.
+  ![CloudFormation_S3_URL](./images/CloudFormation_S3_URL.png)<br><br>
+  - At `Step 2: Specify stack details` notice how may of the parameters are pre-completed for you and don't need to be changed. The only task here is to complete `Provide a stack name`. As this name is used to create resources a simple name is recommended such as `stream`. Then click `Next`.
+  ![CloudFormation_step2](./images/CloudFormation_step2.png)<br><br>
+  - At `Step 3: Configure stack options` scroll down to the bottom of the page then simply tick the check box next to the statement: `I acknowledge that AWS CloudFormation might create IAM resources with customised names.` then click `Next`.
+  - At `Step 4: Configure stack options`, scroll to the bottom of the page and click the `Submit` button. Your stack (we called `stream`) will now deploy and will show `ℹ CREATE_IN_PROGRESS` while it deploys. After about 3 minutes it should show the message `ℹ CREATE_COMPLETE`.
+
+````{dropdown} While the template deploys, click here for useful information and troubleshooting tips.
+```{note}
+⌚ Using an AWS CloudFormation template in this workshop saves time by automating resource setup, avoiding manual clicks in the AWS Portal.
+
+CloudFormation templates are common in DevOps for creating consistent environments across development, testing, and production. In this workshop, the template sets up a single-node Redshift cluster (dc2.large) with basic authentication and permissive security settings to simplify access and experimentation.
+
+This setup is for learning purposes and does not include production-grade features like private endpoints or stricter security controls. Learn more about CloudFormation templates here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html 
+```
+
 ```{Note}
 ⌛ Your ACG Azure sandbox will automatically shut down and its data will be deleted after four hours. You will receive a notification one hour before the sandbox expires, allowing you to extend it for an additional four hours. Please plan your work accordingly to avoid disruptions.
 ```
@@ -197,24 +216,7 @@ AWS Glue jobs, being Spark-based, provision distributed computing environments e
 
 If your sandbox is suspended, don’t worry, this is part of learning to use powerful tools like AWS Glue. Simply start a new sandbox and redeploy the CloudFormation template, which will be ready in 3–4 minutes. Learn more about Glue DPUs and optimisation here: https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html
 ```
-
-2. **Deploy AWS CloudFormation template:** 
-  - Once logged in search for `CloudFormation`. 
-  - At the top, click on the far right drop down `Create stack` and select `With new resources (standard)`
-  - At `Step 1: Create Stack` copy and paste this URL `https://da5corndel.s3.eu-west-2.amazonaws.com/CloudFormation_streaming.yaml` into the `Amazon S3 URL` box and click `Next`.
-  ![CloudFormation_S3_URL](./images/CloudFormation_S3_URL.png)<br><br>
-  - At `Step 2: Specify stack details` notice how may of the parameters are pre-completed for you and don't need to be changed. The only task here is to complete `Provide a stack name`. As this name is used to create resources a simple name is recommended such as `stream`. Then click `Next`.
-  ![CloudFormation_step2](./images/CloudFormation_step2.png)<br><br>
-  - At `Step 3: Configure stack options` scroll down to the bottom of the page then simply tick the check box next to the statement: `I acknowledge that AWS CloudFormation might create IAM resources with customised names.` then click `Next`.
-  - At `Step 4: Configure stack options`, scroll to the bottom of the page and click the `Submit` button. Your stack (we called `stream`) will now deploy and will show `ℹ CREATE_IN_PROGRESS` while it deploys. After about 3 minutes it should show the message `ℹ CREATE_COMPLETE`.
-
-```{note}
-⌚ Using an AWS CloudFormation template in this workshop saves time by automating resource setup, avoiding manual clicks in the AWS Portal.
-
-CloudFormation templates are common in DevOps for creating consistent environments across development, testing, and production. In this workshop, the template sets up a single-node Redshift cluster (dc2.large) with basic authentication and permissive security settings to simplify access and experimentation.
-
-This setup is for learning purposes and does not include production-grade features like private endpoints or stricter security controls. Learn more about CloudFormation templates here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html 
-```
+````
 
 3. **How to explore your stack `Outputs`**
   - Once your stack shows `ℹ CREATE_COMPLETE`, click on the `Outputs` tab. This is a set of URLs created by the deployment for the key resources you will use in this workshop. Ideally keep this page open during the workhsop so you can come back here and easily navigate to different parts of the application.
@@ -238,19 +240,22 @@ This setup is for learning purposes and does not include production-grade featur
 📈 5. ANALYTICS / SERVING (Athena & Redshift)<br>
 
 ### ✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):
-    - This represents the start where real-time weather data enters our system. The combination of Lambda and EventBridge creates a reliable, serverless data collection mechanism that will continuously feed data into our streaming pipeline. Let's explore them.
-   - First, from your CloudFormation `Outputs` tab, locate the `LambdaFunctionURL` and open it in a new tab.
-   - This Lambda function serves as our data producer - think of it as an automated weather station that collects and reports data every minute.
 
-    ![Lambda](./images/Lambda.png)<br>
+- This represents the start where real-time weather data enters our system. The combination of Lambda and EventBridge creates a reliable, serverless data collection mechanism that will continuously feed data into our streaming pipeline. Let's explore them.
+- First, from your CloudFormation `Outputs` tab, locate the `LambdaFunctionURL` and open it in a new tab.
+- This Lambda function serves as our data producer - think of it as an automated weather station that collects and reports data every minute.
+![Lambda](./images/Lambda.png)<br>
 
+````{dropdown} 🌦️ Before we explore the code, let's understand our data source by clicking here to expand.
 ```{Note}
-🌦️ Before we explore the code, let's understand our data source. We're using the Open-Meteo Weather API (https://open-meteo.com/), which provides free weather data for educational and development purposes. We chose this API deliberately for our workshop because its both free and doesn't require any authentication or API keys, eliminating the complexity of credential management. This means the application starts calling the API immediately without you needing to register and manage access tokens. 
+We're using the Open-Meteo Weather API (https://open-meteo.com/), which provides free weather data for educational and development purposes. We chose this API deliberately for our workshop because its both free and doesn't require any authentication or API keys, eliminating the complexity of credential management. This means the application starts calling the API immediately without you needing to register and manage access tokens. 
 
 In a production environment, you'd typically need to handle API authentication, rate limiting, and usage tracking, but by removing these complexities here, we can focus purely on building our data pipeline and analytics capabilities. We will explore these important production considerations in Workshop 13: 'Integrating  API Data Sources'.
       
 You can explore the API documentation at https://open-meteo.com/en/docs to understand all the available weather parameters. For our workshop, we're using just a subset of the available data (current temperature) to keep things focused, but in a real-world application, you might want to collect additional parameters like humidity, wind speed, or precipitation.
 ```
+````
+
    - Let's examine how the Lambda function collects and streams weather data bey reviewing its Python code shown below.
    - The Lambda handler function manages the flow of data flow by pulling from the weather API to a Kinesis data stream. It uses `boto3` to connect to Kinesis, with the stream name configured through environment variables from our CloudFormation template.
    - The process follows a logical flow of:
@@ -259,6 +264,7 @@ You can explore the API documentation at https://open-meteo.com/en/docs to under
         - The main processing loop (that begins with `for location in locations:`) collects data for each city from the API and streams it to a Kinesis data stream, using the city name as the partition key for organised downstream processing we will look at shortly.
         - Logging tracks successes and failures and can be seen below as the `response` object finally retunred by the overall Lambda handler function. 
 
+````{dropdown} 🧑‍💻 Clicking here to view the Python Code in the Lambda function
 ```{code-block} python
 import json
 import boto3
@@ -360,8 +366,8 @@ def lambda_handler(event, context):
         response["body"]["failed_cities"] = failed_cities
         
     return response
-
 ```
+````
 
    - Now, let's understand how this lambda function gets triggered automatically by an Amazon EventBridge rule:
         - In the `Function overview` section, in the diagram click on the `EventBridge (CloudWatch Events)` then right click on the URL that now appears in the `Configuration` section as shown below. (You could also simply search for `EventBridge` at the top of the page).
@@ -580,15 +586,17 @@ Now that you understand how data flows through the system - from collection thro
    - Click `Run crawler`
    - Wait for completion (usually around 2 minutes)
 
-2. **Verify Results**:
+2. **Verify Results and Edit Schema**:
    - From the left hand navigation menu, expand `Data Catalog` and click on `Tables`, then select the table name created by the carwerly you implicity named with the `raw_` prefix eealire that should be called `raw_weather_data`
    - Click on the table to examine its schema
    ![GlueTableSchema](./images/GlueTableSchema.png)<br>
+   - At the top right of the Schema click `Edit schemas as JSON` and for the two fields of `measurement_time` and `collection_time` modify the type from `string` to `timestamp` then click `Save as new table version`.
+   ![GlueTableEditSchema](./images/GlueTableEditSchema.png)<br>
 
 ```{note}
 📚 Notice how Glue automatically:
 - Detected the JSON structure
-- Identified data types
+- Identified some but not all data types (we changed two columns to timestamp)
 - Recognised the partitioning scheme (location/year/month/day)
 ```
 
@@ -596,79 +604,231 @@ Now that you understand how data flows through the system - from collection thro
 
 1. **Configure Athena Settings**:
    - In the AWS Console, search for `Athena` and open it in a new tab
-   - Then using the defauult option select `Launch query editor`<br>
+   - Then using the default option select `Launch query editor`<br>
    ![AthenaQuery](./images/AthenaQuery.png)<br>
    
-   - You will and on the `Editor` tab of Athena. Click on the `Settings` tab the click the `Manage` button.
-   - For `Query result location`, click `Browse S3` and select the bucket: `s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/`
-   - Click `Save`
-   ![AthenaSettings](./images/AthenaSettings.png)<br>
+   - You should land on the `Editor` tab of Athena. Click on the `Settings` tab further to the right, then click the `Manage` button.
+   ![AthenaLanding](./images/AthenaLanding.png)<br>
+   - For the `Location of query result` box click `Browse S3` button to the right of it and select the bucket: `s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/` then click `Choose`, then `Save`.
+   ![AthenaQueryS3](./images/AthenaQueryS3.png)<br>
 
 ```{note}
 📁 We already created this results bucket in our CloudFormation template with appropriate lifecycle rules to clean up old query results automatically. This helps manage storage costs while maintaining useful query history.
 ```
 
-2. **Choose Your Workgroup**:
-   - You can use the default "primary" workgroup for this workshop
+
+2.  **Understanding the Athena default settings**:
+    - Click on the `Editor` tab of Athena.
+    - Look at the top right of the screen and note the default `primary` workgroup is selected. We will use this for our workshop.
+    - Looking on the left-hand side, for `Data source` and note that `AwsDataCatalog` is selected by default, and below that `catalogue` is none.
+    - Also, note that Athena has detected and selected the Glue database called `weather-analytics_dev_db` that was created by the CloudFormation template and is in our `AwsDataCatalog`, .
+    - Finally, look bottom left in the `Tables` section where the table `raw_weather_data` we created with the Glue Crawler can be seen ready to query!
+    - ![AthenaEditor](./images/AthenaEditor.png)
 
 ```{note}
-Note: In production environments, creating separate workgroups is recommended for:
-- Cost tracking and control
-- Team-specific configurations
-- Usage attribution
+📚 In production environments, creating separate workgroups is recommended. This allows for:
+
+-   Cost tracking and control
+-   Team-specific configurations
+-   Usage attribution
+
+The default settings you see are for the 'primary' workgroup.
+
+-   `AwsDataCatalog` is the system Athena uses to organize metadata. You can think of it as the root of your data organization.
+-   A catalog is a group of databases within the `AwsDataCatalog`. We are using the `AwsDataCatalog` with no sub-catalogs.
+-   Athena has selected the `weather-analytics_dev_db` database because it is the only database in the `AwsDataCatalog`.
+
+To learn more see: https://docs.aws.amazon.com/athena/latest/ug/data-sources-glue.html
 ```
 
-### 📊 Query Your Weather Data:
+### 📊 Inspect Your Weather Data:
 
 1. **Basic Data Exploration**:
+    - A quick way to quickly query the data in Athena is to click on the three dots to the right of a table then select `Preview Table`. This auto-genartes and runs working SQL to view the first 10 rows of the table. 
+    ![AthenaPreviewTable](./images/AthenaPreviewTable.png)
+    - Or paste the code below into the query pane and click `Run`.
 
+```{code-block} sql
 SELECT *
 FROM raw_weather_data
 ORDER BY measurement_time DESC
 LIMIT 10;
+```
 
-2. **Leverage Partitioning**:
+### 🧽 Create Clean View of Weather Data:
 
+1. **Understanding Raw Data**:
+   - First, let's examine our raw data to understand the duplication pattern:
+
+```{code-block} sql
+SELECT *
+FROM raw_weather_data
+ORDER BY city, measurement_time
+LIMIT 30;
+```
+   - Notice how we have:
+     - Multiple rows with the same temperature and measurement_time
+     - Different collection_times for the same reading
+     - Weather readings that update every 15 minutes
+
+2. **Create a Clean View**:
+   - Let's create a view that handles deduplication:
+
+```{code-block} sql
+CREATE OR REPLACE VIEW clean_weather_data AS
+SELECT 
+    city,
+    temperature,
+    measurement_time,
+    MIN(collection_time) as first_collection_time,
+    COUNT(*) as collection_count,
+    location,
+    year,
+    month,
+    day
+FROM raw_weather_data
+GROUP BY 
+    city,
+    temperature,
+    measurement_time,
+    location,
+    year,
+    month,
+    day;
+```
+
+```{note}
+🎯 This view:
+- Takes only the first collection of each unique reading
+- Maintains the partition columns for performance
+- Tracks how many times each reading was collected (useful for monitoring)
+```
+
+3. **Verify the View**:
+   - Let's check our view is working as expected:
+
+```{code-block} sql
+SELECT *
+FROM clean_weather_data
+ORDER BY city, measurement_time DESC
+LIMIT 10;
+```
+
+### 📈 Analyze Clean Data:
+
+1. **Temperature Trends**:
+   - Now we can write cleaner, more intuitive queries:
+
+```{code-block} sql
+SELECT 
+    city,
+    DATE_TRUNC('hour', measurement_time) as hour,
+    AVG(temperature) as avg_temp,
+    COUNT(*) as readings_per_hour
+FROM clean_weather_data
+WHERE year = '2025' -- Change to current year
+    AND month = '01' -- Change to current month
+GROUP BY 
+    city,
+    DATE_TRUNC('hour', measurement_time)
+ORDER BY 
+    city, 
+    hour DESC;
+```
+
+2. **City Comparisons**:
+
+```{code-block} sql
+SELECT 
+    city,
+    COUNT(*) as total_readings,
+    ROUND(AVG(temperature), 1) as avg_temp,
+    ROUND(MIN(temperature), 1) as min_temp,
+    ROUND(MAX(temperature), 1) as max_temp,
+    ROUND(STDDEV(temperature), 2) as temp_variation
+FROM clean_weather_data
+WHERE year = '2025'
+    AND month = '01'
+GROUP BY city
+ORDER BY avg_temp DESC;
+```
+
+```{note}
+💡 Using the view:
+- Makes queries more readable
+- Ensures consistent deduplication
+- Improves query performance (less data processed)
+- Makes it easier to modify deduplication logic if needed
+```
+
+3. **Data Quality Monitoring**:
+   - We can also monitor our collection process:
+
+```{code-block} sql
+SELECT 
+    city,
+    DATE(measurement_time) as date,
+    COUNT(*) as readings,
+    AVG(collection_count) as avg_collections_per_reading,
+    MAX(collection_count) as max_collections_per_reading
+FROM clean_weather_data
+WHERE year = '2025'
+    AND month = '01'
+GROUP BY 
+    city,
+    DATE(measurement_time)
+ORDER BY 
+    date DESC,
+    city;
+```
+
+4. **Leverage Partitioning**:
+
+```{code-block} sql
 SELECT 
     city,
     AVG(temperature) as avg_temp,
     MIN(temperature) as min_temp,
     MAX(temperature) as max_temp,
     DATE(measurement_time) as date
-FROM raw_weather_data
+FROM clean_weather_data
 WHERE location = 'London'
-    AND year = '2025'
-    AND month = '01'
+    AND year = '2025' -- Change this to the current year
+    AND month = '01'  -- Change this to the current month
 GROUP BY city, DATE(measurement_time)
 ORDER BY date DESC;
+```
 
 ```{note}
 💡 Notice how we use partition columns (location, year, month) in the WHERE clause. Athena uses these to read only relevant data files, making queries more efficient and cost-effective.
 ```
 
-3. **City Comparison Analysis**:
+5. **City Comparison Analysis**:
 
+```{code-block} sql
 SELECT 
     city,
     COUNT(*) as measurements,
     ROUND(AVG(temperature), 2) as avg_temp,
     ROUND(STDDEV(temperature), 2) as temp_stddev
-FROM raw_weather_data
+FROM clean_weather_data
 WHERE year = '2025'
     AND month = '01'
 GROUP BY city
 ORDER BY avg_temp DESC;
+```
 
-### 📈 3.5 Advanced Analytics:
+### 📈 Advanced Analytics:
 
 1. **Temperature Trends**:
 
+```{code-block} sql
 WITH hourly_temps AS (
     SELECT 
         city,
         DATE_TRUNC('hour', measurement_time) as hour,
         AVG(temperature) as avg_temp
-    FROM raw_weather_data
+    FROM clean_weather_data
     WHERE year = '2025' AND month = '01'
     GROUP BY city, DATE_TRUNC('hour', measurement_time)
 )
@@ -680,9 +840,11 @@ SELECT
     ROUND(avg_temp - LAG(avg_temp) OVER (PARTITION BY city ORDER BY hour), 2) as temp_change
 FROM hourly_temps
 ORDER BY city, hour DESC;
+```
 
 2. **Data Quality Checks**:
 
+```{code-block} sql
 SELECT 
     location,
     year,
@@ -692,10 +854,11 @@ SELECT
     COUNT(DISTINCT EXTRACT(hour FROM measurement_time)) as unique_hours,
     MIN(measurement_time) as first_record,
     MAX(measurement_time) as last_record
-FROM raw_weather_data
+FROM clean_weather_data
 WHERE year = '2025' AND month = '01'
 GROUP BY location, year, month, day
 ORDER BY location, year, month, day DESC;
+```{code-block} sql
 
 ```{note}
 ✅ These quality checks help identify any gaps in data collection. In a production environment, you might set up alerts based on these metrics to monitor data pipeline health.
@@ -715,7 +878,7 @@ Try writing queries to answer these questions:
 
 ### Cost Management Best Practices:
 
-1. **Optimize Your Queries**:
+1. **Optimise Your Queries**:
    - Always use partition filtering when possible
    - Select only needed columns instead of SELECT *
    - Use appropriate data types and compression
@@ -728,15 +891,6 @@ Try writing queries to answer these questions:
 
 ```{note}
 💰 Athena pricing is based on data scanned. Well-structured queries on partitioned data help minimise costs. The partitioning scheme we implemented (by city and date) helps optimise both query performance and cost.
-```
-
-Now that you've explored your weather data lake with Athena, you're ready to move on to more advanced analytics using AWS Glue and Redshift. In the next task, you'll learn how to:
-- Create and run Glue crawlers
-- Build ETL jobs for data transformation
-- Load processed data into Redshift for high-performance querying
-
-```{note}
-🗒️ Keep your Athena queries handy - you'll use them to validate your ETL results and compare query performance between Athena and Redshift.
 ```
 
 ## Wrapping Up and Reflecting on Your Project
@@ -757,13 +911,22 @@ This afternoon, we will consider how your project and its potential ...
 ```{note}
 🎉 Congratulations - you've completed today's main exercise! 
 
+Now that you've explored your weather data lake with Athena, if your up for the going furthe exercies, you're ready to move on to more advanced analytics using AWS Glue and Redshift. One task is to :
+- Create and run Glue crawlers
+- Build ETL jobs for data transformation
+- Load processed data into Redshift for high-performance querying
+
+```{note}
+🗒️ Keep your Athena queries handy - you'll use them to validate your ETL results and compare query performance between Athena and Redshift.
+```
+
 Below are three optional exercises that extend what you've learned. Choose any that:
 - Are relevant to your current role
 - Match your project's needs
 - Interest you technically
 
 Even if you don't complete them, consider reviewing what they cover in your own time, they demonstrate common patterns you might need later in your data engineering career.
-```
+
 
 ## 🚀 Going Further
 
@@ -771,8 +934,8 @@ Even if you don't complete them, consider reviewing what they cover in your own 
 
 Mike's idea about learners creating one....
 
-### Going Further 2: Streaming in Glue
+### Going Further 2: Streaming in Glue itself
 
-### Going Further 3: Something else...
+### Going Further 3: Orchestrated ETL pipeline to write to Athena
 
 

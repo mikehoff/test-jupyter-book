@@ -330,8 +330,10 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-glue-crawler">📋 Set Up Glue Crawler:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-crawler">🏃‍♂️ Run the Crawler:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-athena-query-environment">⚙️ Set Up Athena Query Environment:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#query-your-weather-data">📊 Query Your Weather Data:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-analytics">📈 3.5 Advanced Analytics:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-your-weather-data">📊 Inspect Your Weather Data:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-clean-view-of-weather-data">🧽 Create Clean View of Weather Data:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analyze-clean-data">📈 Analyze Clean Data:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-analytics">📈 Advanced Analytics:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#challenge-exercises">🎯 Challenge Exercises:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cost-management-best-practices">Cost Management Best Practices:</a></li>
 </ul>
@@ -344,8 +346,8 @@
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-data-architecture-diagram">Going Further 1: Data architecture diagram</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-streaming-in-glue">Going Further 2: Streaming in Glue</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-something-else">Going Further 3: Something else…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-streaming-in-glue-itself">Going Further 2: Streaming in Glue itself</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-orchestrated-etl-pipeline-to-write-to-athena">Going Further 3: Orchestrated ETL pipeline to write to Athena</a></li>
 </ul>
 </li>
 </ul>
@@ -579,21 +581,6 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p>Use this link and start <code class="docutils literal notranslate"><span class="pre">AWS</span> <span class="pre">Sandbox</span> <span class="pre">-</span> <span class="pre">Default</span></code> and log in: <a class="reference external" href="https://learn.acloud.guru/cloud-playground/cloud-sandboxes">https://learn.acloud.guru/cloud-playground/cloud-sandboxes</a> <br>
 <img alt="AWS_ACG_start" src="_images/AWS_ACG_start.png" /></p></li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>⌛ Your ACG Azure sandbox will automatically shut down and its data will be deleted after four hours. You will receive a notification one hour before the sandbox expires, allowing you to extend it for an additional four hours. Please plan your work accordingly to avoid disruptions.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>🔃 If you encounter deployment issues or want to start fresh, we recommend deleting the entire sandbox from the ACG playground rather than individual resources or the CloudFormation stack. This is faster and ensures a clean slate for redeployment.</p>
-<p>The CloudFormation stack includes retention settings for resources like S3 buckets to avoid accidental data loss, and deletion can take 15–20 minutes due to dependencies between components (e.g., Lambda, Kinesis, Redshift). If you must delete the stack, empty S3 buckets manually first, as their deletion protection will block the process.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>⛔ When using AWS Glue, your ACG sandbox may shut down due to exceeding Glue DPU (Data Processing Unit) limits. You’ll receive an email titled “Your Hands-On Lab or Cloud Playground has been shut down,” explaining the suspension due to excessive DPU usage.</p>
-<p>AWS Glue jobs, being Spark-based, provision distributed computing environments even for small tasks, which can quickly hit ACG’s limits designed to prevent runaway costs. This restriction is a helpful reminder of resource management in data processing.</p>
-<p>If your sandbox is suspended, don’t worry, this is part of learning to use powerful tools like AWS Glue. Simply start a new sandbox and redeploy the CloudFormation template, which will be ready in 3–4 minutes. Learn more about Glue DPUs and optimisation here: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html">https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html</a></p>
-</div>
 <ol class="arabic simple" start="2">
 <li><p><strong>Deploy AWS CloudFormation template:</strong></p></li>
 </ol>
@@ -607,13 +594,32 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">3:</span> <span class="pre">Configure</span> <span class="pre">stack</span> <span class="pre">options</span></code> scroll down to the bottom of the page then simply tick the check box next to the statement: <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">acknowledge</span> <span class="pre">that</span> <span class="pre">AWS</span> <span class="pre">CloudFormation</span> <span class="pre">might</span> <span class="pre">create</span> <span class="pre">IAM</span> <span class="pre">resources</span> <span class="pre">with</span> <span class="pre">customised</span> <span class="pre">names.</span></code> then click <code class="docutils literal notranslate"><span class="pre">Next</span></code>.</p></li>
 <li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">4:</span> <span class="pre">Configure</span> <span class="pre">stack</span> <span class="pre">options</span></code>, scroll to the bottom of the page and click the <code class="docutils literal notranslate"><span class="pre">Submit</span></code> button. Your stack (we called <code class="docutils literal notranslate"><span class="pre">stream</span></code>) will now deploy and will show <code class="docutils literal notranslate"><span class="pre">ℹ</span> <span class="pre">CREATE_IN_PROGRESS</span></code> while it deploys. After about 3 minutes it should show the message <code class="docutils literal notranslate"><span class="pre">ℹ</span> <span class="pre">CREATE_COMPLETE</span></code>.</p></li>
 </ul>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">While the template deploys, click here for useful information and troubleshooting tips.</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>⌚ Using an AWS CloudFormation template in this workshop saves time by automating resource setup, avoiding manual clicks in the AWS Portal.</p>
-<p>CloudFormation templates are common in DevOps for creating consistent environments across development, testing, and production. In this workshop, the template sets up a single-node Redshift cluster (dc2.large) with basic authentication and permissive security settings to simplify access and experimentation.</p>
-<p>This setup is for learning purposes and does not include production-grade features like private endpoints or stricter security controls. Learn more about CloudFormation templates here: <a class="reference external" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html</a></p>
+<p class="sd-card-text">⌚ Using an AWS CloudFormation template in this workshop saves time by automating resource setup, avoiding manual clicks in the AWS Portal.</p>
+<p class="sd-card-text">CloudFormation templates are common in DevOps for creating consistent environments across development, testing, and production. In this workshop, the template sets up a single-node Redshift cluster (dc2.large) with basic authentication and permissive security settings to simplify access and experimentation.</p>
+<p class="sd-card-text">This setup is for learning purposes and does not include production-grade features like private endpoints or stricter security controls. Learn more about CloudFormation templates here: <a class="reference external" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html</a></p>
 </div>
-<ol class="arabic simple" start="3">
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p class="sd-card-text">⌛ Your ACG Azure sandbox will automatically shut down and its data will be deleted after four hours. You will receive a notification one hour before the sandbox expires, allowing you to extend it for an additional four hours. Please plan your work accordingly to avoid disruptions.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p class="sd-card-text">🔃 If you encounter deployment issues or want to start fresh, we recommend deleting the entire sandbox from the ACG playground rather than individual resources or the CloudFormation stack. This is faster and ensures a clean slate for redeployment.</p>
+<p class="sd-card-text">The CloudFormation stack includes retention settings for resources like S3 buckets to avoid accidental data loss, and deletion can take 15–20 minutes due to dependencies between components (e.g., Lambda, Kinesis, Redshift). If you must delete the stack, empty S3 buckets manually first, as their deletion protection will block the process.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p class="sd-card-text">⛔ When using AWS Glue, your ACG sandbox may shut down due to exceeding Glue DPU (Data Processing Unit) limits. You’ll receive an email titled “Your Hands-On Lab or Cloud Playground has been shut down,” explaining the suspension due to excessive DPU usage.</p>
+<p class="sd-card-text">AWS Glue jobs, being Spark-based, provision distributed computing environments even for small tasks, which can quickly hit ACG’s limits designed to prevent runaway costs. This restriction is a helpful reminder of resource management in data processing.</p>
+<p class="sd-card-text">If your sandbox is suspended, don’t worry, this is part of learning to use powerful tools like AWS Glue. Simply start a new sandbox and redeploy the CloudFormation template, which will be ready in 3–4 minutes. Learn more about Glue DPUs and optimisation here: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html">https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html</a></p>
+</div>
+</div>
+</details><ol class="arabic simple" start="3">
 <li><p><strong>How to explore your stack <code class="docutils literal notranslate"><span class="pre">Outputs</span></code></strong></p></li>
 </ol>
 <ul class="simple">
@@ -639,23 +645,23 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 📈 5. ANALYTICS / SERVING (Athena &amp; Redshift)<br></p>
 <section id="producer-explore-the-data-producer-lambda-function">
 <h3>✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):<a class="headerlink" href="#producer-explore-the-data-producer-lambda-function" title="Link to this heading">#</a></h3>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>- This represents the start where real-time weather data enters our system. The combination of Lambda and EventBridge creates a reliable, serverless data collection mechanism that will continuously feed data into our streaming pipeline. Let&#39;s explore them.
-</pre></div>
-</div>
 <ul class="simple">
+<li><p>This represents the start where real-time weather data enters our system. The combination of Lambda and EventBridge creates a reliable, serverless data collection mechanism that will continuously feed data into our streaming pipeline. Let’s explore them.</p></li>
 <li><p>First, from your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab, locate the <code class="docutils literal notranslate"><span class="pre">LambdaFunctionURL</span></code> and open it in a new tab.</p></li>
-<li><p>This Lambda function serves as our data producer - think of it as an automated weather station that collects and reports data every minute.</p></li>
+<li><p>This Lambda function serves as our data producer - think of it as an automated weather station that collects and reports data every minute.
+<img alt="Lambda" src="_images/Lambda.png" /><br></p></li>
 </ul>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>![Lambda](./images/Lambda.png)&lt;br&gt;
-</pre></div>
-</div>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🌦️ Before we explore the code, let’s understand our data source by clicking here to expand.</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>🌦️ Before we explore the code, let’s understand our data source. We’re using the Open-Meteo Weather API (<a class="reference external" href="https://open-meteo.com/">https://open-meteo.com/</a>), which provides free weather data for educational and development purposes. We chose this API deliberately for our workshop because its both free and doesn’t require any authentication or API keys, eliminating the complexity of credential management. This means the application starts calling the API immediately without you needing to register and manage access tokens.</p>
-<p>In a production environment, you’d typically need to handle API authentication, rate limiting, and usage tracking, but by removing these complexities here, we can focus purely on building our data pipeline and analytics capabilities. We will explore these important production considerations in Workshop 13: ‘Integrating  API Data Sources’.</p>
-<p>You can explore the API documentation at <a class="reference external" href="https://open-meteo.com/en/docs">https://open-meteo.com/en/docs</a> to understand all the available weather parameters. For our workshop, we’re using just a subset of the available data (current temperature) to keep things focused, but in a real-world application, you might want to collect additional parameters like humidity, wind speed, or precipitation.</p>
+<p class="sd-card-text">We’re using the Open-Meteo Weather API (<a class="reference external" href="https://open-meteo.com/">https://open-meteo.com/</a>), which provides free weather data for educational and development purposes. We chose this API deliberately for our workshop because its both free and doesn’t require any authentication or API keys, eliminating the complexity of credential management. This means the application starts calling the API immediately without you needing to register and manage access tokens.</p>
+<p class="sd-card-text">In a production environment, you’d typically need to handle API authentication, rate limiting, and usage tracking, but by removing these complexities here, we can focus purely on building our data pipeline and analytics capabilities. We will explore these important production considerations in Workshop 13: ‘Integrating  API Data Sources’.</p>
+<p class="sd-card-text">You can explore the API documentation at <a class="reference external" href="https://open-meteo.com/en/docs">https://open-meteo.com/en/docs</a> to understand all the available weather parameters. For our workshop, we’re using just a subset of the available data (current temperature) to keep things focused, but in a real-world application, you might want to collect additional parameters like humidity, wind speed, or precipitation.</p>
 </div>
-<ul class="simple">
+</div>
+</details><ul class="simple">
 <li><p>Let’s examine how the Lambda function collects and streams weather data bey reviewing its Python code shown below.</p></li>
 <li><p>The Lambda handler function manages the flow of data flow by pulling from the weather API to a Kinesis data stream. It uses <code class="docutils literal notranslate"><span class="pre">boto3</span></code> to connect to Kinesis, with the stream name configured through environment variables from our CloudFormation template.</p></li>
 <li><p>The process follows a logical flow of:</p>
@@ -667,6 +673,9 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </ul>
 </li>
 </ul>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🧑‍💻 Clicking here to view the Python Code in the Lambda function</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">boto3</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
@@ -769,7 +778,8 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
     <span class="k">return</span> <span class="n">response</span>
 </pre></div>
 </div>
-<ul class="simple">
+</div>
+</details><ul class="simple">
 <li><p>Now, let’s understand how this lambda function gets triggered automatically by an Amazon EventBridge rule:</p>
 <ul>
 <li><p>In the <code class="docutils literal notranslate"><span class="pre">Function</span> <span class="pre">overview</span></code> section, in the diagram click on the <code class="docutils literal notranslate"><span class="pre">EventBridge</span> <span class="pre">(CloudWatch</span> <span class="pre">Events)</span></code> then right click on the URL that now appears in the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> section as shown below. (You could also simply search for <code class="docutils literal notranslate"><span class="pre">EventBridge</span></code> at the top of the page).
@@ -1071,11 +1081,13 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p>Wait for completion (usually around 2 minutes)</p></li>
 </ul>
 </li>
-<li><p><strong>Verify Results</strong>:</p>
+<li><p><strong>Verify Results and Edit Schema</strong>:</p>
 <ul class="simple">
 <li><p>From the left hand navigation menu, expand <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">Catalog</span></code> and click on <code class="docutils literal notranslate"><span class="pre">Tables</span></code>, then select the table name created by the carwerly you implicity named with the <code class="docutils literal notranslate"><span class="pre">raw_</span></code> prefix eealire that should be called <code class="docutils literal notranslate"><span class="pre">raw_weather_data</span></code></p></li>
 <li><p>Click on the table to examine its schema
 <img alt="GlueTableSchema" src="_images/GlueTableSchema.png" /><br></p></li>
+<li><p>At the top right of the Schema click <code class="docutils literal notranslate"><span class="pre">Edit</span> <span class="pre">schemas</span> <span class="pre">as</span> <span class="pre">JSON</span></code> and for the two fields of <code class="docutils literal notranslate"><span class="pre">measurement_time</span></code> and <code class="docutils literal notranslate"><span class="pre">collection_time</span></code> modify the type from <code class="docutils literal notranslate"><span class="pre">string</span></code> to <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> then click <code class="docutils literal notranslate"><span class="pre">Save</span> <span class="pre">as</span> <span class="pre">new</span> <span class="pre">table</span> <span class="pre">version</span></code>.
+<img alt="GlueTableEditSchema" src="_images/GlueTableEditSchema.png" /><br></p></li>
 </ul>
 </li>
 </ol>
@@ -1084,7 +1096,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <p>📚 Notice how Glue automatically:</p>
 <ul class="simple">
 <li><p>Detected the JSON structure</p></li>
-<li><p>Identified data types</p></li>
+<li><p>Identified some but not all data types (we changed two columns to timestamp)</p></li>
 <li><p>Recognised the partitioning scheme (location/year/month/day)</p></li>
 </ul>
 </div>
@@ -1095,12 +1107,12 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p><strong>Configure Athena Settings</strong>:</p>
 <ul class="simple">
 <li><p>In the AWS Console, search for <code class="docutils literal notranslate"><span class="pre">Athena</span></code> and open it in a new tab</p></li>
-<li><p>Then using the defauult option select <code class="docutils literal notranslate"><span class="pre">Launch</span> <span class="pre">query</span> <span class="pre">editor</span></code><br>
+<li><p>Then using the default option select <code class="docutils literal notranslate"><span class="pre">Launch</span> <span class="pre">query</span> <span class="pre">editor</span></code><br>
 <img alt="AthenaQuery" src="_images/AthenaQuery.png" /><br></p></li>
-<li><p>You will and on the <code class="docutils literal notranslate"><span class="pre">Editor</span></code> tab of Athena. Click on the <code class="docutils literal notranslate"><span class="pre">Settings</span></code> tab the click the <code class="docutils literal notranslate"><span class="pre">Manage</span></code> button.</p></li>
-<li><p>For <code class="docutils literal notranslate"><span class="pre">Query</span> <span class="pre">result</span> <span class="pre">location</span></code>, click <code class="docutils literal notranslate"><span class="pre">Browse</span> <span class="pre">S3</span></code> and select the bucket: <code class="docutils literal notranslate"><span class="pre">s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/</span></code></p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Save</span></code>
-<img alt="AthenaSettings" src="_images/AthenaSettings.png" /><br></p></li>
+<li><p>You should land on the <code class="docutils literal notranslate"><span class="pre">Editor</span></code> tab of Athena. Click on the <code class="docutils literal notranslate"><span class="pre">Settings</span></code> tab further to the right, then click the <code class="docutils literal notranslate"><span class="pre">Manage</span></code> button.
+<img alt="AthenaLanding" src="_images/AthenaLanding.png" /><br></p></li>
+<li><p>For the <code class="docutils literal notranslate"><span class="pre">Location</span> <span class="pre">of</span> <span class="pre">query</span> <span class="pre">result</span></code> box click <code class="docutils literal notranslate"><span class="pre">Browse</span> <span class="pre">S3</span></code> button to the right of it and select the bucket: <code class="docutils literal notranslate"><span class="pre">s3://weather-analytics-athena-results-dev-[YOUR-ACCOUNT-ID]/</span></code> then click <code class="docutils literal notranslate"><span class="pre">Choose</span></code>, then <code class="docutils literal notranslate"><span class="pre">Save</span></code>.
+<img alt="AthenaQueryS3" src="_images/AthenaQueryS3.png" /><br></p></li>
 </ul>
 </li>
 </ol>
@@ -1109,101 +1121,286 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <p>📁 We already created this results bucket in our CloudFormation template with appropriate lifecycle rules to clean up old query results automatically. This helps manage storage costs while maintaining useful query history.</p>
 </div>
 <ol class="arabic simple" start="2">
-<li><p><strong>Create a Workgroup</strong>:</p>
+<li><p><strong>Understanding the Athena default settings</strong>:</p>
 <ul class="simple">
-<li><p>In the left navigation, click <code class="docutils literal notranslate"><span class="pre">Workgroups</span></code></p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">workgroup</span></code></p></li>
-<li><p>Name: <code class="docutils literal notranslate"><span class="pre">weather-analytics-workgroup</span></code></p></li>
-<li><p>Choose the same query result location as above</p></li>
-<li><p>Under <code class="docutils literal notranslate"><span class="pre">Additional</span> <span class="pre">configurations</span></code>, enable <code class="docutils literal notranslate"><span class="pre">Override</span> <span class="pre">client-side</span> <span class="pre">settings</span></code></p></li>
-<li><p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">workgroup</span></code></p></li>
+<li><p>Click on the <code class="docutils literal notranslate"><span class="pre">Editor</span></code> tab of Athena.</p></li>
+<li><p>Look at the top right of the screen and note the default <code class="docutils literal notranslate"><span class="pre">primary</span></code> workgroup is selected. We will use this for our workshop.</p></li>
+<li><p>Looking on the left-hand side, for <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">source</span></code> and note that <code class="docutils literal notranslate"><span class="pre">AwsDataCatalog</span></code> is selected by default, and below that <code class="docutils literal notranslate"><span class="pre">catalogue</span></code> is none.</p></li>
+<li><p>Also, note that Athena has detected and selected the Glue database called <code class="docutils literal notranslate"><span class="pre">weather-analytics_dev_db</span></code> that was created by the CloudFormation template and is in our <code class="docutils literal notranslate"><span class="pre">AwsDataCatalog</span></code>, .</p></li>
+<li><p>Finally, look bottom left in the <code class="docutils literal notranslate"><span class="pre">Tables</span></code> section where the table <code class="docutils literal notranslate"><span class="pre">raw_weather_data</span></code> we created with the Glue Crawler can be seen ready to query!</p></li>
+<li><p><img alt="AthenaEditor" src="_images/AthenaEditor.png" /></p></li>
 </ul>
 </li>
 </ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>📚 In production environments, creating separate workgroups is recommended. This allows for:</p>
+<ul class="simple">
+<li><p>Cost tracking and control</p></li>
+<li><p>Team-specific configurations</p></li>
+<li><p>Usage attribution</p></li>
+</ul>
+<p>The default settings you see are for the ‘primary’ workgroup.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AwsDataCatalog</span></code> is the system Athena uses to organize metadata. You can think of it as the root of your data organization.</p></li>
+<li><p>A catalog is a group of databases within the <code class="docutils literal notranslate"><span class="pre">AwsDataCatalog</span></code>. We are using the <code class="docutils literal notranslate"><span class="pre">AwsDataCatalog</span></code> with no sub-catalogs.</p></li>
+<li><p>Athena has selected the <code class="docutils literal notranslate"><span class="pre">weather-analytics_dev_db</span></code> database because it is the only database in the <code class="docutils literal notranslate"><span class="pre">AwsDataCatalog</span></code>.</p></li>
+</ul>
+<p>To learn more see: <a class="reference external" href="https://docs.aws.amazon.com/athena/latest/ug/data-sources-glue.html">https://docs.aws.amazon.com/athena/latest/ug/data-sources-glue.html</a></p>
+</div>
 </section>
-<section id="query-your-weather-data">
-<h3>📊 Query Your Weather Data:<a class="headerlink" href="#query-your-weather-data" title="Link to this heading">#</a></h3>
+<section id="inspect-your-weather-data">
+<h3>📊 Inspect Your Weather Data:<a class="headerlink" href="#inspect-your-weather-data" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
-<li><p><strong>Basic Data Exploration</strong>:</p></li>
+<li><p><strong>Basic Data Exploration</strong>:</p>
+<ul class="simple">
+<li><p>A quick way to quickly query the data in Athena is to click on the three dots to the right of a table then select <code class="docutils literal notranslate"><span class="pre">Preview</span> <span class="pre">Table</span></code>. This auto-genartes and runs working SQL to view the first 10 rows of the table.
+<img alt="AthenaPreviewTable" src="_images/AthenaPreviewTable.png" /></p></li>
+<li><p>Or paste the code below into the query pane and click <code class="docutils literal notranslate"><span class="pre">Run</span></code>.</p></li>
+</ul>
+</li>
 </ol>
-<p>SELECT *
-FROM raw_weather_data
-ORDER BY measurement_time DESC
-LIMIT 10;</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">raw_weather_data</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">measurement_time</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="create-clean-view-of-weather-data">
+<h3>🧽 Create Clean View of Weather Data:<a class="headerlink" href="#create-clean-view-of-weather-data" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Understanding Raw Data</strong>:</p>
+<ul class="simple">
+<li><p>First, let’s examine our raw data to understand the duplication pattern:</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">raw_weather_data</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">measurement_time</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Notice how we have:</p>
+<ul>
+<li><p>Multiple rows with the same temperature and measurement_time</p></li>
+<li><p>Different collection_times for the same reading</p></li>
+<li><p>Weather readings that update every 15 minutes</p></li>
+</ul>
+</li>
+</ul>
 <ol class="arabic simple" start="2">
+<li><p><strong>Create a Clean View</strong>:</p>
+<ul class="simple">
+<li><p>Let’s create a view that handles deduplication:</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">clean_weather_data</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="n">temperature</span><span class="p">,</span>
+<span class="w">    </span><span class="n">measurement_time</span><span class="p">,</span>
+<span class="w">    </span><span class="k">MIN</span><span class="p">(</span><span class="n">collection_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_collection_time</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">collection_count</span><span class="p">,</span>
+<span class="w">    </span><span class="k">location</span><span class="p">,</span>
+<span class="w">    </span><span class="k">year</span><span class="p">,</span>
+<span class="w">    </span><span class="k">month</span><span class="p">,</span>
+<span class="w">    </span><span class="k">day</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">raw_weather_data</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="n">temperature</span><span class="p">,</span>
+<span class="w">    </span><span class="n">measurement_time</span><span class="p">,</span>
+<span class="w">    </span><span class="k">location</span><span class="p">,</span>
+<span class="w">    </span><span class="k">year</span><span class="p">,</span>
+<span class="w">    </span><span class="k">month</span><span class="p">,</span>
+<span class="w">    </span><span class="k">day</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🎯 This view:</p>
+<ul class="simple">
+<li><p>Takes only the first collection of each unique reading</p></li>
+<li><p>Maintains the partition columns for performance</p></li>
+<li><p>Tracks how many times each reading was collected (useful for monitoring)</p></li>
+</ul>
+</div>
+<ol class="arabic simple" start="3">
+<li><p><strong>Verify the View</strong>:</p>
+<ul class="simple">
+<li><p>Let’s check our view is working as expected:</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">clean_weather_data</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">measurement_time</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="analyze-clean-data">
+<h3>📈 Analyze Clean Data:<a class="headerlink" href="#analyze-clean-data" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Temperature Trends</strong>:</p>
+<ul class="simple">
+<li><p>Now we can write cleaner, more intuitive queries:</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;hour&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">hour</span><span class="p">,</span>
+<span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">readings_per_hour</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">clean_weather_data</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2025&#39;</span><span class="w"> </span><span class="c1">-- Change to current year</span>
+<span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;01&#39;</span><span class="w"> </span><span class="c1">-- Change to current month</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;hour&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">hour</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>City Comparisons</strong>:</p></li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">total_readings</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ROUND</span><span class="p">(</span><span class="k">AVG</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ROUND</span><span class="p">(</span><span class="k">MIN</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">min_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ROUND</span><span class="p">(</span><span class="k">MAX</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">max_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ROUND</span><span class="p">(</span><span class="n">STDDEV</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">temp_variation</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">clean_weather_data</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2025&#39;</span>
+<span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;01&#39;</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">avg_temp</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>💡 Using the view:</p>
+<ul class="simple">
+<li><p>Makes queries more readable</p></li>
+<li><p>Ensures consistent deduplication</p></li>
+<li><p>Improves query performance (less data processed)</p></li>
+<li><p>Makes it easier to modify deduplication logic if needed</p></li>
+</ul>
+</div>
+<ol class="arabic simple" start="3">
+<li><p><strong>Data Quality Monitoring</strong>:</p>
+<ul class="simple">
+<li><p>We can also monitor our collection process:</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">DATE</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nb">date</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">readings</span><span class="p">,</span>
+<span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="n">collection_count</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_collections_per_reading</span><span class="p">,</span>
+<span class="w">    </span><span class="k">MAX</span><span class="p">(</span><span class="n">collection_count</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">max_collections_per_reading</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">clean_weather_data</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2025&#39;</span>
+<span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;01&#39;</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">DATE</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span>
+<span class="w">    </span><span class="nb">date</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span>
+<span class="w">    </span><span class="n">city</span><span class="p">;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
 <li><p><strong>Leverage Partitioning</strong>:</p></li>
 </ol>
-<p>SELECT
-city,
-AVG(temperature) as avg_temp,
-MIN(temperature) as min_temp,
-MAX(temperature) as max_temp,
-DATE(measurement_time) as date
-FROM raw_weather_data
-WHERE location = ‘London’
-AND year = ‘2025’
-AND month = ‘01’
-GROUP BY city, DATE(measurement_time)
-ORDER BY date DESC;</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="k">MIN</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">min_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="k">MAX</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">max_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">DATE</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nb">date</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">clean_weather_data</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">location</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;London&#39;</span>
+<span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2025&#39;</span><span class="w"> </span><span class="c1">-- Change this to the current year</span>
+<span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;01&#39;</span><span class="w">  </span><span class="c1">-- Change this to the current month</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="nb">DATE</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="nb">date</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>💡 Notice how we use partition columns (location, year, month) in the WHERE clause. Athena uses these to read only relevant data files, making queries more efficient and cost-effective.</p>
 </div>
-<ol class="arabic simple" start="3">
+<ol class="arabic simple" start="5">
 <li><p><strong>City Comparison Analysis</strong>:</p></li>
 </ol>
-<p>SELECT
-city,
-COUNT(*) as measurements,
-ROUND(AVG(temperature), 2) as avg_temp,
-ROUND(STDDEV(temperature), 2) as temp_stddev
-FROM raw_weather_data
-WHERE year = ‘2025’
-AND month = ‘01’
-GROUP BY city
-ORDER BY avg_temp DESC;</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">measurements</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ROUND</span><span class="p">(</span><span class="k">AVG</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ROUND</span><span class="p">(</span><span class="n">STDDEV</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">temp_stddev</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">clean_weather_data</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2025&#39;</span>
+<span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;01&#39;</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">avg_temp</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</pre></div>
+</div>
 </section>
 <section id="advanced-analytics">
-<h3>📈 3.5 Advanced Analytics:<a class="headerlink" href="#advanced-analytics" title="Link to this heading">#</a></h3>
+<h3>📈 Advanced Analytics:<a class="headerlink" href="#advanced-analytics" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
 <li><p><strong>Temperature Trends</strong>:</p></li>
 </ol>
-<p>WITH hourly_temps AS (
-SELECT
-city,
-DATE_TRUNC(‘hour’, measurement_time) as hour,
-AVG(temperature) as avg_temp
-FROM raw_weather_data
-WHERE year = ‘2025’ AND month = ‘01’
-GROUP BY city, DATE_TRUNC(‘hour’, measurement_time)
-)
-SELECT
-city,
-hour,
-avg_temp,
-LAG(avg_temp) OVER (PARTITION BY city ORDER BY hour) as prev_hour_temp,
-ROUND(avg_temp - LAG(avg_temp) OVER (PARTITION BY city ORDER BY hour), 2) as temp_change
-FROM hourly_temps
-ORDER BY city, hour DESC;</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">WITH</span><span class="w"> </span><span class="n">hourly_temps</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">        </span><span class="n">city</span><span class="p">,</span>
+<span class="w">        </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;hour&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">hour</span><span class="p">,</span>
+<span class="w">        </span><span class="k">AVG</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_temp</span>
+<span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="n">clean_weather_data</span>
+<span class="w">    </span><span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2025&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;01&#39;</span>
+<span class="w">    </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;hour&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="n">hour</span><span class="p">,</span>
+<span class="w">    </span><span class="n">avg_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="n">LAG</span><span class="p">(</span><span class="n">avg_temp</span><span class="p">)</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">hour</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">prev_hour_temp</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ROUND</span><span class="p">(</span><span class="n">avg_temp</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">LAG</span><span class="p">(</span><span class="n">avg_temp</span><span class="p">)</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">hour</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">temp_change</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">hourly_temps</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">hour</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</pre></div>
+</div>
 <ol class="arabic simple" start="2">
 <li><p><strong>Data Quality Checks</strong>:</p></li>
 </ol>
-<p>SELECT
-location,
-year,
-month,
-day,
-COUNT(*) as record_count,
-COUNT(DISTINCT EXTRACT(hour FROM measurement_time)) as unique_hours,
-MIN(measurement_time) as first_record,
-MAX(measurement_time) as last_record
-FROM raw_weather_data
-WHERE year = ‘2025’ AND month = ‘01’
-GROUP BY location, year, month, day
-ORDER BY location, year, month, day DESC;</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>✅ These quality checks help identify any gaps in data collection. In a production environment, you might set up alerts based on these metrics to monitor data pipeline health.</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="k">location</span><span class="p">,</span>
+<span class="w">    </span><span class="k">year</span><span class="p">,</span>
+<span class="w">    </span><span class="k">month</span><span class="p">,</span>
+<span class="w">    </span><span class="k">day</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">record_count</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="k">EXTRACT</span><span class="p">(</span><span class="n">hour</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">unique_hours</span><span class="p">,</span>
+<span class="w">    </span><span class="k">MIN</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_record</span><span class="p">,</span>
+<span class="w">    </span><span class="k">MAX</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">last_record</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">clean_weather_data</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2025&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;01&#39;</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">location</span><span class="p">,</span><span class="w"> </span><span class="k">year</span><span class="p">,</span><span class="w"> </span><span class="k">month</span><span class="p">,</span><span class="w"> </span><span class="k">day</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">location</span><span class="p">,</span><span class="w"> </span><span class="k">year</span><span class="p">,</span><span class="w"> </span><span class="k">month</span><span class="p">,</span><span class="w"> </span><span class="k">day</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+<span class="o">```</span><span class="err">{</span><span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="err">}</span><span class="w"> </span><span class="k">sql</span>
+
+<span class="o">```</span><span class="err">{</span><span class="n">note</span><span class="err">}</span>
+<span class="err">✅</span><span class="w"> </span><span class="n">These</span><span class="w"> </span><span class="n">quality</span><span class="w"> </span><span class="n">checks</span><span class="w"> </span><span class="n">help</span><span class="w"> </span><span class="n">identify</span><span class="w"> </span><span class="k">any</span><span class="w"> </span><span class="n">gaps</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">data</span><span class="w"> </span><span class="n">collection</span><span class="p">.</span><span class="w"> </span><span class="k">In</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">production</span><span class="w"> </span><span class="n">environment</span><span class="p">,</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">might</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">alerts</span><span class="w"> </span><span class="n">based</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">these</span><span class="w"> </span><span class="n">metrics</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">monitor</span><span class="w"> </span><span class="k">data</span><span class="w"> </span><span class="n">pipeline</span><span class="w"> </span><span class="n">health</span><span class="p">.</span>
+</pre></div>
 </div>
 </section>
 <section id="challenge-exercises">
@@ -1222,7 +1419,7 @@ ORDER BY location, year, month, day DESC;</p>
 <section id="cost-management-best-practices">
 <h3>Cost Management Best Practices:<a class="headerlink" href="#cost-management-best-practices" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
-<li><p><strong>Optimize Your Queries</strong>:</p>
+<li><p><strong>Optimise Your Queries</strong>:</p>
 <ul class="simple">
 <li><p>Always use partition filtering when possible</p></li>
 <li><p>Select only needed columns instead of SELECT *</p></li>
@@ -1245,16 +1442,6 @@ ORDER BY location, year, month, day DESC;</p>
 <p class="admonition-title">Note</p>
 <p>💰 Athena pricing is based on data scanned. Well-structured queries on partitioned data help minimise costs. The partitioning scheme we implemented (by city and date) helps optimise both query performance and cost.</p>
 </div>
-<p>Now that you’ve explored your weather data lake with Athena, you’re ready to move on to more advanced analytics using AWS Glue and Redshift. In the next task, you’ll learn how to:</p>
-<ul class="simple">
-<li><p>Create and run Glue crawlers</p></li>
-<li><p>Build ETL jobs for data transformation</p></li>
-<li><p>Load processed data into Redshift for high-performance querying</p></li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>🗒️ Keep your Athena queries handy - you’ll use them to validate your ETL results and compare query performance between Athena and Redshift.</p>
-</div>
 </section>
 </section>
 <section id="wrapping-up-and-reflecting-on-your-project">
@@ -1273,6 +1460,17 @@ ORDER BY location, year, month, day DESC;</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>🎉 Congratulations - you’ve completed today’s main exercise!</p>
+<p>Now that you’ve explored your weather data lake with Athena, if your up for the going furthe exercies, you’re ready to move on to more advanced analytics using AWS Glue and Redshift. One task is to :</p>
+<ul class="simple">
+<li><p>Create and run Glue crawlers</p></li>
+<li><p>Build ETL jobs for data transformation</p></li>
+<li><p>Load processed data into Redshift for high-performance querying</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🗒️ Keep your Athena queries handy - you’ll use them to validate your ETL results and compare query performance between Athena and Redshift.</p>
+</div>
+</div>
 <p>Below are three optional exercises that extend what you’ve learned. Choose any that:</p>
 <ul class="simple">
 <li><p>Are relevant to your current role</p></li>
@@ -1280,7 +1478,6 @@ ORDER BY location, year, month, day DESC;</p>
 <li><p>Interest you technically</p></li>
 </ul>
 <p>Even if you don’t complete them, consider reviewing what they cover in your own time, they demonstrate common patterns you might need later in your data engineering career.</p>
-</div>
 </section>
 </section>
 <section id="going-further">
@@ -1289,11 +1486,11 @@ ORDER BY location, year, month, day DESC;</p>
 <h3>Going Further 1: Data architecture diagram<a class="headerlink" href="#going-further-1-data-architecture-diagram" title="Link to this heading">#</a></h3>
 <p>Mike’s idea about learners creating one…</p>
 </section>
-<section id="going-further-2-streaming-in-glue">
-<h3>Going Further 2: Streaming in Glue<a class="headerlink" href="#going-further-2-streaming-in-glue" title="Link to this heading">#</a></h3>
+<section id="going-further-2-streaming-in-glue-itself">
+<h3>Going Further 2: Streaming in Glue itself<a class="headerlink" href="#going-further-2-streaming-in-glue-itself" title="Link to this heading">#</a></h3>
 </section>
-<section id="going-further-3-something-else">
-<h3>Going Further 3: Something else…<a class="headerlink" href="#going-further-3-something-else" title="Link to this heading">#</a></h3>
+<section id="going-further-3-orchestrated-etl-pipeline-to-write-to-athena">
+<h3>Going Further 3: Orchestrated ETL pipeline to write to Athena<a class="headerlink" href="#going-further-3-orchestrated-etl-pipeline-to-write-to-athena" title="Link to this heading">#</a></h3>
 </section>
 </section>
 </section>
@@ -1371,8 +1568,10 @@ ORDER BY location, year, month, day DESC;</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-glue-crawler">📋 Set Up Glue Crawler:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-crawler">🏃‍♂️ Run the Crawler:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-athena-query-environment">⚙️ Set Up Athena Query Environment:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#query-your-weather-data">📊 Query Your Weather Data:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-analytics">📈 3.5 Advanced Analytics:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-your-weather-data">📊 Inspect Your Weather Data:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-clean-view-of-weather-data">🧽 Create Clean View of Weather Data:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analyze-clean-data">📈 Analyze Clean Data:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-analytics">📈 Advanced Analytics:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#challenge-exercises">🎯 Challenge Exercises:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cost-management-best-practices">Cost Management Best Practices:</a></li>
 </ul>
@@ -1385,8 +1584,8 @@ ORDER BY location, year, month, day DESC;</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-data-architecture-diagram">Going Further 1: Data architecture diagram</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-streaming-in-glue">Going Further 2: Streaming in Glue</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-something-else">Going Further 3: Something else…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-streaming-in-glue-itself">Going Further 2: Streaming in Glue itself</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-orchestrated-etl-pipeline-to-write-to-athena">Going Further 3: Orchestrated ETL pipeline to write to Athena</a></li>
 </ul>
 </li>
 </ul>
