@@ -166,7 +166,8 @@ In this setup, your pipeline will perform ... main operations:
 
 By the end of the workshop, you will have built this architecture:
 
-![architecture](./images/architecture.png)
+![Workshop_09_architecture.drawio](./images/Workshop_09_architecture.drawio.png)<br>
+
 
 # Note
 
@@ -858,7 +859,7 @@ FROM clean_weather_data
 WHERE year = '2025' AND month = '01'
 GROUP BY location, year, month, day
 ORDER BY location, year, month, day DESC;
-```{code-block} sql
+```
 
 ```{note}
 ✅ These quality checks help identify any gaps in data collection. In a production environment, you might set up alerts based on these metrics to monitor data pipeline health.
@@ -911,7 +912,7 @@ This afternoon, we will consider how your project and its potential ...
 ```{note}
 🎉 Congratulations - you've completed today's main exercise! 
 
-Now that you've explored your weather data lake with Athena, if your up for the going furthe exercies, you're ready to move on to more advanced analytics using AWS Glue and Redshift. One task is to :
+Now that you've explored your weather data lake with Athena, if your up for the going further exercises, you're ready to move on to more advanced analytics using AWS Glue and Redshift. One task is to :
 - Create and run Glue crawlers
 - Build ETL jobs for data transformation
 - Load processed data into Redshift for high-performance querying
@@ -930,12 +931,235 @@ Even if you don't complete them, consider reviewing what they cover in your own 
 
 ## 🚀 Going Further
 
-### Going Further 1: Data architecture diagram
+### Going Further 1: Orchestrated pipeline to write to Redshift
 
-Mike's idea about learners creating one....
+> So far we have crawled the data being streamed into S3 on-demand. A data analyst has asked for a table in Redshift they can explore and connect to PowerBI that is regularly updated with temperature readings. In this exercise we will create the target table in Redshift, then create a Glue visual ETL job that Extracts, Transforms and Loads the table from the Glue database to the Redshfit table. We query Redshift and visualise temperature over time. Finally, we orchestrate the full process by using AWS Glue `Workflows (orchestration)` to regularly run our S3 crawler (created in the main exercise), followed by the visual ETL.
 
-### Going Further 2: Streaming in Glue itself
+#### 🎯 Create target table in Redshift
 
-### Going Further 3: Orchestrated ETL pipeline to write to Athena
+1. **Connect to Redshift database**:
+   - In the search bar at the top, search for `Redshift` and open in a new tab.
+   - You will several `Access denied..` messages you can safely ignore (they are explained in the note below).
+   - Click on the only Redshfit cluster listed called `weather-stream`.
+   - Click on the `Query data` dropdown (that is on the top right) then select `Query in query editor`.
+   - Click `Connect to database` then in the `Database name` box enter `weather` and for the `Database user` enter `corndeladmin`, then click `Connect`.
+    ![RedshfitDatabaseConnect](./images/RedshfitDatabaseConnect.png)
+
+```{note}
+⛔  The red `Access denied..` error messages can be safely ignored. They simply indicate that you don't have administrative permissions for Redshift Serverless backups, workgroups, and snapshots. You can still do everything needed for creating tables, querying data, and running ETL processes.
+```
+
+2. **Create Redshift target table**:
+   - In the Redshift Query editor copy and paste the SQL below then click `Run`.
+
+```{code-block} sql
+DROP TABLE IF EXISTS real_time_weather_stats;
+CREATE TABLE real_time_weather_stats (
+   window_start_time TIMESTAMP,
+   window_end_time TIMESTAMP,
+   city VARCHAR(255),
+   temperature DOUBLE PRECISION,
+   previous_temperature DOUBLE PRECISION,
+   temperature_change DOUBLE PRECISION,
+   location VARCHAR(255),
+   source VARCHAR(50),
+   collection_attempts INTEGER,
+   collection_window_seconds INTEGER,
+   initial_latency_seconds INTEGER,
+   last_update TIMESTAMP,
+   ingest_year INTEGER,
+   ingest_month INTEGER, 
+   ingest_day INTEGER,
+   ingest_hour INTEGER
+)
+DISTKEY(city)
+SORTKEY(window_start_time, city);
+```
+
+#### ➡️ Create AWS Glue visual ETL
+
+1. **Create Glue Visual ETL and data source**:
+   - In the search bar at the top, search for `Glue` and open in a new tab.
+   - From the left hand menu, from under `ELT jobs` click on `Visual ETL` the click `Visual ETL`.
+   - From the `Sources` menu click on `AWS Glue Data Catalog` then click on the node itself on the canvas to reveal the properties of the node ot the right.
+   - From `Database` select `weather-analytics_dev_db`.
+   - From `Table` select `raw_weather_data` (this is the table you created in the main exercise of this workshop by crawling the S3 data lake).
+   ![VisualETL_Source](./images/VisualETL_Source.png)
+   - So that this ETL can access our data source, click on the `Job details` tab and for the `IAM Role` drop-down select `weather-analytics-glue-role-dev`.
+   ![VisualETL_Role](./images/VisualETL_Role.png)
+   - On the top left edit the name of the ETL to `ETL_job`, then on the top right click `Save`.
+
+3. **Create Glue Visual ETL with data source and SQL transform**:
+   - Click on the `Visual` tab then left click on the data source node on the canvas.
+   - Then click the blue circle with a plus to add another node to the ETL.
+   - In the `Transforms` tab click on `SQL Query`.
+   - Then paste the following SQL into the `SQL query` box. When you paste the SQL into the box it will generate a `Data preview` showing the result of your query.
+
+```{code-block} sql
+WITH deduplicated_data AS (
+    SELECT 
+        city,
+        temperature,
+        measurement_time,
+        source,
+        location,
+        MIN(collection_time) as first_collection_time,
+        MAX(collection_time) as last_collection_time,
+        COUNT(*) as collection_attempts
+    FROM myDataSource
+    GROUP BY 
+        city,
+        temperature,
+        measurement_time,
+        source,
+        location
+)
+SELECT 
+    date_trunc('minute', measurement_time) as window_start_time,
+    date_trunc('minute', measurement_time) + INTERVAL '15 minute' as window_end_time,
+    city,
+    temperature,
+    LAG(temperature) OVER (PARTITION BY city ORDER BY measurement_time) as previous_temperature,
+    temperature - LAG(temperature) OVER (PARTITION BY city ORDER BY measurement_time) as temperature_change,
+    location,
+    source,
+    collection_attempts,
+    unix_timestamp(last_collection_time) - unix_timestamp(first_collection_time) as collection_window_seconds,
+    unix_timestamp(first_collection_time) - unix_timestamp(measurement_time) as initial_latency_seconds,
+    current_timestamp() as last_update,
+    year(measurement_time) as ingest_year,
+    month(measurement_time) as ingest_month,
+    day(measurement_time) as ingest_day,
+    hour(measurement_time) as ingest_hour
+FROM deduplicated_data
+```  
+
+![VisualETL_SQL](./images/VisualETL_SQL.png)<br>
+
+4. **Add Redshift target node**:
+   - With the SQL node selected, click on the the blue circle with a plus to add another node to the ETL.
+   - In the `Targets` tab click on `Amazon Redshift`.
+   - In the pane to the right, from the `Redshift connection` select `weather-analytics-redshift-connection-dev`.
+   - For the `Schema` select `public`.
+   - For the `Table` select `real_time_weather_stats` (this is the table you created in an earlier step in Redshfit).
+   - For `Handling of data and target table` select `TRUNCATE`.
+   - Finally click `Save` and then `Run` to start your ETL job.
+   - From the gren message at the top click on `Run details` to monitor your job run. It will take around four minutes to complete and for its `Run status` to change from `Running` to `Succeeded`.
+![VisualETL_Redshift](./images/VisualETL_Redshift.png)<br>
+
+####  📈 Inspect and visualise Redshift target table
+
+1. **Inspect data in target table**:
+   - Go to the browswer tab for Redshift you had open earlier and the Query Editor.
+   - Use the plus icon to open a new blank query window and paste the SQL code below then click `Run` to inspect the raw data in the target table.
+
+```{code-block} sql
+SELECT *
+FROM real_time_weather_stats;
+```
+
+1. **Visualise London temperature over time**:
+   - Use the plus icon to open a new blank query window and paste the SQL code below then click `Run`.
+   - In the `Query results` pane click `Visualise`.
+   - Select `Chart type` as `Bar`.
+   - Select `X axis` as `minutessincemidnight`.
+   - Select  `Y axis` at `temperature`. 
+   - Take a screenshot of your plot. We will look at this plot again later and compare it to the plot when run on a new data refresh.
+
+```{code-block} sql
+SELECT 
+   EXTRACT(HOUR FROM window_start_time) * 60 + EXTRACT(MINUTE FROM window_start_time) as "Minutes Since Midnight",
+   ROUND(temperature::numeric, 1) as "Temperature",
+   ROUND(temperature_change::numeric, 2) as "Temperature Change",
+   initial_latency_seconds as "Latency (seconds)"
+FROM real_time_weather_stats
+WHERE city = 'London'  
+ORDER BY window_start_time;
+```
+![Redshift_Plot](./images/Redshift_Plot.png)<br>
+
+#### 🎼 Orchestrate the entire process!
+
+1. **Create and run orchesterated workflow**:
+   - Go to the browswer tab for Glue you had open earlier.
+   - In the left hand menu click on `Workflows (orchestration)`.
+   - Click `Add workflow` and name it `weather_workflow` then click `Create workflow`.
+   - Click on `weather_workflow` then `Add trigger` then `Add new`.
+   - Name the trigger `start_crawl`.
+   - For the `Trigger type` select `Schedule`.
+   - For the `Frequency` select `Custom`.
+   - In the `Cron expression` enter `*/10 * * * ? *` which will trigger every 10 minutes.
+   ![Workflow_Trigger](./images/Workflow_Trigger.png)<br>
+   - In the visual workflow canvas that appears, to the right of the `crawl_s3_data_lake` trigger, click on `Add node`, select the `crawlers` tab then tick the crawler name you created in your main exercise (likely called `weather-data-crawler`) then click `Add`.
+   - Now click on the crawler (the icon with the spider) and click on `Add trigger` to the right of it.
+   - Select the `Add new` then name the trigger `run_etl`.
+   - For `Trigger type` leave `Event` selected.
+   - For `Trigger logic` select `Start after ALL watched event` then click `Add`.
+   - Now to the right of the `run_etl` trigger node, click `Add node`, select the `Jobs` tab and then tick the visual ETL job you created earlier (likely called `ETL_job`) then click `Add`.
+   - Finally, click `Run workflow`.
+    ![Workflow_Canvas](./images/Workflow_Canvas.png)<br>
+
+1. **Monitor workflow**:
+   - In the left hand menu of glue click on `workflows (orchestration).
+   - Click on the workflow `weather_workflow`.
+   - Click on the `History` tab.
+   - Select the `Workflow run ID` with the status `Running` then click `View run details`.
+   - When this triggers you should see the nodes incrementally chaning from `Not Started` to `🔁 Running` then `✅ Succeeded`.
+    ![Workflow_Monitor](./images/Workflow_Monitor.png)<br>
+    - when all noes are at `✅ Succeeded` status, return to redshift and re-run your plot code from the previous task to confirm new data has arrived into the target table by comparing this plot to your previous plot.
+    ![Redshift_NewPlot](./images/Redshift_NewPlot.png)<br>
+
+```{Note}
+⛔ At this point or soon after, your ACG sandbox may shut down due to exceeding Glue DPU (Data Processing Unit) limits. You’ll receive an email titled “Your Hands-On Lab or Cloud Playground has been shut down,” explaining the suspension due to excessive DPU usage.
+
+AWS Glue jobs, being Spark-based, provision distributed computing environments even for small tasks, which can quickly hit ACG's limits designed to prevent runaway costs. This restriction is a helpful reminder of resource management in data processing.
+
+If your sandbox is suspended, don’t worry, this is part of learning to use powerful tools like AWS Glue. Simply start a new sandbox and redeploy the CloudFormation template, which will be ready in 3–4 minutes. Learn more about Glue DPUs and optimisation here: https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html
+```
+
+### Going Further 2: Data architecture diagram
+
+> So far, we’ve used many AWS services in a deliberate sequence. If you had to explain this architecture to a colleague, they might lose track when you describe all the different AWS services and how they interact. This is where architecture diagrams become essential—not just a nice-to-have. They facilitate clear and transparent discussions with various colleagues, whether to address the security of what you’re building, collaborate, or consider changes to the architecture. These changes might involve using different services, transitioning to another cloud platform like Azure or GCP, or adopting a new streaming framework like Kafka.
+
+```{note}
+🗺️This is also an excellent opportunity to practise creating clear and visually appealing architecture diagrams. These diagrams are not only helpful for explaining your current work but could also form part of your project, including as an appendix in your project evaluation report for the End Point Assessment. Additionally, when answering questions about your project to provide verbal evidence for pass descriptors, a clear architecture diagram can be an invaluable tool. It gives you a strong visual aid to screen share, discuss, and use as a reference point to demonstrate your knowledge and skills gained during the apprenticeship.
+```
+
+#### AWS Architecture Icons and Guidance
+
+1. **Visit Architecture Icons page**:
+   - Visit this web page `https://aws.amazon.com/architecture/icons/` and consider clicking on `Get started` and downloading `Microsoft PPtx toolkits`. 
+   - When unzipped this folder contains two PowerPoint files, one for Light and one for Dark themes. Consider these your reference for working out how to create a professional AWS compliant architecture diagram you would see from an experience data architect create. Slides 13 to 18 have simple rules to follow.
+ 
+#### Drawing and diagramming tools
+
+1. **Create diagram**:
+   - Scroll down the web page `https://aws.amazon.com/architecture/icons/` to the section `Drawing and diagramming tools` and note the different tools AWS reccomends.
+   - We suggest starting with Draw.io as its free, simple to use and can be used to create professional diagrams in AWS, Azure, GCP, IBM Cloud, and on-premises architectures: `https://app.diagrams.net/`
+   - After clicing on the link select where to save your diagram (or decide later)
+   ![SaveDiagrams](./images/SaveDiagrams.png)<br>
+   - Click the `+ More Shapes` blue button bottom left.
+   - In the left hand side of the Shapes dialog that appears, click the `AWS 2025` checkbox then `Apply`.
+   - You should now be able to find any AWS icon and AWS arrow you need to re-create the architecture diagram shown at the start of this workshop and below.
+   - Your task now is to..
+   ![Workshop_09_architecture.drawio](./images/Workshop_09_architecture.drawio.png)<br>
+
+
+   
+### Going Further 3: Streaming in Glue itself
+
+### Going Further 4: Connect to PowerBI..
+
+![alt text](image.png)
+
+![alt text](image-2.png)
+
+![alt text](image-1.png)
+
+
+
+
+
+
 
 

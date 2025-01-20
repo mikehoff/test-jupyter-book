@@ -345,9 +345,20 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-data-architecture-diagram">Going Further 1: Data architecture diagram</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-streaming-in-glue-itself">Going Further 2: Streaming in Glue itself</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-orchestrated-etl-pipeline-to-write-to-athena">Going Further 3: Orchestrated ETL pipeline to write to Athena</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift">Going Further 1: Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-target-table-in-redshift">🎯 Create target table in Redshift</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-aws-glue-visual-etl">➡️ Create AWS Glue visual ETL</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-and-visualise-redshift-target-table">📈 Inspect and visualise Redshift target table</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#orchestrate-the-entire-process">🎼 Orchestrate the entire process!</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram">Going Further 2: Data architecture diagram</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aws-architecture-icons-and-guidance">AWS Architecture Icons and Guidance</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#drawing-and-diagramming-tools">Drawing and diagramming tools</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-streaming-in-glue-itself">Going Further 3: Streaming in Glue itself</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-4-connect-to-powerbi">Going Further 4: Connect to PowerBI…</a></li>
 </ul>
 </li>
 </ul>
@@ -560,7 +571,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p><strong>…</strong>: A …</p></li>
 </ol>
 <p>By the end of the workshop, you will have built this architecture:</p>
-<p><img alt="architecture" src="images/architecture.png" /></p>
+<p><img alt="Workshop_09_architecture.drawio" src="_images/Workshop_09_architecture.drawio.png" /><br></p>
 </section>
 </section>
 </section>
@@ -1396,11 +1407,11 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2025&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;01&#39;</span>
 <span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">location</span><span class="p">,</span><span class="w"> </span><span class="k">year</span><span class="p">,</span><span class="w"> </span><span class="k">month</span><span class="p">,</span><span class="w"> </span><span class="k">day</span>
 <span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">location</span><span class="p">,</span><span class="w"> </span><span class="k">year</span><span class="p">,</span><span class="w"> </span><span class="k">month</span><span class="p">,</span><span class="w"> </span><span class="k">day</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
-<span class="o">```</span><span class="err">{</span><span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="err">}</span><span class="w"> </span><span class="k">sql</span>
-
-<span class="o">```</span><span class="err">{</span><span class="n">note</span><span class="err">}</span>
-<span class="err">✅</span><span class="w"> </span><span class="n">These</span><span class="w"> </span><span class="n">quality</span><span class="w"> </span><span class="n">checks</span><span class="w"> </span><span class="n">help</span><span class="w"> </span><span class="n">identify</span><span class="w"> </span><span class="k">any</span><span class="w"> </span><span class="n">gaps</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">data</span><span class="w"> </span><span class="n">collection</span><span class="p">.</span><span class="w"> </span><span class="k">In</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">production</span><span class="w"> </span><span class="n">environment</span><span class="p">,</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">might</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">alerts</span><span class="w"> </span><span class="n">based</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">these</span><span class="w"> </span><span class="n">metrics</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">monitor</span><span class="w"> </span><span class="k">data</span><span class="w"> </span><span class="n">pipeline</span><span class="w"> </span><span class="n">health</span><span class="p">.</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>✅ These quality checks help identify any gaps in data collection. In a production environment, you might set up alerts based on these metrics to monitor data pipeline health.</p>
 </div>
 </section>
 <section id="challenge-exercises">
@@ -1460,7 +1471,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>🎉 Congratulations - you’ve completed today’s main exercise!</p>
-<p>Now that you’ve explored your weather data lake with Athena, if your up for the going furthe exercies, you’re ready to move on to more advanced analytics using AWS Glue and Redshift. One task is to :</p>
+<p>Now that you’ve explored your weather data lake with Athena, if your up for the going further exercises, you’re ready to move on to more advanced analytics using AWS Glue and Redshift. One task is to :</p>
 <ul class="simple">
 <li><p>Create and run Glue crawlers</p></li>
 <li><p>Build ETL jobs for data transformation</p></li>
@@ -1482,15 +1493,270 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </section>
 <section id="going-further">
 <h2>🚀 Going Further<a class="headerlink" href="#going-further" title="Link to this heading">#</a></h2>
-<section id="going-further-1-data-architecture-diagram">
-<h3>Going Further 1: Data architecture diagram<a class="headerlink" href="#going-further-1-data-architecture-diagram" title="Link to this heading">#</a></h3>
-<p>Mike’s idea about learners creating one…</p>
+<section id="going-further-1-orchestrated-pipeline-to-write-to-redshift">
+<h3>Going Further 1: Orchestrated pipeline to write to Redshift<a class="headerlink" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift" title="Link to this heading">#</a></h3>
+<blockquote>
+<div><p>So far we have crawled the data being streamed into S3 on-demand. A data analyst has asked for a table in Redshift they can explore and connect to PowerBI that is regularly updated with temperature readings. In this exercise we will create the target table in Redshift, then create a Glue visual ETL job that Extracts, Transforms and Loads the table from the Glue database to the Redshfit table. We query Redshift and visualise temperature over time. Finally, we orchestrate the full process by using AWS Glue <code class="docutils literal notranslate"><span class="pre">Workflows</span> <span class="pre">(orchestration)</span></code> to regularly run our S3 crawler (created in the main exercise), followed by the visual ETL.</p>
+</div></blockquote>
+<section id="create-target-table-in-redshift">
+<h4>🎯 Create target table in Redshift<a class="headerlink" href="#create-target-table-in-redshift" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p><strong>Connect to Redshift database</strong>:</p>
+<ul class="simple">
+<li><p>In the search bar at the top, search for <code class="docutils literal notranslate"><span class="pre">Redshift</span></code> and open in a new tab.</p></li>
+<li><p>You will several <code class="docutils literal notranslate"><span class="pre">Access</span> <span class="pre">denied..</span></code> messages you can safely ignore (they are explained in the note below).</p></li>
+<li><p>Click on the only Redshfit cluster listed called <code class="docutils literal notranslate"><span class="pre">weather-stream</span></code>.</p></li>
+<li><p>Click on the <code class="docutils literal notranslate"><span class="pre">Query</span> <span class="pre">data</span></code> dropdown (that is on the top right) then select <code class="docutils literal notranslate"><span class="pre">Query</span> <span class="pre">in</span> <span class="pre">query</span> <span class="pre">editor</span></code>.</p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Connect</span> <span class="pre">to</span> <span class="pre">database</span></code> then in the <code class="docutils literal notranslate"><span class="pre">Database</span> <span class="pre">name</span></code> box enter <code class="docutils literal notranslate"><span class="pre">weather</span></code> and for the <code class="docutils literal notranslate"><span class="pre">Database</span> <span class="pre">user</span></code> enter <code class="docutils literal notranslate"><span class="pre">corndeladmin</span></code>, then click <code class="docutils literal notranslate"><span class="pre">Connect</span></code>.
+<img alt="RedshfitDatabaseConnect" src="_images/RedshfitDatabaseConnect.png" /></p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>⛔  The red <code class="docutils literal notranslate"><span class="pre">Access</span> <span class="pre">denied..</span></code> error messages can be safely ignored. They simply indicate that you don’t have administrative permissions for Redshift Serverless backups, workgroups, and snapshots. You can still do everything needed for creating tables, querying data, and running ETL processes.</p>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>Create Redshift target table</strong>:</p>
+<ul class="simple">
+<li><p>In the Redshift Query editor copy and paste the SQL below then click <code class="docutils literal notranslate"><span class="pre">Run</span></code>.</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">real_time_weather_stats</span><span class="p">;</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">real_time_weather_stats</span><span class="w"> </span><span class="p">(</span>
+<span class="w">   </span><span class="n">window_start_time</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="p">,</span>
+<span class="w">   </span><span class="n">window_end_time</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="p">,</span>
+<span class="w">   </span><span class="n">city</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span>
+<span class="w">   </span><span class="n">temperature</span><span class="w"> </span><span class="n">DOUBLE</span><span class="w"> </span><span class="k">PRECISION</span><span class="p">,</span>
+<span class="w">   </span><span class="n">previous_temperature</span><span class="w"> </span><span class="n">DOUBLE</span><span class="w"> </span><span class="k">PRECISION</span><span class="p">,</span>
+<span class="w">   </span><span class="n">temperature_change</span><span class="w"> </span><span class="n">DOUBLE</span><span class="w"> </span><span class="k">PRECISION</span><span class="p">,</span>
+<span class="w">   </span><span class="k">location</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span>
+<span class="w">   </span><span class="k">source</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span>
+<span class="w">   </span><span class="n">collection_attempts</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">,</span>
+<span class="w">   </span><span class="n">collection_window_seconds</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">,</span>
+<span class="w">   </span><span class="n">initial_latency_seconds</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">,</span>
+<span class="w">   </span><span class="n">last_update</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="p">,</span>
+<span class="w">   </span><span class="n">ingest_year</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">,</span>
+<span class="w">   </span><span class="n">ingest_month</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">,</span><span class="w"> </span>
+<span class="w">   </span><span class="n">ingest_day</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">,</span>
+<span class="w">   </span><span class="n">ingest_hour</span><span class="w"> </span><span class="nb">INTEGER</span>
+<span class="p">)</span>
+<span class="n">DISTKEY</span><span class="p">(</span><span class="n">city</span><span class="p">)</span>
+<span class="n">SORTKEY</span><span class="p">(</span><span class="n">window_start_time</span><span class="p">,</span><span class="w"> </span><span class="n">city</span><span class="p">);</span>
+</pre></div>
+</div>
 </section>
-<section id="going-further-2-streaming-in-glue-itself">
-<h3>Going Further 2: Streaming in Glue itself<a class="headerlink" href="#going-further-2-streaming-in-glue-itself" title="Link to this heading">#</a></h3>
+<section id="create-aws-glue-visual-etl">
+<h4>➡️ Create AWS Glue visual ETL<a class="headerlink" href="#create-aws-glue-visual-etl" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p><strong>Create Glue Visual ETL and data source</strong>:</p>
+<ul class="simple">
+<li><p>In the search bar at the top, search for <code class="docutils literal notranslate"><span class="pre">Glue</span></code> and open in a new tab.</p></li>
+<li><p>From the left hand menu, from under <code class="docutils literal notranslate"><span class="pre">ELT</span> <span class="pre">jobs</span></code> click on <code class="docutils literal notranslate"><span class="pre">Visual</span> <span class="pre">ETL</span></code> the click <code class="docutils literal notranslate"><span class="pre">Visual</span> <span class="pre">ETL</span></code>.</p></li>
+<li><p>From the <code class="docutils literal notranslate"><span class="pre">Sources</span></code> menu click on <code class="docutils literal notranslate"><span class="pre">AWS</span> <span class="pre">Glue</span> <span class="pre">Data</span> <span class="pre">Catalog</span></code> then click on the node itself on the canvas to reveal the properties of the node ot the right.</p></li>
+<li><p>From <code class="docutils literal notranslate"><span class="pre">Database</span></code> select <code class="docutils literal notranslate"><span class="pre">weather-analytics_dev_db</span></code>.</p></li>
+<li><p>From <code class="docutils literal notranslate"><span class="pre">Table</span></code> select <code class="docutils literal notranslate"><span class="pre">raw_weather_data</span></code> (this is the table you created in the main exercise of this workshop by crawling the S3 data lake).
+<img alt="VisualETL_Source" src="_images/VisualETL_Source.png" /></p></li>
+<li><p>So that this ETL can access our data source, click on the <code class="docutils literal notranslate"><span class="pre">Job</span> <span class="pre">details</span></code> tab and for the <code class="docutils literal notranslate"><span class="pre">IAM</span> <span class="pre">Role</span></code> drop-down select <code class="docutils literal notranslate"><span class="pre">weather-analytics-glue-role-dev</span></code>.
+<img alt="VisualETL_Role" src="_images/VisualETL_Role.png" /></p></li>
+<li><p>On the top left edit the name of the ETL to <code class="docutils literal notranslate"><span class="pre">ETL_job</span></code>, then on the top right click <code class="docutils literal notranslate"><span class="pre">Save</span></code>.</p></li>
+</ul>
+</li>
+<li><p><strong>Create Glue Visual ETL with data source and SQL transform</strong>:</p>
+<ul class="simple">
+<li><p>Click on the <code class="docutils literal notranslate"><span class="pre">Visual</span></code> tab then left click on the data source node on the canvas.</p></li>
+<li><p>Then click the blue circle with a plus to add another node to the ETL.</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">Transforms</span></code> tab click on <code class="docutils literal notranslate"><span class="pre">SQL</span> <span class="pre">Query</span></code>.</p></li>
+<li><p>Then paste the following SQL into the <code class="docutils literal notranslate"><span class="pre">SQL</span> <span class="pre">query</span></code> box. When you paste the SQL into the box it will generate a <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">preview</span></code> showing the result of your query.</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">WITH</span><span class="w"> </span><span class="n">deduplicated_data</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">        </span><span class="n">city</span><span class="p">,</span>
+<span class="w">        </span><span class="n">temperature</span><span class="p">,</span>
+<span class="w">        </span><span class="n">measurement_time</span><span class="p">,</span>
+<span class="w">        </span><span class="k">source</span><span class="p">,</span>
+<span class="w">        </span><span class="k">location</span><span class="p">,</span>
+<span class="w">        </span><span class="k">MIN</span><span class="p">(</span><span class="n">collection_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_collection_time</span><span class="p">,</span>
+<span class="w">        </span><span class="k">MAX</span><span class="p">(</span><span class="n">collection_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">last_collection_time</span><span class="p">,</span>
+<span class="w">        </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">collection_attempts</span>
+<span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="n">myDataSource</span>
+<span class="w">    </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span>
+<span class="w">        </span><span class="n">city</span><span class="p">,</span>
+<span class="w">        </span><span class="n">temperature</span><span class="p">,</span>
+<span class="w">        </span><span class="n">measurement_time</span><span class="p">,</span>
+<span class="w">        </span><span class="k">source</span><span class="p">,</span>
+<span class="w">        </span><span class="k">location</span>
+<span class="p">)</span>
+<span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">date_trunc</span><span class="p">(</span><span class="s1">&#39;minute&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">window_start_time</span><span class="p">,</span>
+<span class="w">    </span><span class="n">date_trunc</span><span class="p">(</span><span class="s1">&#39;minute&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;15 minute&#39;</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">window_end_time</span><span class="p">,</span>
+<span class="w">    </span><span class="n">city</span><span class="p">,</span>
+<span class="w">    </span><span class="n">temperature</span><span class="p">,</span>
+<span class="w">    </span><span class="n">LAG</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">previous_temperature</span><span class="p">,</span>
+<span class="w">    </span><span class="n">temperature</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">LAG</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">city</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">temperature_change</span><span class="p">,</span>
+<span class="w">    </span><span class="k">location</span><span class="p">,</span>
+<span class="w">    </span><span class="k">source</span><span class="p">,</span>
+<span class="w">    </span><span class="n">collection_attempts</span><span class="p">,</span>
+<span class="w">    </span><span class="n">unix_timestamp</span><span class="p">(</span><span class="n">last_collection_time</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">unix_timestamp</span><span class="p">(</span><span class="n">first_collection_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">collection_window_seconds</span><span class="p">,</span>
+<span class="w">    </span><span class="n">unix_timestamp</span><span class="p">(</span><span class="n">first_collection_time</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">unix_timestamp</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">initial_latency_seconds</span><span class="p">,</span>
+<span class="w">    </span><span class="k">current_timestamp</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">last_update</span><span class="p">,</span>
+<span class="w">    </span><span class="k">year</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ingest_year</span><span class="p">,</span>
+<span class="w">    </span><span class="k">month</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ingest_month</span><span class="p">,</span>
+<span class="w">    </span><span class="k">day</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ingest_day</span><span class="p">,</span>
+<span class="w">    </span><span class="n">hour</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ingest_hour</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">deduplicated_data</span>
+</pre></div>
+</div>
+<p><img alt="VisualETL_SQL" src="_images/VisualETL_SQL.png" /><br></p>
+<ol class="arabic simple" start="4">
+<li><p><strong>Add Redshift target node</strong>:</p>
+<ul class="simple">
+<li><p>With the SQL node selected, click on the the blue circle with a plus to add another node to the ETL.</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">Targets</span></code> tab click on <code class="docutils literal notranslate"><span class="pre">Amazon</span> <span class="pre">Redshift</span></code>.</p></li>
+<li><p>In the pane to the right, from the <code class="docutils literal notranslate"><span class="pre">Redshift</span> <span class="pre">connection</span></code> select <code class="docutils literal notranslate"><span class="pre">weather-analytics-redshift-connection-dev</span></code>.</p></li>
+<li><p>For the <code class="docutils literal notranslate"><span class="pre">Schema</span></code> select <code class="docutils literal notranslate"><span class="pre">public</span></code>.</p></li>
+<li><p>For the <code class="docutils literal notranslate"><span class="pre">Table</span></code> select <code class="docutils literal notranslate"><span class="pre">real_time_weather_stats</span></code> (this is the table you created in an earlier step in Redshfit).</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">Handling</span> <span class="pre">of</span> <span class="pre">data</span> <span class="pre">and</span> <span class="pre">target</span> <span class="pre">table</span></code> select <code class="docutils literal notranslate"><span class="pre">TRUNCATE</span></code>.</p></li>
+<li><p>Finally click <code class="docutils literal notranslate"><span class="pre">Save</span></code> and then <code class="docutils literal notranslate"><span class="pre">Run</span></code> to start your ETL job.</p></li>
+<li><p>From the gren message at the top click on <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">details</span></code> to monitor your job run. It will take around four minutes to complete and for its <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">status</span></code> to change from <code class="docutils literal notranslate"><span class="pre">Running</span></code> to <code class="docutils literal notranslate"><span class="pre">Succeeded</span></code>.
+<img alt="VisualETL_Redshift" src="_images/VisualETL_Redshift.png" /><br></p></li>
+</ul>
+</li>
+</ol>
 </section>
-<section id="going-further-3-orchestrated-etl-pipeline-to-write-to-athena">
-<h3>Going Further 3: Orchestrated ETL pipeline to write to Athena<a class="headerlink" href="#going-further-3-orchestrated-etl-pipeline-to-write-to-athena" title="Link to this heading">#</a></h3>
+<section id="inspect-and-visualise-redshift-target-table">
+<h4>📈 Inspect and visualise Redshift target table<a class="headerlink" href="#inspect-and-visualise-redshift-target-table" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p><strong>Inspect data in target table</strong>:</p>
+<ul class="simple">
+<li><p>Go to the browswer tab for Redshift you had open earlier and the Query Editor.</p></li>
+<li><p>Use the plus icon to open a new blank query window and paste the SQL code below then click <code class="docutils literal notranslate"><span class="pre">Run</span></code> to inspect the raw data in the target table.</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">real_time_weather_stats</span><span class="p">;</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p><strong>Visualise London temperature over time</strong>:</p>
+<ul class="simple">
+<li><p>Use the plus icon to open a new blank query window and paste the SQL code below then click <code class="docutils literal notranslate"><span class="pre">Run</span></code>.</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">Query</span> <span class="pre">results</span></code> pane click <code class="docutils literal notranslate"><span class="pre">Visualise</span></code>.</p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">Chart</span> <span class="pre">type</span></code> as <code class="docutils literal notranslate"><span class="pre">Bar</span></code>.</p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">axis</span></code> as <code class="docutils literal notranslate"><span class="pre">minutessincemidnight</span></code>.</p></li>
+<li><p>Select  <code class="docutils literal notranslate"><span class="pre">Y</span> <span class="pre">axis</span></code> at <code class="docutils literal notranslate"><span class="pre">temperature</span></code>.</p></li>
+<li><p>Take a screenshot of your plot. We will look at this plot again later and compare it to the plot when run on a new data refresh.</p></li>
+</ul>
+</li>
+</ol>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">   </span><span class="k">EXTRACT</span><span class="p">(</span><span class="n">HOUR</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">window_start_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="k">EXTRACT</span><span class="p">(</span><span class="k">MINUTE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">window_start_time</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ss">&quot;Minutes Since Midnight&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="n">ROUND</span><span class="p">(</span><span class="n">temperature</span><span class="p">::</span><span class="nb">numeric</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ss">&quot;Temperature&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="n">ROUND</span><span class="p">(</span><span class="n">temperature_change</span><span class="p">::</span><span class="nb">numeric</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ss">&quot;Temperature Change&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="n">initial_latency_seconds</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ss">&quot;Latency (seconds)&quot;</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">real_time_weather_stats</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">city</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;London&#39;</span><span class="w">  </span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">window_start_time</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><img alt="Redshift_Plot" src="_images/Redshift_Plot.png" /><br></p>
+</section>
+<section id="orchestrate-the-entire-process">
+<h4>🎼 Orchestrate the entire process!<a class="headerlink" href="#orchestrate-the-entire-process" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p><strong>Create and run orchesterated workflow</strong>:</p>
+<ul class="simple">
+<li><p>Go to the browswer tab for Glue you had open earlier.</p></li>
+<li><p>In the left hand menu click on <code class="docutils literal notranslate"><span class="pre">Workflows</span> <span class="pre">(orchestration)</span></code>.</p></li>
+<li><p>Click <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">workflow</span></code> and name it <code class="docutils literal notranslate"><span class="pre">weather_workflow</span></code> then click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">workflow</span></code>.</p></li>
+<li><p>Click on <code class="docutils literal notranslate"><span class="pre">weather_workflow</span></code> then <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">trigger</span></code> then <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">new</span></code>.</p></li>
+<li><p>Name the trigger <code class="docutils literal notranslate"><span class="pre">start_crawl</span></code>.</p></li>
+<li><p>For the <code class="docutils literal notranslate"><span class="pre">Trigger</span> <span class="pre">type</span></code> select <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>.</p></li>
+<li><p>For the <code class="docutils literal notranslate"><span class="pre">Frequency</span></code> select <code class="docutils literal notranslate"><span class="pre">Custom</span></code>.</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">Cron</span> <span class="pre">expression</span></code> enter <code class="docutils literal notranslate"><span class="pre">*/10</span> <span class="pre">*</span> <span class="pre">*</span> <span class="pre">*</span> <span class="pre">?</span> <span class="pre">*</span></code> which will trigger every 10 minutes.
+<img alt="Workflow_Trigger" src="_images/Workflow_Trigger.png" /><br></p></li>
+<li><p>In the visual workflow canvas that appears, to the right of the <code class="docutils literal notranslate"><span class="pre">crawl_s3_data_lake</span></code> trigger, click on <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">node</span></code>, select the <code class="docutils literal notranslate"><span class="pre">crawlers</span></code> tab then tick the crawler name you created in your main exercise (likely called <code class="docutils literal notranslate"><span class="pre">weather-data-crawler</span></code>) then click <code class="docutils literal notranslate"><span class="pre">Add</span></code>.</p></li>
+<li><p>Now click on the crawler (the icon with the spider) and click on <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">trigger</span></code> to the right of it.</p></li>
+<li><p>Select the <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">new</span></code> then name the trigger <code class="docutils literal notranslate"><span class="pre">run_etl</span></code>.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">Trigger</span> <span class="pre">type</span></code> leave <code class="docutils literal notranslate"><span class="pre">Event</span></code> selected.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">Trigger</span> <span class="pre">logic</span></code> select <code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">after</span> <span class="pre">ALL</span> <span class="pre">watched</span> <span class="pre">event</span></code> then click <code class="docutils literal notranslate"><span class="pre">Add</span></code>.</p></li>
+<li><p>Now to the right of the <code class="docutils literal notranslate"><span class="pre">run_etl</span></code> trigger node, click <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">node</span></code>, select the <code class="docutils literal notranslate"><span class="pre">Jobs</span></code> tab and then tick the visual ETL job you created earlier (likely called <code class="docutils literal notranslate"><span class="pre">ETL_job</span></code>) then click <code class="docutils literal notranslate"><span class="pre">Add</span></code>.</p></li>
+<li><p>Finally, click <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">workflow</span></code>.
+<img alt="Workflow_Canvas" src="_images/Workflow_Canvas.png" /><br></p></li>
+</ul>
+</li>
+<li><p><strong>Monitor workflow</strong>:</p>
+<ul class="simple">
+<li><p>In the left hand menu of glue click on `workflows (orchestration).</p></li>
+<li><p>Click on the workflow <code class="docutils literal notranslate"><span class="pre">weather_workflow</span></code>.</p></li>
+<li><p>Click on the <code class="docutils literal notranslate"><span class="pre">History</span></code> tab.</p></li>
+<li><p>Select the <code class="docutils literal notranslate"><span class="pre">Workflow</span> <span class="pre">run</span> <span class="pre">ID</span></code> with the status <code class="docutils literal notranslate"><span class="pre">Running</span></code> then click <code class="docutils literal notranslate"><span class="pre">View</span> <span class="pre">run</span> <span class="pre">details</span></code>.</p></li>
+<li><p>When this triggers you should see the nodes incrementally chaning from <code class="docutils literal notranslate"><span class="pre">Not</span> <span class="pre">Started</span></code> to <code class="docutils literal notranslate"><span class="pre">🔁</span> <span class="pre">Running</span></code> then <code class="docutils literal notranslate"><span class="pre">✅</span> <span class="pre">Succeeded</span></code>.
+<img alt="Workflow_Monitor" src="_images/Workflow_Monitor.png" /><br></p></li>
+<li><p>when all noes are at <code class="docutils literal notranslate"><span class="pre">✅</span> <span class="pre">Succeeded</span></code> status, return to redshift and re-run your plot code from the previous task to confirm new data has arrived into the target table by comparing this plot to your previous plot.
+<img alt="Redshift_NewPlot" src="_images/Redshift_NewPlot.png" /><br></p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>⛔ At this point or soon after, your ACG sandbox may shut down due to exceeding Glue DPU (Data Processing Unit) limits. You’ll receive an email titled “Your Hands-On Lab or Cloud Playground has been shut down,” explaining the suspension due to excessive DPU usage.</p>
+<p>AWS Glue jobs, being Spark-based, provision distributed computing environments even for small tasks, which can quickly hit ACG’s limits designed to prevent runaway costs. This restriction is a helpful reminder of resource management in data processing.</p>
+<p>If your sandbox is suspended, don’t worry, this is part of learning to use powerful tools like AWS Glue. Simply start a new sandbox and redeploy the CloudFormation template, which will be ready in 3–4 minutes. Learn more about Glue DPUs and optimisation here: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html">https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html</a></p>
+</div>
+</section>
+</section>
+<section id="going-further-2-data-architecture-diagram">
+<h3>Going Further 2: Data architecture diagram<a class="headerlink" href="#going-further-2-data-architecture-diagram" title="Link to this heading">#</a></h3>
+<blockquote>
+<div><p>So far, we’ve used many AWS services in a deliberate sequence. If you had to explain this architecture to a colleague, they might lose track when you describe all the different AWS services and how they interact. This is where architecture diagrams become essential—not just a nice-to-have. They facilitate clear and transparent discussions with various colleagues, whether to address the security of what you’re building, collaborate, or consider changes to the architecture. These changes might involve using different services, transitioning to another cloud platform like Azure or GCP, or adopting a new streaming framework like Kafka.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>🗺️This is also an excellent opportunity to practise creating clear and visually appealing architecture diagrams. These diagrams are not only helpful for explaining your current work but could also form part of your project, including as an appendix in your project evaluation report for the End Point Assessment. Additionally, when answering questions about your project to provide verbal evidence for pass descriptors, a clear architecture diagram can be an invaluable tool. It gives you a strong visual aid to screen share, discuss, and use as a reference point to demonstrate your knowledge and skills gained during the apprenticeship.</p>
+</div>
+<section id="aws-architecture-icons-and-guidance">
+<h4>AWS Architecture Icons and Guidance<a class="headerlink" href="#aws-architecture-icons-and-guidance" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p><strong>Visit Architecture Icons page</strong>:</p>
+<ul class="simple">
+<li><p>Visit this web page <code class="docutils literal notranslate"><span class="pre">https://aws.amazon.com/architecture/icons/</span></code> and consider clicking on <code class="docutils literal notranslate"><span class="pre">Get</span> <span class="pre">started</span></code> and downloading <code class="docutils literal notranslate"><span class="pre">Microsoft</span> <span class="pre">PPtx</span> <span class="pre">toolkits</span></code>.</p></li>
+<li><p>When unzipped this folder contains two PowerPoint files, one for Light and one for Dark themes. Consider these your reference for working out how to create a professional AWS compliant architecture diagram you would see from an experience data architect create. Slides 13 to 18 have simple rules to follow.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="drawing-and-diagramming-tools">
+<h4>Drawing and diagramming tools<a class="headerlink" href="#drawing-and-diagramming-tools" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p><strong>Create diagram</strong>:</p>
+<ul class="simple">
+<li><p>Scroll down the web page <code class="docutils literal notranslate"><span class="pre">https://aws.amazon.com/architecture/icons/</span></code> to the section <code class="docutils literal notranslate"><span class="pre">Drawing</span> <span class="pre">and</span> <span class="pre">diagramming</span> <span class="pre">tools</span></code> and note the different tools AWS reccomends.</p></li>
+<li><p>We suggest starting with <a class="reference external" href="http://Draw.io">Draw.io</a> as its free, simple to use and can be used to create professional diagrams in AWS, Azure, GCP, IBM Cloud, and on-premises architectures: <code class="docutils literal notranslate"><span class="pre">https://app.diagrams.net/</span></code></p></li>
+<li><p>After clicing on the link select where to save your diagram (or decide later)
+<img alt="SaveDiagrams" src="_images/SaveDiagrams.png" /><br></p></li>
+<li><p>Click the <code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">More</span> <span class="pre">Shapes</span></code> blue button bottom left.</p></li>
+<li><p>In the left hand side of the Shapes dialog that appears, click the <code class="docutils literal notranslate"><span class="pre">AWS</span> <span class="pre">2025</span></code> checkbox then <code class="docutils literal notranslate"><span class="pre">Apply</span></code>.</p></li>
+<li><p>You should now be able to find any AWS icon and AWS arrow you need to re-create the architecture diagram shown at the start of this workshop and below.</p></li>
+<li><p>Your task now is to…
+<img alt="Workshop_09_architecture.drawio" src="_images/Workshop_09_architecture.drawio.png" /><br></p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+<section id="going-further-3-streaming-in-glue-itself">
+<h3>Going Further 3: Streaming in Glue itself<a class="headerlink" href="#going-further-3-streaming-in-glue-itself" title="Link to this heading">#</a></h3>
+</section>
+<section id="going-further-4-connect-to-powerbi">
+<h3>Going Further 4: Connect to PowerBI…<a class="headerlink" href="#going-further-4-connect-to-powerbi" title="Link to this heading">#</a></h3>
+<p><img alt="alt text" src="_images/image.png" /></p>
+<p><img alt="alt text" src="_images/image-2.png" /></p>
+<p><img alt="alt text" src="_images/image-1.png" /></p>
 </section>
 </section>
 </section>
@@ -1583,9 +1849,20 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-data-architecture-diagram">Going Further 1: Data architecture diagram</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-streaming-in-glue-itself">Going Further 2: Streaming in Glue itself</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-orchestrated-etl-pipeline-to-write-to-athena">Going Further 3: Orchestrated ETL pipeline to write to Athena</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift">Going Further 1: Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-target-table-in-redshift">🎯 Create target table in Redshift</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-aws-glue-visual-etl">➡️ Create AWS Glue visual ETL</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-and-visualise-redshift-target-table">📈 Inspect and visualise Redshift target table</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#orchestrate-the-entire-process">🎼 Orchestrate the entire process!</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram">Going Further 2: Data architecture diagram</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aws-architecture-icons-and-guidance">AWS Architecture Icons and Guidance</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#drawing-and-diagramming-tools">Drawing and diagramming tools</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-streaming-in-glue-itself">Going Further 3: Streaming in Glue itself</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-4-connect-to-powerbi">Going Further 4: Connect to PowerBI…</a></li>
 </ul>
 </li>
 </ul>
