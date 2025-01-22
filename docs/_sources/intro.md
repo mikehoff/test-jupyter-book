@@ -931,7 +931,7 @@ Even if you don't complete them, consider reviewing what they cover in your own 
 
 ## 🚀 Going Further
 
-### Going Further 1: Orchestrated pipeline to write to Redshift
+### 🎼 Going Further 1: Orchestrated pipeline to write to Redshift
 
 > So far we have crawled the data being streamed into S3 on-demand. A data analyst has asked for a table in Redshift they can explore and connect to PowerBI that is regularly updated with temperature readings. In this exercise we will create the target table in Redshift, then create a Glue visual ETL job that Extracts, Transforms and Loads the table from the Glue database to the Redshfit table. We query Redshift and visualise temperature over time. Finally, we orchestrate the full process by using AWS Glue `Workflows (orchestration)` to regularly run our S3 crawler (created in the main exercise), followed by the visual ETL.
 
@@ -985,7 +985,7 @@ SORTKEY(window_start_time, city);
    - From `Database` select `weather-analytics_dev_db`.
    - From `Table` select `raw_weather_data` (this is the table you created in the main exercise of this workshop by crawling the S3 data lake).
    ![VisualETL_Source](./images/VisualETL_Source.png)
-   - So that this ETL can access our data source, click on the `Job details` tab and for the `IAM Role` drop-down select `weather-analytics-glue-role-dev`.
+   - So that this ETL has permission to access our data source, click on the `Job details` tab and for the `IAM Role` drop-down select `weather-analytics-glue-role-dev`. Also change `Requested number of workers` from the default `10` to `2`. This means our job will use less DPUs and not reach the "A Cloud Guru" DPU limit that has been set as quickly.
    ![VisualETL_Role](./images/VisualETL_Role.png)
    - On the top left edit the name of the ETL to `ETL_job`, then on the top right click `Save`.
 
@@ -1117,12 +1117,14 @@ AWS Glue jobs, being Spark-based, provision distributed computing environments e
 If your sandbox is suspended, don’t worry, this is part of learning to use powerful tools like AWS Glue. Simply start a new sandbox and redeploy the CloudFormation template, which will be ready in 3–4 minutes. Learn more about Glue DPUs and optimisation here: https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html
 ```
 
-### Going Further 2: Data architecture diagram
+### 📝 Going Further 2: Data architecture diagram
 
 > So far, we’ve used many AWS services in a deliberate sequence. If you had to explain this architecture to a colleague, they might lose track when you describe all the different AWS services and how they interact. This is where architecture diagrams become essential—not just a nice-to-have. They facilitate clear and transparent discussions with various colleagues, whether to address the security of what you’re building, collaborate, or consider changes to the architecture. These changes might involve using different services, transitioning to another cloud platform like Azure or GCP, or adopting a new streaming framework like Kafka.
 
+![Workshop_09_architecture.drawio](./images/Workshop_09_architecture.drawio.png)<br>
+
 ```{note}
-🗺️This is also an excellent opportunity to practise creating clear and visually appealing architecture diagrams. These diagrams are not only helpful for explaining your current work but could also form part of your project, including as an appendix in your project evaluation report for the End Point Assessment. Additionally, when answering questions about your project to provide verbal evidence for pass descriptors, a clear architecture diagram can be an invaluable tool. It gives you a strong visual aid to screen share, discuss, and use as a reference point to demonstrate your knowledge and skills gained during the apprenticeship.
+🗺️This is also an excellent opportunity to practice creating clear and visually appealing architecture diagrams. These diagrams are not only helpful for explaining your current work but could also form part of your project, including as an appendix in your project evaluation report for the End Point Assessment. Additionally, when answering questions about your project to provide verbal evidence for pass descriptors, a clear architecture diagram can be an invaluable tool. It gives you a strong visual aid to screen share, discuss, and use as a reference point to demonstrate your knowledge and skills gained during the apprenticeship.
 ```
 
 #### AWS Architecture Icons and Guidance
@@ -1133,33 +1135,56 @@ If your sandbox is suspended, don’t worry, this is part of learning to use pow
  
 #### Drawing and diagramming tools
 
-1. **Create diagram**:
+1. **Create workshop diagram**:
    - Scroll down the web page `https://aws.amazon.com/architecture/icons/` to the section `Drawing and diagramming tools` and note the different tools AWS reccomends.
    - We suggest starting with Draw.io as its free, simple to use and can be used to create professional diagrams in AWS, Azure, GCP, IBM Cloud, and on-premises architectures: `https://app.diagrams.net/`
-   - After clicing on the link select where to save your diagram (or decide later)
+   - Select where to save your diagram (or decide later)
    ![SaveDiagrams](./images/SaveDiagrams.png)<br>
-   - Click the `+ More Shapes` blue button bottom left.
-   - In the left hand side of the Shapes dialog that appears, click the `AWS 2025` checkbox then `Apply`.
-   - You should now be able to find any AWS icon and AWS arrow you need to re-create the architecture diagram shown at the start of this workshop and below.
-   - Your task now is to..
-   ![Workshop_09_architecture.drawio](./images/Workshop_09_architecture.drawio.png)<br>
-
-
+   - Then select `File / New...` and click the `Blank Diagram` icon followed by clicking `Cloud` in the sidebar, then `Create`.
+   ![drawio_blank](./images/drawio_blank.png)<br>
+   - To find the AWS icons that represent this architecture you can scroll down on the left hand side pallete and expand different AWS resource categories such as `AWS / Analytics` in which you will find Kinesis.
+   ![drawio_pallette](./images/drawio_pallette.png)<br>
+   - A faster way to find the icon you need is to use search at the top. For instance, searching for `Kinesis data stream` returns two icons shown below. You can mouse over over an icon to see how it is described. To determine which icon is the current official icon for that service, in the AWS PowerPoint file you downloaded earlier, search for the same words to see which icon is the current accepted one to use that matches to one of the choices in draw.io.
+   ![drawio_search](./images/drawio_search.png)<br>
+   - Now see if you can re-create the workshop architecture diagram shown above. Would you re-create it exactly or could you improve the diagram to look similar to an official AWS diagram like the example below? You can search for diagrams here: https://aws.amazon.com/architecture/reference-architecture-diagrams
+   ![AWS_reference_architecture](./images/AWS_reference_architecture.png)<br>
    
-### Going Further 3: Streaming in Glue itself
+### ➡️ Going Further 3: Direct Streaming
 
-### Going Further 4: Connect to PowerBI..
+> In this final going further let's explore alternative patterns where we are more direct and see that we can potentially, using AWS Glue, stream directly from our Amazon Kinesis Data Stream into a Redshift table, or stream directly from Redshift itself and not use Glue at all. In this fast exercise we simply preview the data directly streamed in Glue, but then spend most of our time reflecting on the different possible patterns and why you may prefer one over the other depending on business needs.
 
-![alt text](image.png)
+![Workshop_09_architecture_going_further_direct_streaming.drawio](./images/Workshop_09_architecture_going_further_direct_streaming.drawio.png)<br>
 
-![alt text](image-2.png)
+#### 🚰 Stream directly in glue
 
-![alt text](image-1.png)
+1. **Create Glue Visual ETL and data source**:
+   - In the search bar at the top, search for `Glue` and open in a new tab.
+   - From the left hand menu, from under `ELT jobs` click on `Visual ETL` the click `Visual ETL`.
+    - On the top left edit the name of the ETL to `Streaming`, then on the top right click `Save`.
+   - From the `Sources` menu click on `Amazon Kinesis` then click on the node itself on the canvas to reveal the properties of the node ot the right.
+   - From `Stream name` select `weather-analytics-stream-dev` which is the Amazon Kinesisi data stream (Broker) that the lambda function (Producer) writes to every 60 seconds.
+   ![GlueStream](./images/GlueStream.png)<br>
+   - So that this ETL has permission to access our Kinesis data stream, click on the `Job details` tab and for the `IAM Role` drop-down select `weather-analytics-glue-role-dev`. Also change `Worker type` to the lower spec `G 1X`.
+   ![GlueStreamJobDetails](./images/GlueStreamJobDetails.png)<br>
 
+3. **Create Glue Visual ETL with data source and SQL transform**:
+   - Return to the `Visual` tab and you should soon see a `Data preview` of that source data
+   ![GlueStreamSourcePreview](./images/GlueStreamSourcePreview.png)<br>
+   - Behind the Data preview tab is an `Output Schema` tab. This is the schema of the data that will output from this node into the next node of the exercise. Note that all types are correct but not the timesampe fields.
+   ![GlueStreamSourceSchema](./images/GlueStreamSourceSchema.png)<br>
+   - To address this, let's add a node after the source node to map the ..click the blue circle with a plus to add another node to the ETL.
+   - In the `Transforms` tab click on `Changes Schema`.
+   - Select the `Change Schema` node so that its properites show to the right. Correct the two data timestamp data types and drop the final field. After these changes the Data preview should automatically update and show you the data in its new schema, and update the Output schema. 
+   ![GlueStreamChangeSchema](./images/GlueStreamChangeSchema.png)<br>
+   - Just like in the first going further exercise where we wrote to Redshift we could create a Redshfit table to match our schema and select Redshift as the targer.
+   ![GlueStreamTarget](./images/GlueStreamTarget.png)<br>
 
+3. **Finalising this direct streaming pattern**:   
+    - In this direct streaming example we would still have duplications, think about how you could use both a SQL tranforms node and MERGE when you write to Redshift to handle potential duplicatoins. Click below to reveal a hint, then expand further for a fuller suggested answer.....
 
-
-
-
+4. **Direct streaming into Redshift**:   
+    - A recent addition to Redshift is streaming direct https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion.html
+    - In this example https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion-example-station-data.html
+   
 
 

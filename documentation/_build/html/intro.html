@@ -345,20 +345,22 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift">Going Further 1: Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift">🎼 Going Further 1: Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-target-table-in-redshift">🎯 Create target table in Redshift</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-aws-glue-visual-etl">➡️ Create AWS Glue visual ETL</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-and-visualise-redshift-target-table">📈 Inspect and visualise Redshift target table</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#orchestrate-the-entire-process">🎼 Orchestrate the entire process!</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram">Going Further 2: Data architecture diagram</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram">📝 Going Further 2: Data architecture diagram</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aws-architecture-icons-and-guidance">AWS Architecture Icons and Guidance</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#drawing-and-diagramming-tools">Drawing and diagramming tools</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-streaming-in-glue-itself">Going Further 3: Streaming in Glue itself</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-4-connect-to-powerbi">Going Further 4: Connect to PowerBI…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-direct-streaming">➡️ Going Further 3: Direct Streaming</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stream-directly-in-glue">🚰 Stream directly in glue</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1494,7 +1496,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <section id="going-further">
 <h2>🚀 Going Further<a class="headerlink" href="#going-further" title="Link to this heading">#</a></h2>
 <section id="going-further-1-orchestrated-pipeline-to-write-to-redshift">
-<h3>Going Further 1: Orchestrated pipeline to write to Redshift<a class="headerlink" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift" title="Link to this heading">#</a></h3>
+<h3>🎼 Going Further 1: Orchestrated pipeline to write to Redshift<a class="headerlink" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift" title="Link to this heading">#</a></h3>
 <blockquote>
 <div><p>So far we have crawled the data being streamed into S3 on-demand. A data analyst has asked for a table in Redshift they can explore and connect to PowerBI that is regularly updated with temperature readings. In this exercise we will create the target table in Redshift, then create a Glue visual ETL job that Extracts, Transforms and Loads the table from the Glue database to the Redshfit table. We query Redshift and visualise temperature over time. Finally, we orchestrate the full process by using AWS Glue <code class="docutils literal notranslate"><span class="pre">Workflows</span> <span class="pre">(orchestration)</span></code> to regularly run our S3 crawler (created in the main exercise), followed by the visual ETL.</p>
 </div></blockquote>
@@ -1558,7 +1560,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p>From <code class="docutils literal notranslate"><span class="pre">Database</span></code> select <code class="docutils literal notranslate"><span class="pre">weather-analytics_dev_db</span></code>.</p></li>
 <li><p>From <code class="docutils literal notranslate"><span class="pre">Table</span></code> select <code class="docutils literal notranslate"><span class="pre">raw_weather_data</span></code> (this is the table you created in the main exercise of this workshop by crawling the S3 data lake).
 <img alt="VisualETL_Source" src="_images/VisualETL_Source.png" /></p></li>
-<li><p>So that this ETL can access our data source, click on the <code class="docutils literal notranslate"><span class="pre">Job</span> <span class="pre">details</span></code> tab and for the <code class="docutils literal notranslate"><span class="pre">IAM</span> <span class="pre">Role</span></code> drop-down select <code class="docutils literal notranslate"><span class="pre">weather-analytics-glue-role-dev</span></code>.
+<li><p>So that this ETL has permission to access our data source, click on the <code class="docutils literal notranslate"><span class="pre">Job</span> <span class="pre">details</span></code> tab and for the <code class="docutils literal notranslate"><span class="pre">IAM</span> <span class="pre">Role</span></code> drop-down select <code class="docutils literal notranslate"><span class="pre">weather-analytics-glue-role-dev</span></code>. Also change <code class="docutils literal notranslate"><span class="pre">Requested</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">workers</span></code> from the default <code class="docutils literal notranslate"><span class="pre">10</span></code> to <code class="docutils literal notranslate"><span class="pre">2</span></code>. This means our job will use less DPUs and not reach the “A Cloud Guru” DPU limit that has been set as quickly.
 <img alt="VisualETL_Role" src="_images/VisualETL_Role.png" /></p></li>
 <li><p>On the top left edit the name of the ETL to <code class="docutils literal notranslate"><span class="pre">ETL_job</span></code>, then on the top right click <code class="docutils literal notranslate"><span class="pre">Save</span></code>.</p></li>
 </ul>
@@ -1711,13 +1713,14 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </section>
 </section>
 <section id="going-further-2-data-architecture-diagram">
-<h3>Going Further 2: Data architecture diagram<a class="headerlink" href="#going-further-2-data-architecture-diagram" title="Link to this heading">#</a></h3>
+<h3>📝 Going Further 2: Data architecture diagram<a class="headerlink" href="#going-further-2-data-architecture-diagram" title="Link to this heading">#</a></h3>
 <blockquote>
 <div><p>So far, we’ve used many AWS services in a deliberate sequence. If you had to explain this architecture to a colleague, they might lose track when you describe all the different AWS services and how they interact. This is where architecture diagrams become essential—not just a nice-to-have. They facilitate clear and transparent discussions with various colleagues, whether to address the security of what you’re building, collaborate, or consider changes to the architecture. These changes might involve using different services, transitioning to another cloud platform like Azure or GCP, or adopting a new streaming framework like Kafka.</p>
 </div></blockquote>
+<p><img alt="Workshop_09_architecture.drawio" src="_images/Workshop_09_architecture.drawio.png" /><br></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>🗺️This is also an excellent opportunity to practise creating clear and visually appealing architecture diagrams. These diagrams are not only helpful for explaining your current work but could also form part of your project, including as an appendix in your project evaluation report for the End Point Assessment. Additionally, when answering questions about your project to provide verbal evidence for pass descriptors, a clear architecture diagram can be an invaluable tool. It gives you a strong visual aid to screen share, discuss, and use as a reference point to demonstrate your knowledge and skills gained during the apprenticeship.</p>
+<p>🗺️This is also an excellent opportunity to practice creating clear and visually appealing architecture diagrams. These diagrams are not only helpful for explaining your current work but could also form part of your project, including as an appendix in your project evaluation report for the End Point Assessment. Additionally, when answering questions about your project to provide verbal evidence for pass descriptors, a clear architecture diagram can be an invaluable tool. It gives you a strong visual aid to screen share, discuss, and use as a reference point to demonstrate your knowledge and skills gained during the apprenticeship.</p>
 </div>
 <section id="aws-architecture-icons-and-guidance">
 <h4>AWS Architecture Icons and Guidance<a class="headerlink" href="#aws-architecture-icons-and-guidance" title="Link to this heading">#</a></h4>
@@ -1733,30 +1736,73 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <section id="drawing-and-diagramming-tools">
 <h4>Drawing and diagramming tools<a class="headerlink" href="#drawing-and-diagramming-tools" title="Link to this heading">#</a></h4>
 <ol class="arabic simple">
-<li><p><strong>Create diagram</strong>:</p>
+<li><p><strong>Create workshop diagram</strong>:</p>
 <ul class="simple">
 <li><p>Scroll down the web page <code class="docutils literal notranslate"><span class="pre">https://aws.amazon.com/architecture/icons/</span></code> to the section <code class="docutils literal notranslate"><span class="pre">Drawing</span> <span class="pre">and</span> <span class="pre">diagramming</span> <span class="pre">tools</span></code> and note the different tools AWS reccomends.</p></li>
 <li><p>We suggest starting with <a class="reference external" href="http://Draw.io">Draw.io</a> as its free, simple to use and can be used to create professional diagrams in AWS, Azure, GCP, IBM Cloud, and on-premises architectures: <code class="docutils literal notranslate"><span class="pre">https://app.diagrams.net/</span></code></p></li>
-<li><p>After clicing on the link select where to save your diagram (or decide later)
+<li><p>Select where to save your diagram (or decide later)
 <img alt="SaveDiagrams" src="_images/SaveDiagrams.png" /><br></p></li>
-<li><p>Click the <code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">More</span> <span class="pre">Shapes</span></code> blue button bottom left.</p></li>
-<li><p>In the left hand side of the Shapes dialog that appears, click the <code class="docutils literal notranslate"><span class="pre">AWS</span> <span class="pre">2025</span></code> checkbox then <code class="docutils literal notranslate"><span class="pre">Apply</span></code>.</p></li>
-<li><p>You should now be able to find any AWS icon and AWS arrow you need to re-create the architecture diagram shown at the start of this workshop and below.</p></li>
-<li><p>Your task now is to…
-<img alt="Workshop_09_architecture.drawio" src="_images/Workshop_09_architecture.drawio.png" /><br></p></li>
+<li><p>Then select <code class="docutils literal notranslate"><span class="pre">File</span> <span class="pre">/</span> <span class="pre">New...</span></code> and click the <code class="docutils literal notranslate"><span class="pre">Blank</span> <span class="pre">Diagram</span></code> icon followed by clicking <code class="docutils literal notranslate"><span class="pre">Cloud</span></code> in the sidebar, then <code class="docutils literal notranslate"><span class="pre">Create</span></code>.
+<img alt="drawio_blank" src="_images/drawio_blank.png" /><br></p></li>
+<li><p>To find the AWS icons that represent this architecture you can scroll down on the left hand side pallete and expand different AWS resource categories such as <code class="docutils literal notranslate"><span class="pre">AWS</span> <span class="pre">/</span> <span class="pre">Analytics</span></code> in which you will find Kinesis.
+<img alt="drawio_pallette" src="_images/drawio_pallette.png" /><br></p></li>
+<li><p>A faster way to find the icon you need is to use search at the top. For instance, searching for <code class="docutils literal notranslate"><span class="pre">Kinesis</span> <span class="pre">data</span> <span class="pre">stream</span></code> returns two icons shown below. You can mouse over over an icon to see how it is described. To determine which icon is the current official icon for that service, in the AWS PowerPoint file you downloaded earlier, search for the same words to see which icon is the current accepted one to use that matches to one of the choices in <a class="reference external" href="http://draw.io">draw.io</a>.
+<img alt="drawio_search" src="_images/drawio_search.png" /><br></p></li>
+<li><p>Now see if you can re-create the workshop architecture diagram shown above. Would you re-create it exactly or could you improve the diagram to look similar to an official AWS diagram like the example below? You can search for diagrams here: <a class="reference external" href="https://aws.amazon.com/architecture/reference-architecture-diagrams">https://aws.amazon.com/architecture/reference-architecture-diagrams</a>
+<img alt="AWS_reference_architecture" src="_images/AWS_reference_architecture.png" /><br></p></li>
 </ul>
 </li>
 </ol>
 </section>
 </section>
-<section id="going-further-3-streaming-in-glue-itself">
-<h3>Going Further 3: Streaming in Glue itself<a class="headerlink" href="#going-further-3-streaming-in-glue-itself" title="Link to this heading">#</a></h3>
+<section id="going-further-3-direct-streaming">
+<h3>➡️ Going Further 3: Direct Streaming<a class="headerlink" href="#going-further-3-direct-streaming" title="Link to this heading">#</a></h3>
+<blockquote>
+<div><p>In this final going further let’s explore alternative patterns where we are more direct and see that we can potentially, using AWS Glue, stream directly from our Amazon Kinesis Data Stream into a Redshift table, or stream directly from Redshift itself and not use Glue at all. In this fast exercise we simply preview the data directly streamed in Glue, but then spend most of our time reflecting on the different possible patterns and why you may prefer one over the other depending on business needs.</p>
+</div></blockquote>
+<p><img alt="Workshop_09_architecture_going_further_direct_streaming.drawio" src="_images/Workshop_09_architecture_going_further_direct_streaming.drawio.png" /><br></p>
+<section id="stream-directly-in-glue">
+<h4>🚰 Stream directly in glue<a class="headerlink" href="#stream-directly-in-glue" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p><strong>Create Glue Visual ETL and data source</strong>:</p>
+<ul class="simple">
+<li><p>In the search bar at the top, search for <code class="docutils literal notranslate"><span class="pre">Glue</span></code> and open in a new tab.</p></li>
+<li><p>From the left hand menu, from under <code class="docutils literal notranslate"><span class="pre">ELT</span> <span class="pre">jobs</span></code> click on <code class="docutils literal notranslate"><span class="pre">Visual</span> <span class="pre">ETL</span></code> the click <code class="docutils literal notranslate"><span class="pre">Visual</span> <span class="pre">ETL</span></code>.</p></li>
+<li><p>On the top left edit the name of the ETL to <code class="docutils literal notranslate"><span class="pre">Streaming</span></code>, then on the top right click <code class="docutils literal notranslate"><span class="pre">Save</span></code>.</p></li>
+<li><p>From the <code class="docutils literal notranslate"><span class="pre">Sources</span></code> menu click on <code class="docutils literal notranslate"><span class="pre">Amazon</span> <span class="pre">Kinesis</span></code> then click on the node itself on the canvas to reveal the properties of the node ot the right.</p></li>
+<li><p>From <code class="docutils literal notranslate"><span class="pre">Stream</span> <span class="pre">name</span></code> select <code class="docutils literal notranslate"><span class="pre">weather-analytics-stream-dev</span></code> which is the Amazon Kinesisi data stream (Broker) that the lambda function (Producer) writes to every 60 seconds.
+<img alt="GlueStream" src="_images/GlueStream.png" /><br></p></li>
+<li><p>So that this ETL has permission to access our Kinesis data stream, click on the <code class="docutils literal notranslate"><span class="pre">Job</span> <span class="pre">details</span></code> tab and for the <code class="docutils literal notranslate"><span class="pre">IAM</span> <span class="pre">Role</span></code> drop-down select <code class="docutils literal notranslate"><span class="pre">weather-analytics-glue-role-dev</span></code>. Also change <code class="docutils literal notranslate"><span class="pre">Worker</span> <span class="pre">type</span></code> to the lower spec <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">1X</span></code>.
+<img alt="GlueStreamJobDetails" src="_images/GlueStreamJobDetails.png" /><br></p></li>
+</ul>
+</li>
+<li><p><strong>Create Glue Visual ETL with data source and SQL transform</strong>:</p>
+<ul class="simple">
+<li><p>Return to the <code class="docutils literal notranslate"><span class="pre">Visual</span></code> tab and you should soon see a <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">preview</span></code> of that source data
+<img alt="GlueStreamSourcePreview" src="_images/GlueStreamSourcePreview.png" /><br></p></li>
+<li><p>Behind the Data preview tab is an <code class="docutils literal notranslate"><span class="pre">Output</span> <span class="pre">Schema</span></code> tab. This is the schema of the data that will output from this node into the next node of the exercise. Note that all types are correct but not the timesampe fields.
+<img alt="GlueStreamSourceSchema" src="_images/GlueStreamSourceSchema.png" /><br></p></li>
+<li><p>To address this, let’s add a node after the source node to map the …click the blue circle with a plus to add another node to the ETL.</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">Transforms</span></code> tab click on <code class="docutils literal notranslate"><span class="pre">Changes</span> <span class="pre">Schema</span></code>.</p></li>
+<li><p>Select the <code class="docutils literal notranslate"><span class="pre">Change</span> <span class="pre">Schema</span></code> node so that its properites show to the right. Correct the two data timestamp data types and drop the final field. After these changes the Data preview should automatically update and show you the data in its new schema, and update the Output schema.
+<img alt="GlueStreamChangeSchema" src="_images/GlueStreamChangeSchema.png" /><br></p></li>
+<li><p>Just like in the first going further exercise where we wrote to Redshift we could create a Redshfit table to match our schema and select Redshift as the targer.
+<img alt="GlueStreamTarget" src="_images/GlueStreamTarget.png" /><br></p></li>
+</ul>
+</li>
+<li><p><strong>Finalising this direct streaming pattern</strong>:</p>
+<ul class="simple">
+<li><p>In this direct streaming example we would still have duplications, think about how you could use both a SQL tranforms node and MERGE when you write to Redshift to handle potential duplicatoins. Click below to reveal a hint, then expand further for a fuller suggested answer…</p></li>
+</ul>
+</li>
+<li><p><strong>Direct streaming into Redshift</strong>:</p>
+<ul class="simple">
+<li><p>A recent addition to Redshift is streaming direct <a class="reference external" href="https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion.html">https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion.html</a></p></li>
+<li><p>In this example <a class="reference external" href="https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion-example-station-data.html">https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion-example-station-data.html</a></p></li>
+</ul>
+</li>
+</ol>
 </section>
-<section id="going-further-4-connect-to-powerbi">
-<h3>Going Further 4: Connect to PowerBI…<a class="headerlink" href="#going-further-4-connect-to-powerbi" title="Link to this heading">#</a></h3>
-<p><img alt="alt text" src="_images/image.png" /></p>
-<p><img alt="alt text" src="_images/image-2.png" /></p>
-<p><img alt="alt text" src="_images/image-1.png" /></p>
 </section>
 </section>
 </section>
@@ -1849,20 +1895,22 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift">Going Further 1: Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift">🎼 Going Further 1: Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-target-table-in-redshift">🎯 Create target table in Redshift</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-aws-glue-visual-etl">➡️ Create AWS Glue visual ETL</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-and-visualise-redshift-target-table">📈 Inspect and visualise Redshift target table</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#orchestrate-the-entire-process">🎼 Orchestrate the entire process!</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram">Going Further 2: Data architecture diagram</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram">📝 Going Further 2: Data architecture diagram</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aws-architecture-icons-and-guidance">AWS Architecture Icons and Guidance</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#drawing-and-diagramming-tools">Drawing and diagramming tools</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-streaming-in-glue-itself">Going Further 3: Streaming in Glue itself</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-4-connect-to-powerbi">Going Further 4: Connect to PowerBI…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-direct-streaming">➡️ Going Further 3: Direct Streaming</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stream-directly-in-glue">🚰 Stream directly in glue</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
