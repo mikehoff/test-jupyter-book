@@ -304,19 +304,13 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Data Engineer Workshop 9: Advanced Stream Processing Pipelines</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reminder-of-workshop-5-data-integration-with-cloud-services">Reminder of Workshop 5 - Data Integration with Cloud Services</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-real-time-or-near-real-time-what-s-the-difference">Streaming, real time or near real time? What’s the difference?</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#applying-each-workshop-to-your-project">Applying Each Workshop to Your Project</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-forward-with-your-project">Moving Forward With Your Project</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alignment-with-data-engineer-pass-descriptors">Alignment with Data Engineer Pass Descriptors</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#today-s-workshop-scenario-and-objectives">Today’s Workshop Scenario and Objectives</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#building-on-previous-workshops-from-on-demand-to-batch-and-streaming">🧱 Building on Previous Workshops: From On-Demand to Batch and Streaming</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#should-we-really-be-streaming-data">⁉️ Should we really be streaming data?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alignment-with-data-engineer-pass-descriptors">🤝 Alignment with Data Engineer Pass Descriptors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#today-s-workshop-scenario-and-objectives">🌬️ Today’s Workshop Scenario and Objectives</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#note">Note</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-1-configuring-the-development-environment">⚙️ Task 1: Configuring the Development Environment</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-2-explore-and-understand-your-streaming-application-so-far">🗺️ Task 2: Explore and understand your streaming application so far</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#producer-explore-the-data-producer-lambda-function">✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):</a></li>
@@ -339,34 +333,31 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapping-up-and-reflecting-on-your-project">Wrapping Up and Reflecting on Your Project</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#real-time-vs">Real Time vs…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-real-time-or-near-real-time-what-s-the-difference">Streaming, real time or near real time? What’s the difference?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#another-topic">Another topic</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#this-afternoon-reflecting-on-your-project">This afternoon - reflecting on your project</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift">🎼 Going Further 1: Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift"><strong>🎼 Going Further 1:</strong> Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-target-table-in-redshift">🎯 Create target table in Redshift</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-aws-glue-visual-etl">➡️ Create AWS Glue visual ETL</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-and-visualise-redshift-target-table">📈 Inspect and visualise Redshift target table</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#orchestrate-the-entire-process">🎼 Orchestrate the entire process!</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram">📝 Going Further 2: Data architecture diagram</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram"><strong>📝 Going Further 2:</strong> Data architecture diagram</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aws-architecture-icons-and-guidance">AWS Architecture Icons and Guidance</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#drawing-and-diagramming-tools">Drawing and diagramming tools</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-direct-streaming">➡️ Going Further 3: Direct Streaming</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-direct-streaming"><strong>➡️ Going Further 3:</strong> Direct Streaming</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stream-directly-in-glue">🚰 Stream directly in glue</a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-
             </nav>
         </div>
     </div>
@@ -381,141 +372,55 @@
 <h1>Data Engineer Workshop 9: Advanced Stream Processing Pipelines<a class="headerlink" href="#data-engineer-workshop-9-advanced-stream-processing-pipelines" title="Link to this heading">#</a></h1>
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
-<section id="reminder-of-workshop-5-data-integration-with-cloud-services">
-<h3>Reminder of Workshop 5 - Data Integration with Cloud Services<a class="headerlink" href="#reminder-of-workshop-5-data-integration-with-cloud-services" title="Link to this heading">#</a></h3>
-<p>In Workshop 5, we explored … Let’s recap what we did:</p>
-<ol class="arabic simple">
-<li><p><strong>Environment Setup</strong></p></li>
-</ol>
+<section id="building-on-previous-workshops-from-on-demand-to-batch-and-streaming">
+<h3>🧱 Building on Previous Workshops: From On-Demand to Batch and Streaming<a class="headerlink" href="#building-on-previous-workshops-from-on-demand-to-batch-and-streaming" title="Link to this heading">#</a></h3>
+<p>Our workshop journey so far through different data processing patterns has prepared us for today’s exploration of streaming architectures.</p>
 <ul class="simple">
-<li></li>
+<li><p>In Workshop 5, we learned how to make data rapidly available for analysts using AWS cloud services. We transformed CSV files into optimised Parquet format, used Glue to automatically discover and catalogue data structures, and enabled quick analysis through Athena’s serverless querying. This taught us how we might handle data at rest efficiently and make it immediately queryable.</p></li>
 </ul>
-<ol class="arabic simple" start="2">
-<li><p><strong>Data Transformation</strong></p></li>
-</ol>
+<p><img alt="workshop5-final-arch_01" src="_images/workshop5-final-arch_01.png" /><br></p>
 <ul class="simple">
-<li></li>
-<li><p>In today’s workshop, we’ll build on this foundation by implementing …</p></li>
+<li><p>Workshop 7 then introduced the challenges of keeping analytical data current as source systems change. Using the Sakila DVD rental database, we built automated pipelines in Azure Synapse to detect changes in our OLTP data source and update our dimensional model (the customer dimension). This showed us how to maintain data warehouse consistency through scheduled batch updates.</p></li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In Workshop 5, the …</p>
-</div>
-<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
-<summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">For more detail on …, click here</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<p class="sd-card-text">In Workshop 5, the …</p>
-<p class="sd-card-text">Today, we’ll build on this to demonstrate …</p>
-</div>
-</details></section>
-<section id="streaming-real-time-or-near-real-time-what-s-the-difference">
-<h3>Streaming, real time or near real time? What’s the difference?<a class="headerlink" href="#streaming-real-time-or-near-real-time-what-s-the-difference" title="Link to this heading">#</a></h3>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>While our focus today is on …</p>
-</div>
-<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
-<summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">For more detail on …, click here</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<p class="sd-card-text">In this workshop, …</p>
-</div>
-</details><div class="admonition-question admonition">
-<p class="admonition-title">Question</p>
-<p>Can you remember the difference between A and B?</p>
-</div>
-<div class="dropdown admonition hint">
-<p class="admonition-title">Hint</p>
-<p>Think about …</p>
-<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
-<summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">For the solution, click here</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<p class="sd-card-text">The answer is …</p>
-</div>
-</details></div>
+<p><img alt="workshop_07_architecture" src="_images/workshop_07_architecture.png" /><br></p>
+<p>Today, we can combine these practical insights as we move from periodic batch processing to continuous streaming. So instead of waiting to gather changes and process them on a schedule (e.g. daily, weekly, monthly), we’ll build a pipeline that can processes weather data from an API in real-time as it arrives. This will combine the efficient data storage patterns we learned in Workshop 5 with the change handling techniques from Workshop 7, but applies them to data in motion! 🏃‍♂️‍➡️</p>
+<p>Our new streaming architecture will:</p>
+<ul class="simple">
+<li><p>Ingest data continuously through Kinesis streams (versus periodic batch loads in Workshop 5)</p></li>
+<li><p>Process records immediately as they arrive (versus scheduled updates)</p></li>
+<li><p>Enable multiple downstream consumers to analyse the same data stream</p></li>
+<li><p>Support both real-time analytics and historical querying</p></li>
+</ul>
+<p><img alt="Workshop_09_architecture.drawio" src="_images/Workshop_09_architecture.drawio.png" /><br></p>
+<p>This approach particularly suits use cases where data freshness is a key businesss requirement, like monitoring weather conditions, tracking financial transactions, or analysing Internet of Things (IoT) sensor data (e.g… ). As you work through today’s exercises, consider how streaming might complement the batch processing patterns you’ve already learned, and when each approach might be most appropriate for your own orgnasation or project.</p>
 </section>
-<section id="applying-each-workshop-to-your-project">
-<h3>Applying Each Workshop to Your Project<a class="headerlink" href="#applying-each-workshop-to-your-project" title="Link to this heading">#</a></h3>
-<p>Let’s consider again how each workshop’s approach might fit your specific needs, regardless of the data source type or format:</p>
-<div class="admonition-reflect-on-your-journey admonition">
-<p class="admonition-title">Reflect on Your Journey</p>
-<p>Think about which patterns could work for you:</p>
+<section id="should-we-really-be-streaming-data">
+<h3>⁉️ Should we really be streaming data?<a class="headerlink" href="#should-we-really-be-streaming-data" title="Link to this heading">#</a></h3>
+<p>While streaming architectures can help answer <em>“what’s happening right now?”</em> versus historical <em>“what happened?”</em> analysis, it’s important to carefully evaluate whether real-time data serves a genuine business need. Consider:</p>
 <ol class="arabic simple">
-<li><p><strong>Workshop 3: Initial Star Schema</strong></p>
+<li><p><strong>Business Value</strong>: Does real-time insight enable better decision-making or customer experience that justifies the additional complexity?</p></li>
+<li><p><strong>True Requirements</strong>: When stakeholders request <em>“real-time”</em> data, would near real-time or daily batch updates suffice?</p></li>
+<li><p><strong>Cost-Benefit Analysis</strong>:  Streaming architectures can introduce complexity we will encounter directly in the workshop exercises. While these examples may not be immediately clear now, they’ll become concrete as you build and test each component of the weather data pipeline:</p>
 <ul class="simple">
-<li><p><strong>What we did</strong>: Built a static dimensional model.</p></li>
-<li><p><strong>Practical takeaway</strong>: While a one-off load isn’t suitable for production, you might refresh your entire model periodically. Either way, getting your star schema design right is essential before adding automation.</p></li>
-<li><p><strong>Project question</strong>: Could periodic full refreshes work for your data, or do you need more frequent updates? Does the format of your source (e.g., OLTP database, API, or flat file) affect your approach?</p></li>
+<li><p>Error handling and recovery (e.g. handling failed API calls to the weather service, managing retry logic for Kinesis stream failures, dealing with Lambda function timeouts)</p></li>
+<li><p>Data consistency and ordering (e.g. ensuring weather readings from different cities arrive in the correct chronological order, handling duplicate temperature measurements from multiple collections of the same reading)</p></li>
+<li><p>Infrastructure management (e.g. monitoring Kinesis stream throughput capacity, managing Lambda concurrency limits, scaling Firehose delivery performance)</p></li>
+<li><p>Monitoring and alerting (e.g. tracking end-to-end latency from weather measurement time to Redshift availability, detecting gaps in city data collection, alerting on abnormal temperature variations)</p></li>
 </ul>
 </li>
-<li><p><strong>Workshop 4: Denormalised Data with Full Refresh</strong></p>
-<ul class="simple">
-<li><p><strong>What we did</strong>: Loaded Companies House CSV data (already denormalised) into a simple table.</p></li>
-<li><p><strong>Practical takeaway</strong>: Many data sources provide ready-to-load flat files, unlike the normalised Sakila database we’re using today.</p></li>
-<li><p><strong>Project question</strong>: Is your source data already flattened like Companies House, or do you need to transform a normalised or semi-structured source (e.g., JSON or XML)?</p></li>
-</ul>
-</li>
-<li><p><strong>Workshop 5: Serverless File Analysis</strong></p>
-<ul class="simple">
-<li><p><strong>What we did</strong>: Direct querying of S3 files through AWS Athena.</p></li>
-<li><p><strong>Practical takeaway</strong>: Sometimes maintaining a database is overkill when you can query files directly.</p></li>
-<li><p><strong>Project question</strong>: Is your data best managed in a database, or could a serverless query approach suffice? For instance, does your source format (e.g., log files, IoT data) favour file-based analysis?</p></li>
-</ul>
-</li>
-<li><p><strong>Workshop 6: Detailed Design</strong></p>
-<ul class="simple">
-<li><p><strong>What we did</strong>: Specifications for dimensions and ETL processes.</p></li>
-<li><p><strong>Practical takeaway</strong>: Planning your data flows and transformation rules saves major headaches later.</p></li>
-<li><p><strong>Project question</strong>: Have you documented how your data flows and transformations will handle different source formats (e.g., structured databases, semi-structured APIs)?</p></li>
-</ul>
-</li>
-<li><p><strong>Workshop 7: Automated Updates</strong></p>
-<ul class="simple">
-<li><p><strong>What we did</strong>: Incremental dimension updates in Azure Synapse.</p></li>
-<li><p><strong>Practical takeaway</strong>: Processing only what’s changed is efficient for frequently updated data.</p></li>
-<li><p><strong>Project question</strong>: What is your strategy for handling data changes from diverse sources (e.g., timestamp tracking in databases, new files in a directory, or API data deltas)? We’ll explore this today.</p></li>
-</ul>
-</li>
-</ol>
-<p>Looking ahead, we’ll explore more patterns such as:</p>
-<ol class="arabic simple" start="6">
-<li><p><strong>Workshop 9 (Today): Stream Processing</strong></p>
-<ul class="simple">
-<li><p><strong>What we’ll cover</strong>: Processing data in real-time as it arrives.</p></li>
-<li><p><strong>Project relevance</strong>: If batch updates aren’t fast enough, streaming might be appropriate for certain sources, like IoT sensors or transactional events.</p></li>
-</ul>
-</li>
-<li><p><strong>Workshop 13: API Integration</strong></p>
-<ul class="simple">
-<li><p><strong>What we’ll cover</strong>: Pulling data directly from one or more API sources.</p></li>
-<li><p><strong>Project relevance</strong>: When your data lives in cloud services or external systems rather than the databases or files we’ve focused on so far.</p></li>
-</ul>
-</li>
-</ol>
-</div>
-</section>
-<section id="moving-forward-with-your-project">
-<h3>Moving Forward With Your Project<a class="headerlink" href="#moving-forward-with-your-project" title="Link to this heading">#</a></h3>
-<p>As you now consider the stream processing:</p>
-<ol class="arabic simple">
-<li><p><strong>Choose Your Pattern</strong>: Is your use case best served by:</p></li>
+<li><p><strong>Alternative Approaches</strong>: Could simpler solutions work?</p></li>
 </ol>
 <ul class="simple">
-<li><p>Regular full refreshes (like Workshop 4’s Companies House approach)?</p></li>
-<li><p>Direct file querying (like Workshop 5’s serverless pattern)?</p></li>
-<li><p>Incremental updates (like Workshop 7’s Type 1 SCD implementation)?</p></li>
-<li><p>Or perhaps streaming as in today’s workshop 9.</p></li>
+<li><p>On-demand updates (Workshops 5)</p></li>
+<li><p>Scheduled batch processing (Workshop 7)</p></li>
+<li><p>More frequent but still batch-based loads</p></li>
 </ul>
-<ol class="arabic simple" start="2">
-<li><p><strong>Stream Appropriately</strong>: Remember that complex solutions aren’t always better:</p></li>
-</ol>
-<ul class="simple">
-<li><p>A simple near real time…</p></li>
-<li><p>This morning’s exercise demonstrates one approach, but your project might need something simpler or more complex. We’ll discuss the approaches after lunch, focusing on finding the right fit for your specific business needs!</p></li>
-<li><p>Fo instance, in this Tweet, it is suggested that… <a class="reference external" href="https://x.com/EcZachly/status/1875002741711626444">https://x.com/EcZachly/status/1875002741711626444</a></p></li>
-</ul>
+<p>As Zach Wilson provocatively notes in this X post: <em>“Stop building streaming pipelines when your stakeholders request ‘real time’ data!”</em></p>
+<p><img alt="Zach Wilson Tweet" src="https://pbs.twimg.com/media/GgVZDkhbwAErpUs?format=jpg&amp;name=900x900" /></p>
+<p>This afternoon, as well as reflecting on the practical exercises here we’ll explore how to evaluate these tradeoffs for your specific project needs and stakeholder requirements.</p>
 </section>
 <section id="alignment-with-data-engineer-pass-descriptors">
-<h3>Alignment with Data Engineer Pass Descriptors<a class="headerlink" href="#alignment-with-data-engineer-pass-descriptors" title="Link to this heading">#</a></h3>
+<h3>🤝 Alignment with Data Engineer Pass Descriptors<a class="headerlink" href="#alignment-with-data-engineer-pass-descriptors" title="Link to this heading">#</a></h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This workshop aligns with several IFATE Data Engineer Pass Descriptors: <a class="reference external" href="https://www.instituteforapprenticeships.org/apprenticeship-standards/data-engineer-v1-0">https://www.instituteforapprenticeships.org/apprenticeship-standards/data-engineer-v1-0</a></p>
@@ -523,65 +428,101 @@
 <details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">Click here to review more detail</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<ul class="simple">
-<li><p class="sd-card-text"><strong>Explains techniques such as star schemas, data lakes and data marts and the impact they have on data warehousing principles. (K15)</strong><br />
-This workshop directly demonstrates this by showing how a star schema can be implemented and maintained in a data warehouse, specifically focusing on dimension table updates using SCD Type 1.</p></li>
-<li><p class="sd-card-text"><strong>Describes the types and uses of data engineering tools in their own organisation and how they apply them. (K20)</strong><br />
-The workshop covers multiple Azure data engineering tools (Azure SQL, Azure Synapse, Dedicated SQL Pools) and shows their practical application in building a data warehouse update pipeline, demonstrating how each tool serves a specific purpose in the overall architecture.</p></li>
-<li><p class="sd-card-text"><strong>Explains the deployment approaches processes for new data pipelines and automated processes. (K8)</strong><br />
-We walk through the complete deployment of a new data pipeline in Azure Synapse, from setting up the infrastructure to implementing and testing the automated update process.</p></li>
-<li><p class="sd-card-text"><strong>Explains how they monitor different types of data store to optimise system management, performance and availability. (K1, S7)</strong><br />
-We will implement audit logging tables to track pipeline success, and consideration of table distribution and udpate methods in Azure Synapse for optimised performance.</p></li>
+<ul>
 <li><p class="sd-card-text"><strong>Describes how they use data ingestion frameworks such as streaming, batching and on demand services to move data from one location to another in order to optimise data ingestion processes. (K18, S15)</strong><br />
-We focus on batch processing and this workshop demonstrates an optimised ingestion process using staging tables and audit logging to ensure reliable data movement from OLTP to OLAP systems.</p></li>
+We focus on streaming and this workshop demonstrate different kinds of streaming patterns and consider their optimisation and business uses.</p></li>
+<li><p class="sd-card-text"><strong>Describes the types and uses of data engineering tools in their own organisation and how they apply them. (K20)</strong><br />
+The workshop covers multiple AWS data engineering tools that represent common architectural patterns you’ll find across different cloud platforms and on-premises solutions. By understanding these core patterns, you’ll be better equipped to work with equivalent tools in your own organisation, whether they use AWS, Azure, Google Cloud, or open-source alternatives like Kafka:</p>
+<ul class="simple">
+<li><p class="sd-card-text"><strong>AWS Lambda: Functions as a Service</strong> - A serverless compute service that lets you run code without having to provision a server. It also automatically scales your applications in response to incoming requests. If your organisation uses Azure Functions, or Google Cloud Functions you’ll find the concepts very similar.</p></li>
+<li><p class="sd-card-text"><strong>Amazon EventBridge: Event Orchestration Service</strong> - A serverless “event bus” that makes it easy to connect applications together using data from your own applications. While your organisation might use Azure Event Grid, Google Cloud Pub/Sub, or Apache Kafka for event orchestration, the fundamental patterns of event-driven architecture remain the same.</p></li>
+<li><p class="sd-card-text"><strong>Amazon Kinesis Data Stream: Streaming Broker</strong> - A massively scalable and durable real-time data streaming service. Think of it as a continuously flowing river of data that can handle hundreds of terabytes of data per hour from multiple sources! The patterns you learn here apply equally to Azure Event Hubs, Google Cloud Pub/Sub streams, or Apache Kafka topics.</p></li>
+<li><p class="sd-card-text"><strong>Amazon Kinesis Firehose: Streaming Consumer</strong> - A fully managed service that reliably loads streaming data into data lakes, data stores, and analytics services. These concepts map directly to services like Azure Stream Analytics, Google Cloud Dataflow, or Kafka Connect in your organisation.</p></li>
+<li><p class="sd-card-text"><strong>AWS Glue: Serverless ETL Service</strong> - A fully managed extract, transform, and load (ETL) service that makes it easy to prepare and load your data for analytics. Whether your organisation uses Azure Data Factory, Google Cloud Dataflow, or Apache NiFi, the ETL principles remain consistent.</p></li>
+<li><p class="sd-card-text"><strong>Amazon Athena: Serverless Query Service</strong> - An interactive query service that makes it easy to analyse data directly in Amazon S3 using standard SQL. Your organization might use Azure Synapse Analytics serverless SQL pools (we used these in workshop 7) or Google BigQuery, but the concept of serverless SQL querying is universal.</p></li>
+<li><p class="sd-card-text"><strong>Amazon Redshift: Cloud Data Warehouse</strong> - A fully managed, OLAP data warehouse service. While your organisation might use Azure Synapse Analytics dedicated SQL pools (we used these in workshop 7), Google BigQuery, or Snowflake, the fundamental concepts of cloud data warehousing remain the same.</p></li>
+</ul>
+<p class="sd-card-text">These services work together to create a comprehensive data engineering pipeline: EventBridge can trigger Lambda functions, which can process data and send it to Kinesis Streams. Firehose can then load this data into S3, where it can be cataloged by Glue, queried by Athena, and eventually loaded into Redshift for complex analytics! We will do all this together!</p>
+</li>
+<li><p class="sd-card-text"><strong>Explains the deployment approaches processes for new data pipelines and automated processes. (K8)</strong></p>
+<ul class="simple">
+<li><p class="sd-card-text">We walk through the complete deployment of a real-time weather data pipeline in a learning environment, using an infrastructure-as-code approach with CloudFormation. The pipeline flows through these key layers:<br><br></p></li>
+</ul>
+<p class="sd-card-text"><strong>✨ 1. PRODUCER:</strong> Lambda function collects weather data via API<br>
+🔻<br>
+<strong>➡️➡️➡️ 2. BROKER:</strong> Kinesis Data Stream buffers real-time data<br>
+🔻<br>
+<strong>📩 3. CONSUMER:</strong> Kinesis Firehose manages delivery<br>
+🔻<br>
+<strong>🪣 4. STORAGE:</strong> S3 data lake with smart partitioning<br>
+🔻<br>
+<strong>📈 5. ANALYTICS/SERVING:</strong> Athena for querying, Redshift for warehousing<br></p>
+<ul class="simple">
+<li><p class="sd-card-text">In Going Further, there is an exercies in automating and orchestrating this entire flow through Glue Workflows, demonstrating how to coordinate data ingestion, transformation, and loading processes in a systematic way. Note we will consider orchestration practically and in more detail in Workhsop 10.</p></li>
+</ul>
+</li>
+<li><p class="sd-card-text"><strong>Demonstrates how they used security, scalability and governance when automating data pipelines using programming languages and data integration platforms with graphical user interfaces. (K13, S4)”</strong></p>
+<ul class="simple">
+<li><p class="sd-card-text">While this workshop uses purposefully permissive security settings (public subnets, broad IAM roles, simplified authentication) to facilitate learning, we will emphasise how these would need to be hardened for production use, such as implementing private subnets with NAT Gateways, restrictive security groups, and AWS Secrets Manager for credentials.</p></li>
+</ul>
+</li>
 </ul>
 </div>
 </details></section>
 <section id="today-s-workshop-scenario-and-objectives">
-<h3>Today’s Workshop Scenario and Objectives<a class="headerlink" href="#today-s-workshop-scenario-and-objectives" title="Link to this heading">#</a></h3>
-<p>In this workshop, you’ll implement a streaming process to …</p>
-<p>Using AWS… By the end of this workshop, you will have:</p>
+<h3>🌬️ Today’s Workshop Scenario and Objectives<a class="headerlink" href="#today-s-workshop-scenario-and-objectives" title="Link to this heading">#</a></h3>
+<p>Real-time weather monitoring is essential for many industries. Consider these business use cases for streaming weather data:</p>
 <ul class="simple">
-<li><p>Set up …</p></li>
-<li><p>Created …</p></li>
-<li><p>Built a …</p></li>
-<li><p>Developed a streamin pipeline that:</p>
-<ul>
-<li><p>…</p></li>
-<li><p>…</p></li>
+<li><p><strong>Wind Energy</strong>: Wind farm operators need immediate temperature alerts to prevent turbine damage and optimise power generation. When temperatures exceed 35°C, they must quickly adjust operations to prevent overheating of mechanical components. Historical temperature analysis helps schedule maintenance during optimal weather windows, potentially saving millions in repair costs.</p></li>
+<li><p><strong>Transportation</strong>: Railway operators monitor temperature changes across thousands of miles of track, as sudden temperature variations can compromise rail integrity. Their monitoring systems must detect concerning temperature gradients in real-time while building historical analysis to identify vulnerable sections requiring extra monitoring.</p></li>
+<li><p><strong>Retail</strong>: Major supermarket chains adjust inventory and staffing based on temperature forecasts and real-time conditions. A sudden temperature spike can drive demand for certain products up by 300%, requiring rapid supply chain adjustments based on both current readings and historical sales patterns.</p></li>
+<li><p><strong>Smart Buildings</strong>: Modern commercial buildings use temperature data streams to automatically optimize HVAC operations (Heating, ventilation, and air conditioning), typically achieving 30-50% energy savings through real-time adjustments and predictive optimisation based on historical patterns. This requires both immediate response to current conditions and analysis of long-term temperature trends.</p></li>
 </ul>
-</li>
-<li><p>Tested the pipeline by:</p>
-<ul>
-<li><p>…</p></li>
-<li><p>…</p></li>
-<li><p>…</p></li>
-</ul>
-</li>
+<p>For our workshop, we’ll focus on wind energy, where weather data directly impacts operations and revenue. As noted in “The Impact of Weather on Wind Farms” (2024): <a class="reference external" href="https://www.infoplaza.com/en/blog/the-impact-of-weather-on-wind-farms">https://www.infoplaza.com/en/blog/the-impact-of-weather-on-wind-farms</a></p>
+<blockquote>
+<div><p><em>“The power output of a turbine is related to density, which is a function of altitude, pressure, and also temperature. Dense air (which comes with lower temperatures) exerts more force on the rotors, resulting in a higher power output, even at relatively lower wind speeds compared to warmer and less dense air.”</em></p>
+</div></blockquote>
+<p><img alt="Turbines" src="_images/turbine.png" /></p>
+<p>A wind farm operator has approached you to prototype a real-time temperature monitoring system. While their production system will need to monitor hundreds of turbine locations and track multiple weather parameters (temperature, wind speed, humidity), they want to start with a proof-of-concept using just temperature data from three cities to validate the approach. This temperature monitoring is needed as <em>“extreme heat can cause overheating of the turbine’s electrical and mechanical components as well as lubrication systems, potentially leading to shutdowns and increased maintenance costs.”</em></p>
+<p>This represents a typical project progression that you learned about in module <code class="docutils literal notranslate"><span class="pre">9.1	From</span> <span class="pre">Prototype</span> <span class="pre">to</span> <span class="pre">Production:</span> <span class="pre">Implementing</span> <span class="pre">Data</span> <span class="pre">Solutions</span></code>.</p>
+<ol class="arabic simple">
+<li><p><strong>Scoping (Current)</strong>: We’ve identified the core requirements - tracking temperature variations that could impact turbine performance and maintenance scheduling</p></li>
+<li><p><strong>Prototype (This Workshop)</strong>: Building a working demo with 3 locations using AWS services to get rapid stakeholder feedback</p></li>
+<li><p><strong>Development</strong>: Will expand to all turbine locations, add wind speed and humidity monitoring, implement production-grade security, and integrate with turbine control systems</p></li>
+<li><p><strong>Production</strong>: Full deployment with comprehensive monitoring, automated scaling, and disaster recovery</p></li>
+<li><p><strong>Continuous Improvement</strong>: Regular evaluation of performance, costs, and new requirements</p></li>
+</ol>
+<p>Using AWS’s serverless and streaming services, we’ll build this initial prototype. By the end of this workshop, you will have:</p>
+<ul class="simple">
+<li><p>Set up a complete data streaming infrastructure using CloudFormation</p></li>
+<li><p>Created an automated data collection system that pulls weather data every minute using Lambda</p></li>
+<li><p>Built a resilient streaming pipeline using Kinesis services</p></li>
+<li><p>Developed a streaming pipeline that:</p></li>
+<li><p>Processes weather readings from three UK cities (expandable to more locations)</p></li>
+<li><p>Automatically partitions data by location and time for efficient querying</p></li>
+<li><p>Tested the pipeline by:</p></li>
+<li><p>Monitoring real-time data flows through CloudWatch</p></li>
+<li><p>Querying historical weather patterns using Athena</p></li>
+<li><p>Creating analytical views for temperature trend analysis</p></li>
 </ul>
 <p>This workshop will provide practical experience with:</p>
 <ul class="simple">
-<li><p>…</p></li>
-<li><p>…</p></li>
-<li><p>…</p></li>
-<li><p>…</p></li>
-<li><p>…</p></li>
+<li><p>Infrastructure-as-code deployment using CloudFormation</p></li>
+<li><p>Real-time data collection using Lambda and EventBridge</p></li>
+<li><p>Stream processing with Kinesis Data Streams and Firehose</p></li>
+<li><p>Data lake organisation and partitioning strategies</p></li>
+<li><p>SQL analytics using Athena and Redshift</p></li>
+<li><p>ETL workflow automation / orchestration using AWS Glue</p></li>
 </ul>
-<p>In this setup, your pipeline will perform … main operations:</p>
+<p>In this prototype, your pipeline will perform two main operations:</p>
 <ol class="arabic simple">
-<li><p><strong>…</strong>: …</p></li>
-<li><p><strong>…</strong>: A …</p></li>
+<li><p><strong>Real-time Processing</strong>: Continuously collect and stream temperature data from multiple locations, helping operators monitor conditions that could impact turbine performance</p></li>
+<li><p><strong>Historical Analytics</strong>: Automatically organise historical weather data in the data lake for analysing temperature patterns and optimising maintenance schedules</p></li>
 </ol>
 <p>By the end of the workshop, you will have built this architecture:</p>
-<p><img alt="Workshop_09_architecture.drawio" src="_images/Workshop_09_architecture.drawio.png" /><br></p>
+<p><img alt="Workshop_09_architecture.drawio" src="_images/Workshop_09_architecture.drawio.png" /></p>
 </section>
 </section>
-</section>
-<section class="tex2jax_ignore mathjax_ignore" id="note">
-<h1>Note<a class="headerlink" href="#note" title="Link to this heading">#</a></h1>
-<blockquote>
-<div><p>Review the Glue Streaming guidance patterns starting here: <a class="reference external" href="https://docs.aws.amazon.com/glue/latest/dg/streaming-tutorial-studio.html">https://docs.aws.amazon.com/glue/latest/dg/streaming-tutorial-studio.html</a></p>
-</div></blockquote>
 <section id="task-1-configuring-the-development-environment">
 <h2>⚙️ Task 1: Configuring the Development Environment<a class="headerlink" href="#task-1-configuring-the-development-environment" title="Link to this heading">#</a></h2>
 <blockquote>
@@ -602,19 +543,19 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <li><p>At the top, click on the far right drop down <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">stack</span></code> and select <code class="docutils literal notranslate"><span class="pre">With</span> <span class="pre">new</span> <span class="pre">resources</span> <span class="pre">(standard)</span></code></p></li>
 <li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">1:</span> <span class="pre">Create</span> <span class="pre">Stack</span></code> copy and paste this URL <code class="docutils literal notranslate"><span class="pre">https://da5corndel.s3.eu-west-2.amazonaws.com/CloudFormation_streaming.yaml</span></code> into the <code class="docutils literal notranslate"><span class="pre">Amazon</span> <span class="pre">S3</span> <span class="pre">URL</span></code> box and click <code class="docutils literal notranslate"><span class="pre">Next</span></code>.
 <img alt="CloudFormation_S3_URL" src="_images/CloudFormation_S3_URL.png" /><br><br></p></li>
-<li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">2:</span> <span class="pre">Specify</span> <span class="pre">stack</span> <span class="pre">details</span></code> notice how may of the parameters are pre-completed for you and don’t need to be changed. The only task here is to complete <code class="docutils literal notranslate"><span class="pre">Provide</span> <span class="pre">a</span> <span class="pre">stack</span> <span class="pre">name</span></code>. As this name is used to create resources a simple name is recommended such as <code class="docutils literal notranslate"><span class="pre">stream</span></code>. Then click <code class="docutils literal notranslate"><span class="pre">Next</span></code>.
+<li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">2:</span> <span class="pre">Specify</span> <span class="pre">stack</span> <span class="pre">details</span></code> notice how may of the parameters are pre-completed for you and don’t need to be changed. The only task here is to complete <code class="docutils literal notranslate"><span class="pre">Provide</span> <span class="pre">a</span> <span class="pre">stack</span> <span class="pre">name</span></code>. As this name is used to dynamically create resource names using the name you give the stack. For this reason, a simple name is recommended of <code class="docutils literal notranslate"><span class="pre">stream</span></code> all in lower case. Then click <code class="docutils literal notranslate"><span class="pre">Next</span></code>.
 <img alt="CloudFormation_step2" src="_images/CloudFormation_step2.png" /><br><br></p></li>
 <li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">3:</span> <span class="pre">Configure</span> <span class="pre">stack</span> <span class="pre">options</span></code> scroll down to the bottom of the page then simply tick the check box next to the statement: <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">acknowledge</span> <span class="pre">that</span> <span class="pre">AWS</span> <span class="pre">CloudFormation</span> <span class="pre">might</span> <span class="pre">create</span> <span class="pre">IAM</span> <span class="pre">resources</span> <span class="pre">with</span> <span class="pre">customised</span> <span class="pre">names.</span></code> then click <code class="docutils literal notranslate"><span class="pre">Next</span></code>.</p></li>
 <li><p>At <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">4:</span> <span class="pre">Configure</span> <span class="pre">stack</span> <span class="pre">options</span></code>, scroll to the bottom of the page and click the <code class="docutils literal notranslate"><span class="pre">Submit</span></code> button. Your stack (we called <code class="docutils literal notranslate"><span class="pre">stream</span></code>) will now deploy and will show <code class="docutils literal notranslate"><span class="pre">ℹ</span> <span class="pre">CREATE_IN_PROGRESS</span></code> while it deploys. After about 3 minutes it should show the message <code class="docutils literal notranslate"><span class="pre">ℹ</span> <span class="pre">CREATE_COMPLETE</span></code>.</p></li>
 </ul>
 <details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">While the template deploys, click here for useful information and troubleshooting tips.</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<span class="sd-summary-text">While the template deploys, click here for useful information and troubleshooting tips we reccomend you read.</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p class="sd-card-text">⌚ Using an AWS CloudFormation template in this workshop saves time by automating resource setup, avoiding manual clicks in the AWS Portal.</p>
-<p class="sd-card-text">CloudFormation templates are common in DevOps for creating consistent environments across development, testing, and production. In this workshop, the template sets up a single-node Redshift cluster (dc2.large) with basic authentication and permissive security settings to simplify access and experimentation.</p>
-<p class="sd-card-text">This setup is for learning purposes and does not include production-grade features like private endpoints or stricter security controls. Learn more about CloudFormation templates here: <a class="reference external" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html</a></p>
+<p class="sd-card-text">⌚ Using an AWS CloudFormation template in this workshop automates the deployment of our entire streaming analytics architecture through infrastructure-as-code (IaC). The template provisions and configures network infrastructure (VPC, subnets, gateways), security components (IAM roles, security groups), and all required services (Lambda, Kinesis, S3, Redshift, Glue) with appropriate permissions and connections between them.</p>
+<p class="sd-card-text">For learning purposes, the template uses simplified security settings: public subnets instead of private ones, basic authentication rather than AWS Secrets Manager, and permissive security group rules that allow broad access. A production environment would need significant hardening, including private subnets with NAT gateways, strict security controls, and high-availability configurations.</p>
+<p class="sd-card-text">Learn more about CloudFormation templates here: <a class="reference external" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html</a></p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -647,15 +588,17 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <blockquote>
 <div><p>In this task, we will systematically explore the core data processing pipeline that has been provisioned for you. You’ll examine how weather data flows through the ingestion layer (Lambda and Kinesis), into the storage layer (S3 data lake), creating the foundation for analytics workloads.</p>
 </div></blockquote>
-<p>✨ 1. PRODUCER (Lambda)<br>
-⬇️ <br>
-🗃️ 2. BROKER (Kinesis Data Stream)<br>
-⬇️<br>
-📩 3. CONSUMER (Kinesis Firehose)<br>
-⬇️<br>
-📂 4. STORAGE (S3)<br>
-⬇️<br>
-📈 5. ANALYTICS / SERVING (Athena &amp; Redshift)<br></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>**✨ 1. PRODUCER:** Lambda function collects weather data via API&lt;br&gt;
+🔻&lt;br&gt;
+**➡️➡️➡️ 2. BROKER:** Kinesis Data Stream buffers real-time data&lt;br&gt;
+🔻&lt;br&gt;
+**📩 3. CONSUMER:** Kinesis Firehose manages delivery&lt;br&gt;
+🔻&lt;br&gt;
+**🪣 4. STORAGE:** S3 data lake with smart partitioning&lt;br&gt;
+🔻&lt;br&gt;
+**📈 5. ANALYTICS/SERVING:** Athena for querying, Redshift for warehousing&lt;br&gt;
+</pre></div>
+</div>
 <section id="producer-explore-the-data-producer-lambda-function">
 <h3>✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):<a class="headerlink" href="#producer-explore-the-data-producer-lambda-function" title="Link to this heading">#</a></h3>
 <ul class="simple">
@@ -1459,8 +1402,30 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </section>
 <section id="wrapping-up-and-reflecting-on-your-project">
 <h2>Wrapping Up and Reflecting on Your Project<a class="headerlink" href="#wrapping-up-and-reflecting-on-your-project" title="Link to this heading">#</a></h2>
-<section id="real-time-vs">
-<h3>Real Time vs…<a class="headerlink" href="#real-time-vs" title="Link to this heading">#</a></h3>
+<section id="streaming-real-time-or-near-real-time-what-s-the-difference">
+<h3>Streaming, real time or near real time? What’s the difference?<a class="headerlink" href="#streaming-real-time-or-near-real-time-what-s-the-difference" title="Link to this heading">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While our focus today is on …</p>
+</div>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">For more detail on …, click here</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">In this workshop, …</p>
+</div>
+</details><div class="admonition-question admonition">
+<p class="admonition-title">Question</p>
+<p>Can you remember the difference between A and B?</p>
+</div>
+<div class="dropdown admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Think about …</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">For the solution, click here</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">The answer is …</p>
+</div>
+</details></div>
 </section>
 <section id="another-topic">
 <h3>Another topic<a class="headerlink" href="#another-topic" title="Link to this heading">#</a></h3>
@@ -1496,7 +1461,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 <section id="going-further">
 <h2>🚀 Going Further<a class="headerlink" href="#going-further" title="Link to this heading">#</a></h2>
 <section id="going-further-1-orchestrated-pipeline-to-write-to-redshift">
-<h3>🎼 Going Further 1: Orchestrated pipeline to write to Redshift<a class="headerlink" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift" title="Link to this heading">#</a></h3>
+<h3><strong>🎼 Going Further 1:</strong> Orchestrated pipeline to write to Redshift<a class="headerlink" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift" title="Link to this heading">#</a></h3>
 <blockquote>
 <div><p>So far we have crawled the data being streamed into S3 on-demand. A data analyst has asked for a table in Redshift they can explore and connect to PowerBI that is regularly updated with temperature readings. In this exercise we will create the target table in Redshift, then create a Glue visual ETL job that Extracts, Transforms and Loads the table from the Glue database to the Redshfit table. We query Redshift and visualise temperature over time. Finally, we orchestrate the full process by using AWS Glue <code class="docutils literal notranslate"><span class="pre">Workflows</span> <span class="pre">(orchestration)</span></code> to regularly run our S3 crawler (created in the main exercise), followed by the visual ETL.</p>
 </div></blockquote>
@@ -1713,7 +1678,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </section>
 </section>
 <section id="going-further-2-data-architecture-diagram">
-<h3>📝 Going Further 2: Data architecture diagram<a class="headerlink" href="#going-further-2-data-architecture-diagram" title="Link to this heading">#</a></h3>
+<h3><strong>📝 Going Further 2:</strong> Data architecture diagram<a class="headerlink" href="#going-further-2-data-architecture-diagram" title="Link to this heading">#</a></h3>
 <blockquote>
 <div><p>So far, we’ve used many AWS services in a deliberate sequence. If you had to explain this architecture to a colleague, they might lose track when you describe all the different AWS services and how they interact. This is where architecture diagrams become essential—not just a nice-to-have. They facilitate clear and transparent discussions with various colleagues, whether to address the security of what you’re building, collaborate, or consider changes to the architecture. These changes might involve using different services, transitioning to another cloud platform like Azure or GCP, or adopting a new streaming framework like Kafka.</p>
 </div></blockquote>
@@ -1756,7 +1721,7 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </section>
 </section>
 <section id="going-further-3-direct-streaming">
-<h3>➡️ Going Further 3: Direct Streaming<a class="headerlink" href="#going-further-3-direct-streaming" title="Link to this heading">#</a></h3>
+<h3><strong>➡️ Going Further 3:</strong> Direct Streaming<a class="headerlink" href="#going-further-3-direct-streaming" title="Link to this heading">#</a></h3>
 <blockquote>
 <div><p>In this final going further let’s explore alternative patterns where we are more direct and see that we can potentially, using AWS Glue, stream directly from our Amazon Kinesis Data Stream into a Redshift table, or stream directly from Redshift itself and not use Glue at all. In this fast exercise we simply preview the data directly streamed in Glue, but then spend most of our time reflecting on the different possible patterns and why you may prefer one over the other depending on business needs.</p>
 </div></blockquote>
@@ -1854,19 +1819,13 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Data Engineer Workshop 9: Advanced Stream Processing Pipelines</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reminder-of-workshop-5-data-integration-with-cloud-services">Reminder of Workshop 5 - Data Integration with Cloud Services</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-real-time-or-near-real-time-what-s-the-difference">Streaming, real time or near real time? What’s the difference?</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#applying-each-workshop-to-your-project">Applying Each Workshop to Your Project</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-forward-with-your-project">Moving Forward With Your Project</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alignment-with-data-engineer-pass-descriptors">Alignment with Data Engineer Pass Descriptors</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#today-s-workshop-scenario-and-objectives">Today’s Workshop Scenario and Objectives</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#building-on-previous-workshops-from-on-demand-to-batch-and-streaming">🧱 Building on Previous Workshops: From On-Demand to Batch and Streaming</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#should-we-really-be-streaming-data">⁉️ Should we really be streaming data?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alignment-with-data-engineer-pass-descriptors">🤝 Alignment with Data Engineer Pass Descriptors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#today-s-workshop-scenario-and-objectives">🌬️ Today’s Workshop Scenario and Objectives</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#note">Note</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-1-configuring-the-development-environment">⚙️ Task 1: Configuring the Development Environment</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-2-explore-and-understand-your-streaming-application-so-far">🗺️ Task 2: Explore and understand your streaming application so far</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#producer-explore-the-data-producer-lambda-function">✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):</a></li>
@@ -1889,34 +1848,31 @@ We focus on batch processing and this workshop demonstrates an optimised ingesti
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapping-up-and-reflecting-on-your-project">Wrapping Up and Reflecting on Your Project</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#real-time-vs">Real Time vs…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-real-time-or-near-real-time-what-s-the-difference">Streaming, real time or near real time? What’s the difference?</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#another-topic">Another topic</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#this-afternoon-reflecting-on-your-project">This afternoon - reflecting on your project</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further">🚀 Going Further</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift">🎼 Going Further 1: Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-1-orchestrated-pipeline-to-write-to-redshift"><strong>🎼 Going Further 1:</strong> Orchestrated pipeline to write to Redshift</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-target-table-in-redshift">🎯 Create target table in Redshift</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#create-aws-glue-visual-etl">➡️ Create AWS Glue visual ETL</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-and-visualise-redshift-target-table">📈 Inspect and visualise Redshift target table</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#orchestrate-the-entire-process">🎼 Orchestrate the entire process!</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram">📝 Going Further 2: Data architecture diagram</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-2-data-architecture-diagram"><strong>📝 Going Further 2:</strong> Data architecture diagram</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aws-architecture-icons-and-guidance">AWS Architecture Icons and Guidance</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#drawing-and-diagramming-tools">Drawing and diagramming tools</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-direct-streaming">➡️ Going Further 3: Direct Streaming</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#going-further-3-direct-streaming"><strong>➡️ Going Further 3:</strong> Direct Streaming</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stream-directly-in-glue">🚰 Stream directly in glue</a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-
   </nav></div>
 
 </div></div>
