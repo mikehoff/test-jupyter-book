@@ -18,15 +18,15 @@ kernelspec:
 
 Our workshop journey so far through different data processing patterns has prepared us for today's exploration of streaming architectures.
 
-- In Workshop 5, we learned how to make data rapidly available for analysts using AWS cloud services. We transformed CSV files into optimised Parquet format, used Glue to automatically discover and catalogue data structures, and enabled quick analysis through Athena's serverless querying. This taught us how we might handle data at rest efficiently and make it immediately queryable.
+- In Workshop 5, we learned how to make data rapidly available for analysts using AWS cloud services. We transformed CSV files into optimised Parquet format, used Glue to automatically discover and catalogue data structures, and enabled quick analysis through Athena's serverless querying.
 
 ![workshop5-final-arch_01](./images/workshop5-final-arch_01.png)<br>
 
-- Workshop 7 then introduced the challenges of keeping analytical data current as source systems change. Using the Sakila DVD rental database, we built automated pipelines in Azure Synapse to detect changes in our OLTP data source and update our dimensional model (the customer dimension). This showed us how to maintain data warehouse consistency through scheduled batch updates.
+- Workshop 7 then introduced the challenges of keeping analytical data current as source systems change. Using the Sakila DVD rental database, we built automated pipelines in Azure Synapse to detect changes in our OLTP data source and update our dimensional model (the customer dimension).
 
 ![workshop_07_architecture](./images/workshop_07_architecture.png)<br>
 
-Today, we can combine these practical insights as we move from periodic batch processing to continuous streaming. So instead of waiting to gather changes and process them on a schedule (e.g. daily, weekly, monthly), we'll build a pipeline that can processes weather data from an API in real-time as it arrives. This will combine the efficient data storage patterns we learned in Workshop 5 with the change handling techniques from Workshop 7, but applies them to data in motion! 🏃‍♂️‍➡️
+Today, we can combine these practical insights as we move from periodic batch processing to continuous streaming. So instead of waiting to gather changes and process them on a schedule (e.g. daily, weekly, monthly), we'll build a pipeline that can processes weather data from an API in real-time as it arrives.
 
 Our new streaming architecture will:
 - Ingest data continuously through Kinesis streams (versus periodic batch loads in Workshop 5)
@@ -36,7 +36,9 @@ Our new streaming architecture will:
 
 ![Workshop_09_architecture.drawio](./images/Workshop_09_architecture.drawio.png)<br>
 
-This approach particularly suits use cases where data freshness is a key businesss requirement, like monitoring weather conditions, tracking financial transactions, or analysing Internet of Things (IoT) sensor data (e.g... ). As you work through today's exercises, consider how streaming might complement the batch processing patterns you've already learned, and when each approach might be most appropriate for your own orgnasation or project.
+This approach particularly suits use cases where data freshness is a key businesss requirement, like monitoring weather conditions, tracking financial transactions, or analysing Internet of Things (IoT) sensor data (e.g. monitoring vibration sensors on factory equipment that need to detect and report dangerous oscillations within seconds to prevent catastrophic machine failures). 
+
+As you work through today's exercises, consider how streaming might complement the batch processing patterns you've already learned, and when each approach might be most appropriate for your own organisation or even your project.
 
 ### ⁉️ Should we really be streaming data?
 
@@ -44,16 +46,16 @@ While streaming architectures can help answer *"what's happening right now?"* ve
 
 1. **Business Value**: Does real-time insight enable better decision-making or customer experience that justifies the additional complexity?
 
-2. **True Requirements**: When stakeholders request *"real-time"* data, would near real-time or daily batch updates suffice?
+2. **True Requirements**: If your stakeholders request *"real-time"* data, would near real-time or daily batch updates suffice?
 
-3. **Cost-Benefit Analysis**:  Streaming architectures can introduce complexity we will encounter directly in the workshop exercises. While these examples may not be immediately clear now, they'll become concrete as you build and test each component of the weather data pipeline:
+3. **Cost-Benefit Analysis**:  Streaming architectures can introduce complexity we will encounter directly in the workshop exercises. While the examples of complexity below may not be immediately clear now, some will become concrete as you build and test each component of our weather streaming data pipeline:
     - Error handling and recovery (e.g. handling failed API calls to the weather service, managing retry logic for Kinesis stream failures, dealing with Lambda function timeouts)
     - Data consistency and ordering (e.g. ensuring weather readings from different cities arrive in the correct chronological order, handling duplicate temperature measurements from multiple collections of the same reading)
     - Infrastructure management (e.g. monitoring Kinesis stream throughput capacity, managing Lambda concurrency limits, scaling Firehose delivery performance)
     - Monitoring and alerting (e.g. tracking end-to-end latency from weather measurement time to Redshift availability, detecting gaps in city data collection, alerting on abnormal temperature variations)
 
 4. **Alternative Approaches**: Could simpler solutions work?
-  - On-demand updates (Workshops 5)
+  - On-demand updates (Workshop 5)
   - Scheduled batch processing (Workshop 7)
   - More frequent but still batch-based loads
 
@@ -74,26 +76,26 @@ This workshop aligns with several IFATE Data Engineer Pass Descriptors: https://
   We focus on streaming and this workshop demonstrate different kinds of streaming patterns and consider their optimisation and business uses.
 
 - **Describes the types and uses of data engineering tools in their own organisation and how they apply them. (K20)**  
- The workshop covers multiple AWS data engineering tools that represent common architectural patterns you'll find across different cloud platforms and on-premises solutions. By understanding these core patterns, you'll be better equipped to work with equivalent tools in your own organisation, whether they use AWS, Azure, Google Cloud, or open-source alternatives like Kafka:
+    This workshop covers multiple AWS data engineering tools that represent common architectural patterns you'll find across different cloud platforms and on-premises solutions. By understanding these core patterns, you can be better equipped to understand and describe equivalent tools in your own organisation, whether they use AWS, Azure, Google Cloud, or open-source alternatives like Kafka. Here are the AWS tools we will use and their equivalents from other providers.
  
-    - **AWS Lambda: Functions as a Service** - A serverless compute service that lets you run code without having to provision a server. It also automatically scales your applications in response to incoming requests. If your organisation uses Azure Functions, or Google Cloud Functions you'll find the concepts very similar.
+    - **AWS Lambda: Functions as a Service:** A serverless compute service that lets us run code without having to provision a server. If your organisation uses Azure Functions, or Google Cloud Functions you'll find the concepts very similar.
 
-    - **Amazon EventBridge: Event Orchestration Service** - A serverless "event bus" that makes it easy to connect applications together using data from your own applications. While your organisation might use Azure Event Grid, Google Cloud Pub/Sub, or Apache Kafka for event orchestration, the fundamental patterns of event-driven architecture remain the same.
+    - **Amazon EventBridge: Event Orchestration Service:** A serverless "event bus" that makes it easy to connect applications together using data from your own applications. Think of it like a smart postal sorting office for your data. Just as a postal service routes packages to their correct destinations based on addresses, EventBridge routes data "packages" (events) to the right applications based on rules you define. For example, in our workshop, it's what makes sure our Lambda function gets "woken up" every minute to collect new weather data. While your organisation might use Azure Event Grid, Google Cloud Pub/Sub, or Apache Kafka for event orchestration, the fundamental patterns of event-driven architecture remain the same.
     
-    - **Amazon Kinesis Data Stream: Streaming Broker** - A massively scalable and durable real-time data streaming service. Think of it as a continuously flowing river of data that can handle hundreds of terabytes of data per hour from multiple sources! The patterns you learn here apply equally to Azure Event Hubs, Google Cloud Pub/Sub streams, or Apache Kafka topics.
+    - **Amazon Kinesis Data Stream: Streaming Broker:** A massively scalable and durable real-time data streaming service. Think of it as a continuously flowing river of data that can handle hundreds of terabytes of data per hour from multiple sources! The patterns you learn here apply equally to Azure Event Hubs, Google Cloud Pub/Sub streams, or Apache Kafka topics.
     
-    - **Amazon Kinesis Firehose: Streaming Consumer** - A fully managed service that reliably loads streaming data into data lakes, data stores, and analytics services. These concepts map directly to services like Azure Stream Analytics, Google Cloud Dataflow, or Kafka Connect in your organisation.
+    - **Amazon Kinesis Firehose: Streaming Consumer:** A fully managed service that reliably loads streaming data into data lakes, data stores, and analytics services. These concepts map directly to services like Azure Stream Analytics, Google Cloud Dataflow, or Kafka Connect in your organisation.
     
-    - **AWS Glue: Serverless ETL Service** - A fully managed extract, transform, and load (ETL) service that makes it easy to prepare and load your data for analytics. Whether your organisation uses Azure Data Factory, Google Cloud Dataflow, or Apache NiFi, the ETL principles remain consistent.
+    - **AWS Glue: Serverless ETL Service** A fully managed extract, transform, and load (ETL) service that makes it easy to prepare and load your data for analytics. Whether your organisation uses Azure Data Factory, Google Cloud Dataflow, or Apache NiFi, the ETL principles remain consistent.
     
-    - **Amazon Athena: Serverless Query Service** - An interactive query service that makes it easy to analyse data directly in Amazon S3 using standard SQL. Your organization might use Azure Synapse Analytics serverless SQL pools (we used these in workshop 7) or Google BigQuery, but the concept of serverless SQL querying is universal.
+    - **Amazon Athena: Serverless Query Service:** An interactive query service that makes it easy to analyse data directly in Amazon S3 using standard SQL. Your organization might use Azure Synapse Analytics serverless SQL pools (we used these in workshop 7) or Google BigQuery, but the concept of serverless SQL querying is universal.
     
-    - **Amazon Redshift: Cloud Data Warehouse** - A fully managed, OLAP data warehouse service. While your organisation might use Azure Synapse Analytics dedicated SQL pools (we used these in workshop 7), Google BigQuery, or Snowflake, the fundamental concepts of cloud data warehousing remain the same.
+    - **Amazon Redshift: Cloud Data Warehouse:** A fully managed, OLAP data warehouse service. While your organisation might use Azure Synapse Analytics dedicated SQL pools (we used these in workshop 7), Google BigQuery, or Snowflake, the fundamental concepts of cloud data warehousing remain the same.
     
-    These services work together to create a comprehensive data engineering pipeline: EventBridge can trigger Lambda functions, which can process data and send it to Kinesis Streams. Firehose can then load this data into S3, where it can be cataloged by Glue, queried by Athena, and eventually loaded into Redshift for complex analytics! We will do all this together!
+    These services work together to create a comprehensive data engineering pipeline: EventBridge triggerers the Lambda function, which can process data and send it to Kinesis Streams. Firehose can then load this data into S3, where it can be cataloged by Glue, queried by Athena, and eventually loaded into Redshift for complex analytics! We will do all this together!
 
 - **Explains the deployment approaches processes for new data pipelines and automated processes. (K8)**  
-   - We walk through the complete deployment of a real-time weather data pipeline in a learning environment, using an infrastructure-as-code approach with CloudFormation. The pipeline flows through these key layers:<br><br>
+   - In this workshop we will walk through the complete deployment of a real-time weather data pipeline in a learning environment, using an infrastructure-as-code approach with CloudFormation. The pipeline flows through these key layers:<br><br>
 
     **✨ 1. PRODUCER:** Lambda function collects weather data via API<br>
     🔻<br>
@@ -105,10 +107,11 @@ This workshop aligns with several IFATE Data Engineer Pass Descriptors: https://
     🔻<br>
     **📈 5. ANALYTICS/SERVING:** Athena for querying, Redshift for warehousing<br>
     
-    - In Going Further, there is an exercies in automating and orchestrating this entire flow through Glue Workflows, demonstrating how to coordinate data ingestion, transformation, and loading processes in a systematic way. Note we will consider orchestration practically and in more detail in Workhsop 10.
+    - In Going Further, there is an exercise to automate and orchestrate this entire flow through Glue Workflows, demonstrating how to coordinate data ingestion, transformation, and loading processes in a systematic way. Note we will consider orchestration practically and in more detail in Workshop 10.
 
-- **Demonstrates how they used security, scalability and governance when automating data pipelines using programming languages and data integration platforms with graphical user interfaces. (K13, S4)"** 
-    - While this workshop uses purposefully permissive security settings (public subnets, broad IAM roles, simplified authentication) to facilitate learning, we will emphasise how these would need to be hardened for production use, such as implementing private subnets with NAT Gateways, restrictive security groups, and AWS Secrets Manager for credentials.
+- **Demonstrates how they used security, scalability and governance when automating data pipelines using programming languages and data integration platforms with graphical user interfaces. (K13, S4)** 
+    - While this workshop uses purposefully permissive security settings (public subnets, broad IAM roles, simplified authentication) to facilitate learning, we will later emphasise how these would need to be hardened for production use, such as implementing private subnets with NAT Gateways, restrictive security groups, and AWS Secrets Manager for credentials. 
+    - Don't worry if some of these terms sound unfamiliar or complex, they're just specific tools that help with security and are typically handled by cloud security engineers and infrastructure teams working alongside data engineers to ensure both security and performance. The main point being that all these technical controls serve one clear purpose: to ensure your data only flows exactly where it should, is only accessed by exactly who should access it, and remains protected at every step of its journey through your pipeline.
 
 ````
 
@@ -126,18 +129,16 @@ Real-time weather monitoring is essential for many industries. Consider these bu
 
 For our workshop, we'll focus on wind energy, where weather data directly impacts operations and revenue. As noted in "The Impact of Weather on Wind Farms" (2024): https://www.infoplaza.com/en/blog/the-impact-of-weather-on-wind-farms
 
-
 > *"The power output of a turbine is related to density, which is a function of altitude, pressure, and also temperature. Dense air (which comes with lower temperatures) exerts more force on the rotors, resulting in a higher power output, even at relatively lower wind speeds compared to warmer and less dense air."*
-
 ![Turbines](./images/turbine.png)
 
 A wind farm operator has approached you to prototype a real-time temperature monitoring system. While their production system will need to monitor hundreds of turbine locations and track multiple weather parameters (temperature, wind speed, humidity), they want to start with a proof-of-concept using just temperature data from three cities to validate the approach. This temperature monitoring is needed as *"extreme heat can cause overheating of the turbine's electrical and mechanical components as well as lubrication systems, potentially leading to shutdowns and increased maintenance costs."*
 
 This represents a typical project progression that you learned about in module `9.1	From Prototype to Production: Implementing Data Solutions`.
 
-1. **Scoping (Current)**: We've identified the core requirements - tracking temperature variations that could impact turbine performance and maintenance scheduling
-2. **Prototype (This Workshop)**: Building a working demo with 3 locations using AWS services to get rapid stakeholder feedback
-3. **Development**: Will expand to all turbine locations, add wind speed and humidity monitoring, implement production-grade security, and integrate with turbine control systems
+1. **Scoping (Current)**: We've identified the core requirements: tracking temperature variations that could impact turbine performance and maintenance scheduling.
+2. **Prototype (This Workshop)**: Building a working demo with 3 locations using AWS services to get rapid stakeholder feedback.
+3. **Development**: Will expand to all turbine locations using exact Lat and Lon co-ordinates, add wind speed and humidity monitoring, implement production-grade security, and integrate with turbine control systems.
 4. **Production**: Full deployment with comprehensive monitoring, automated scaling, and disaster recovery
 5. **Continuous Improvement**: Regular evaluation of performance, costs, and new requirements
 
@@ -147,24 +148,24 @@ Using AWS's serverless and streaming services, we'll build this initial prototyp
 - Created an automated data collection system that pulls weather data every minute using Lambda
 - Built a resilient streaming pipeline using Kinesis services
 - Developed a streaming pipeline that:
- - Processes weather readings from three UK cities (expandable to more locations)
- - Automatically partitions data by location and time for efficient querying
+    - Processes weather readings from three UK cities (expandable to more locations)
+    - Automatically partitions data by location and time for efficient querying
 - Tested the pipeline by:
- - Monitoring real-time data flows through CloudWatch
- - Querying historical weather patterns using Athena
- - Creating analytical views for temperature trend analysis
+    - Monitoring real-time data flows through CloudWatch
+    - Querying historical weather patterns using Athena
+    - Creating analytical views for temperature trend analysis
 
 This workshop will provide practical experience with:
-- Infrastructure-as-code deployment using CloudFormation
-- Real-time data collection using Lambda and EventBridge
-- Stream processing with Kinesis Data Streams and Firehose
-- Data lake organisation and partitioning strategies 
-- SQL analytics using Athena and Redshift
-- ETL workflow automation / orchestration using AWS Glue
+    - Infrastructure-as-code deployment using CloudFormation
+    - Real-time data collection using Lambda and EventBridge
+    - Stream processing with Kinesis Data Streams and Firehose
+    - Data lake organisation and partitioning strategies 
+    - SQL analytics using Athena and Redshift
+    - ETL workflow automation / orchestration using AWS Glue
 
 In this prototype, your pipeline will perform two main operations:
-1. **Real-time Processing**: Continuously collect and stream temperature data from multiple locations, helping operators monitor conditions that could impact turbine performance
-2. **Historical Analytics**: Automatically organise historical weather data in the data lake for analysing temperature patterns and optimising maintenance schedules
+1. **Real-time Processing**: Continuously collect and stream temperature data from multiple locations, helping operators monitor conditions that could impact turbine performance.
+2. **Historical Analytics**: Automatically organise historical weather data in the data lake for analysing temperature patterns and optimising maintenance schedules.
 
 By the end of the workshop, you will have built this architecture:
 
@@ -172,7 +173,7 @@ By the end of the workshop, you will have built this architecture:
 
 ## ⚙️ Task 1: Configuring the Development Environment
 
-> In Task 1, you will set up a development environment where weather data streaming and analytics can take place. This involves deploying a comprehensive AWS infrastructure using CloudFormation, which will create multiple interconnected services including a data ingestion pipeline (Lambda and Kinesis), storage layer (S3 data lake), and foundational analytics services (Redshift cluster and Glue database).
+> In Task 1 we set up the development environment for our prototype where weather data streaming and analytics can take place. This involves deploying a comprehensive AWS infrastructure using CloudFormation, which will create multiple interconnected services including a data ingestion pipeline (Lambda and Kinesis), storage layer (S3 data lake), and foundational analytics services (Redshift cluster and Glue database).
 
 1. **Start an ACG AWS sandbox:** 
   - Use this link and start `AWS Sandbox - Default` and log in: https://learn.acloud.guru/cloud-playground/cloud-sandboxes <br>
@@ -183,19 +184,12 @@ By the end of the workshop, you will have built this architecture:
   - At the top, click on the far right drop down `Create stack` and select `With new resources (standard)`
   - At `Step 1: Create Stack` copy and paste this URL `https://da5corndel.s3.eu-west-2.amazonaws.com/CloudFormation_streaming.yaml` into the `Amazon S3 URL` box and click `Next`.
   ![CloudFormation_S3_URL](./images/CloudFormation_S3_URL.png)<br><br>
-  - At `Step 2: Specify stack details` notice how may of the parameters are pre-completed for you and don't need to be changed. The only task here is to complete `Provide a stack name`. As this name is used to dynamically create resource names using the name you give the stack. For this reason, a simple name is recommended of `stream` all in lower case. Then click `Next`.
+  - At `Step 2: Specify stack details`, many parameters are already complete so do not need to be changed. Your only task is to complete the `Provide a stack name` field. This name will dynamically generate resource names based on the stack name you provide. To simplify, use `stream` (all lowercase) as the stack name. Then, click `Next`.
   ![CloudFormation_step2](./images/CloudFormation_step2.png)<br><br>
   - At `Step 3: Configure stack options` scroll down to the bottom of the page then simply tick the check box next to the statement: `I acknowledge that AWS CloudFormation might create IAM resources with customised names.` then click `Next`.
   - At `Step 4: Configure stack options`, scroll to the bottom of the page and click the `Submit` button. Your stack (we called `stream`) will now deploy and will show `ℹ CREATE_IN_PROGRESS` while it deploys. After about 3 minutes it should show the message `ℹ CREATE_COMPLETE`.
 
-````{dropdown} While the template deploys, click here for useful information and troubleshooting tips we reccomend you read.
-```{note}
-⌚ Using an AWS CloudFormation template in this workshop automates the deployment of our entire streaming analytics architecture through infrastructure-as-code (IaC). The template provisions and configures network infrastructure (VPC, subnets, gateways), security components (IAM roles, security groups), and all required services (Lambda, Kinesis, S3, Redshift, Glue) with appropriate permissions and connections between them.
-
-For learning purposes, the template uses simplified security settings: public subnets instead of private ones, basic authentication rather than AWS Secrets Manager, and permissive security group rules that allow broad access. A production environment would need significant hardening, including private subnets with NAT gateways, strict security controls, and high-availability configurations.
-
-Learn more about CloudFormation templates here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
-```
+````{dropdown} While the template is deploying, click here to access helpful information and troubleshooting tips we recommend reading.
 
 ```{Note}
 ⌛ Your ACG Azure sandbox will automatically shut down and its data will be deleted after four hours. You will receive a notification one hour before the sandbox expires, allowing you to extend it for an additional four hours. Please plan your work accordingly to avoid disruptions.
@@ -204,7 +198,7 @@ Learn more about CloudFormation templates here: https://docs.aws.amazon.com/AWSC
 ```{Note}
 🔃 If you encounter deployment issues or want to start fresh, we recommend deleting the entire sandbox from the ACG playground rather than individual resources or the CloudFormation stack. This is faster and ensures a clean slate for redeployment.
 
-The CloudFormation stack includes retention settings for resources like S3 buckets to avoid accidental data loss, and deletion can take 15–20 minutes due to dependencies between components (e.g., Lambda, Kinesis, Redshift). If you must delete the stack, empty S3 buckets manually first, as their deletion protection will block the process.
+The CloudFormation stack includes retention settings for resources like S3 buckets to avoid accidental data loss, and deletion can take 15–20 minutes due to dependencies between components (e.g. Lambda, Kinesis, Redshift). If you must delete the stack, empty S3 buckets manually first, as their deletion protection will block the process.
 ```
 
 ```{Note}
@@ -213,6 +207,13 @@ The CloudFormation stack includes retention settings for resources like S3 bucke
 AWS Glue jobs, being Spark-based, provision distributed computing environments even for small tasks, which can quickly hit ACG's limits designed to prevent runaway costs. This restriction is a helpful reminder of resource management in data processing.
 
 If your sandbox is suspended, don’t worry, this is part of learning to use powerful tools like AWS Glue. Simply start a new sandbox and redeploy the CloudFormation template, which will be ready in 3–4 minutes. Learn more about Glue DPUs and optimisation here: https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-capacity.html
+```
+```{note}
+⌚ Using an AWS CloudFormation template in this workshop automates the deployment of our entire streaming analytics architecture through infrastructure-as-code (IaC). The template provisions and configures network infrastructure (VPC, subnets, gateways), security components (IAM roles, security groups), and all required services (Lambda, Kinesis, S3, Redshift, Glue) with appropriate permissions and connections between them.
+
+For learning purposes, the template uses simplified security settings: public subnets instead of private ones, basic authentication rather than AWS Secrets Manager, and permissive security group rules that allow broad access. A production environment would need significant hardening, including private subnets with NAT gateways, strict security controls, and high-availability configurations.
+
+Learn more about CloudFormation templates here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 ```
 ````
 
@@ -225,17 +226,17 @@ If your sandbox is suspended, don’t worry, this is part of learning to use pow
    
 ## 🗺️ Task 2: Explore and understand your streaming application so far
 
-> In this task, we will systematically explore the core data processing pipeline that has been provisioned for you. You'll examine how weather data flows through the ingestion layer (Lambda and Kinesis), into the storage layer (S3 data lake), creating the foundation for analytics workloads.
+> In this task, we will systematically explore the core data processing pipeline that has been provisioned for you. You'll examine how weather data flows through these different layers:
 
-    **✨ 1. PRODUCER:** Lambda function collects weather data via API<br>
-    🔻<br>
-    **➡️➡️➡️ 2. BROKER:** Kinesis Data Stream buffers real-time data<br>
-    🔻<br>
-    **📩 3. CONSUMER:** Kinesis Firehose manages delivery<br>
-    🔻<br>
-    **🪣 4. STORAGE:** S3 data lake with smart partitioning<br>
-    🔻<br>
-    **📈 5. ANALYTICS/SERVING:** Athena for querying, Redshift for warehousing<br>
+**✨ 1. PRODUCER:** Lambda function collects weather data via API<br>
+🔻<br>
+**➡️➡️➡️ 2. BROKER:** Kinesis Data Stream buffers real-time data<br>
+🔻<br>
+**📩 3. CONSUMER:** Kinesis Firehose manages delivery<br>
+🔻<br>
+**🪣 4. STORAGE:** S3 data lake with smart partitioning<br>
+🔻<br>
+**📈 5. ANALYTICS/SERVING:** Athena for querying, Redshift for warehousing<br>
 
 ### ✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):
 
@@ -244,23 +245,38 @@ If your sandbox is suspended, don’t worry, this is part of learning to use pow
 - This Lambda function serves as our data producer - think of it as an automated weather station that collects and reports data every minute.
 ![Lambda](./images/Lambda.png)<br>
 
-````{dropdown} 🌦️ Before we explore the code, let's understand our data source by clicking here to expand.
 ```{Note}
-We're using the Open-Meteo Weather API (https://open-meteo.com/), which provides free weather data for educational and development purposes. We chose this API deliberately for our workshop because its both free and doesn't require any authentication or API keys, eliminating the complexity of credential management. This means the application starts calling the API immediately without you needing to register and manage access tokens. 
+We're using the Open-Meteo Weather API (https://open-meteo.com/) to simulate collecting temperature data from our wind turbine locations. In a real wind farm, each turbine would have its own temperature sensors feeding data directly into our pipeline, but for learning purposes, we're using this public weather API as a reliable source of real-time temperature data for our three "turbine sites" (London, Manchester, and Edinburgh).
 
-In a production environment, you'd typically need to handle API authentication, rate limiting, and usage tracking, but by removing these complexities here, we can focus purely on building our data pipeline and analytics capabilities. We will explore these important production considerations in Workshop 13: 'Integrating  API Data Sources'.
-      
-You can explore the API documentation at https://open-meteo.com/en/docs to understand all the available weather parameters. For our workshop, we're using just a subset of the available data (current temperature) to keep things focused, but in a real-world application, you might want to collect additional parameters like humidity, wind speed, or precipitation.
+We chose this API deliberately for our workshop because it provides free weather data without requiring authentication or API keys. This means our application starts collecting temperature readings immediately, letting us focus on learning how to process and analyze streaming data. In a production wind farm, you'd need to handle sensor authentication, data validation, and careful rate limiting to ensure you don't miss any critical temperature readings that could indicate potential turbine issues.
+
+While the API offers many weather parameters (which you can explore at https://open-meteo.com/en/docs), we're focusing solely on temperature data for this prototype. This mirrors good development practice: start simple with one essential metric (temperature, which directly affects turbine performance and maintenance needs), then expand to include other parameters like wind speed and humidity once the basic pipeline is working well. We'll explore these considerations around scaling up data collection, along with proper API security and management, in Workshop 13: 'Integrating API Data Sources'.
 ```
-````
 
-   - Let's examine how the Lambda function collects and streams weather data bey reviewing its Python code shown below.
-   - The Lambda handler function manages the flow of data flow by pulling from the weather API to a Kinesis data stream. It uses `boto3` to connect to Kinesis, with the stream name configured through environment variables from our CloudFormation template.
-   - The process follows a logical flow of:
-        - The code stores coordinates for three UK cities (London, Manchester, Edinburgh) in a list called `locations`.
-        - A helper function called ` def fetch_weather_data()` handles the API interaction, transforming raw weather data into a structured format with city name, temperature, and timestamps
-        - The main processing loop (that begins with `for location in locations:`) collects data for each city from the API and streams it to a Kinesis data stream, using the city name as the partition key for organised downstream processing we will look at shortly.
-        - Logging tracks successes and failures and can be seen below as the `response` object finally retunred by the overall Lambda handler function. 
+- Let's examine how our Lambda function works to collect and stream weather data. The function code shown below in full serves as our "weather station," regularly checking temperatures at our wind farm locations.
+
+- The function uses Python and relies on two key tools:
+    - It uses the Open-Meteo API to collect weather data
+    - It uses `boto3` (which is AWS's Python software development kit - think of it as Python's way of talking to AWS services, like a translator that lets Python and AWS understand each other) to send that data into our Kinesis stream
+
+- Here's how the function flows, step by step:
+
+1. First, it keeps a list of our "wind farm locations" - the coordinates for London, Manchester, and Edinburgh stored in a list called `locations`. In a real wind farm, these would be your actual turbine coordinates.
+
+2. When it runs, a helper function called `fetch_weather_data()` does the important job of:
+   - Calling the weather API for each location
+   - Converting the raw weather data into a clean, structured format that includes:
+     - The city name
+     - The current temperature
+     - Timestamps to track when the data was measured and collected
+
+3. The main processing loop (starting with `for location in locations:`) is like a continuous collection cycle:
+   - It visits each city in our locations list
+   - Collects its current temperature data
+   - Sends that data into our Kinesis stream, using the city name as a "partition key" (think of this like putting each city's data in its own labeled channel)
+
+4. Throughout this process, the function keeps detailed logs of what it's doing: whether it successfully collected and sent data, or if it ran into any problems. These logs help us monitor our data collection system's health.
+
 
 ````{dropdown} 🧑‍💻 Clicking here to view the Python Code in the Lambda function
 ```{code-block} python
@@ -384,26 +400,38 @@ def lambda_handler(event, context):
 🔎 Keep an eye on the CloudWatch logs as you proceed through the workshop. They provide valuable insights into the data being collected and can help you troubleshoot any issues that arise.
 ```
 
-### 🗃️ 2 BROKER: View data in the Data Stream (Kinesis):
+```{note}
+While this workshop uses a Lambda function to pull weather data, many real-world streaming applications instead have external systems pushing data through an API Gateway. Our Lambda approach is works well for learning as it provides reliable test data and lets us focus on stream processing concepts. However, production environments often need the additional security, access control, and data validation that API Gateway provides, especially when ingesting data from multiple external sources.
 
-  - We saw that the lambda function pulled weather data for three cities from the weather API and streamed those to a Kinesis data stream with the following code: `kinesis_client.put_record(StreamName=stream_name, Data=json.dumps(weather_data), PartitionKey=weather_data["city"])` Let's now explore that resource to understand how this broker works.
+For example, in a real wind farm deployment, each turbine would likely push its sensor data to an API Gateway endpoint rather than having Lambda pull the readings. This provides better authentication, rate limiting, and the ability to validate data before it enters the stream. We'll consider these architectural patterns more in Workshop 13: 'Integrating API Data Sources'.
+```
+
+![aws-streaming-data-using-api-gateway-architecture](./images/aws-streaming-data-using-api-gateway-architecture.png)<br>
+
+> *Image from AWS Solutions Library, Option 1: https://aws.amazon.com/solutions/implementations/streaming-data-solution-for-amazon-kinesis/*
+
+### ➡️➡️➡️ 2 BROKER: View data in the Data Stream (Kinesis):
+
+- We saw that the lambda function pulled weather data for three cities from the weather API and streamed those to a Kinesis data stream with the following code: `kinesis_client.put_record(StreamName=stream_name, Data=json.dumps(weather_data), PartitionKey=weather_data["city"])` Let's now explore that resource to understand how this broker works.
     
-  - From your CloudFormation `Outputs` tab, locate `KinesisStreamURL` and open in a new tab.
+- From your CloudFormation `Outputs` tab, locate `KinesisStreamURL` and open in a new tab.
     
-  - This Kinesis stream acts as our real-time data buffer, receiving weather data from the Lambda function and temporarily storing it for downstream consumers like Kinesis Firehose. Think of it as a moving window of data that maintains records for 24 hours.
+- This Kinesis stream acts as our real-time data broker/buffer, receiving weather data from the Lambda function and temporarily storing it for downstream consumers like Kinesis Firehose. Think of it as a moving window of data that maintains records for 24 hours.
     
-  - The stream uses the city name as a partition key, helping organize data for downstream processing. This partitioning ensures data from the same city goes to the same shard, maintaining order within each city's data stream. This was achieved in the Python code shown above where we set `PartitionKey=weather_data["city"]`.
+- The stream uses the city name as a partition key, which is like putting each city's data into its own dedicated lane on a highway. Just as having separate lanes prevents cars from interfering with each other's flow, having separate partitions ensures temperature readings from London don't get mixed up with readings from Manchester. When we set `PartitionKey=weather_data["city"]`, we're telling Kinesis "keep all of London's data together, all of Manchester's data together, and all of Edinburgh's data together." This helps maintain the correct time order of temperature readings for each city.
     
-  - Let's now use the Data Viewer to inspect data in our Kinesis Stream:
-      1. Select the `Data Viewer` tab
-      2. Choose the single shard available from the `Shard` drop-down
-      3. From `Starting Position` drop-down, select `Trim horizon`
-      4. Click `Get records` to view the most recent weather data from our cities
-    ![KinesisDataStreamDataViewer](./images/KinesisDataStreamDataViewer.png)<br>
+- Let's now use the Data Viewer to inspect data in our Kinesis Stream:
+    1. Select the `Data Viewer` tab
+    2. Choose the single shard available from the `Shard` drop-down
+    3. From `Starting Position` drop-down, select `Trim horizon`
+    4. Click `Get records` to view the most recent weather data from our cities
+    
+![KinesisDataStreamDataViewer](./images/KinesisDataStreamDataViewer.png)<br>
 
 ```{note}
-📁 Our stream uses one shard because our data volume (3 cities × 1 record/minute = 3 records/minute) is well within a single shard's capacity of 1,000 records/second. This is perfect for workshop purposes and cost-efficient. VALIDATE WITH DOCS IN GEMINI
+📁 Our stream uses one shard because our data volume (3 cities × 1 record/minute = 3 records/minute) is well within a single shard's capacity. A busier applications might need multiple shards to handle more data volume: https://docs.aws.amazon.com/streams/latest/dev/service-sizes-and-limits.html
 ```
+
 ```{note}
  ⌚`Trim horizon` works because it shows all records in the stream's 24-hour retention window, letting you see historical data. `Latest` might not show records immediately because it only shows data that arrives after you start viewing. Since our Lambda writes once per minute, you might need to wait for the next data collection cycle to see new records.
 ```
@@ -452,7 +480,7 @@ def lambda_handler(event, context):
            - Fourth level: `day=DD`
        3. Navigate down through these levels to find the actual data files
        4. Notice the `.gz` extension on the files - this indicates GZIP compression
-   
+       ![DataLakeBuckets](./images/DataLakeBuckets.png)<br>
    - Key features to observe:
        - **Partitioning Structure**: The folder hierarchy directly matches the Firehose prefix pattern we examined earlier:
          ```
@@ -478,14 +506,14 @@ def lambda_handler(event, context):
 
 ### 📈 5 ANALYTICS / SERVING: Preview the Analytics Foundation:
    - Let's explore the analytical and data serving layer that will help us derive insights from our weather data. We'll examine both components:
-       - AWS Glue for data cataloging and ETL
+       - AWS Glue for data cataloguing and ETL
        - Amazon Redshift for data warehousing
    
    - First, let's look at our AWS Glue setup:
        - Open the `GlueDatabaseURL` from your CloudFormation `Outputs` tab in a new tab
        - Click into the database named `weather-analytics-dev-db`
        - Notice it's currently empty - we'll populate it in the next task
-       - Observe the database location points to our S3 data lake:
+       - Observe the database location points to our S3 data lake. However, even though this has been set we will still need to find it in our next exercise:
           ```
           s3://weather-analytics-data-lake-dev-[YOUR-ACCOUNT-ID]/processed/
           ```
@@ -496,45 +524,24 @@ def lambda_handler(event, context):
            - Single-node cluster (`dc2.large`) suitable for workshop volumes
            - Publicly accessible for workshop simplicity
            - Located in the same VPC as other components
-   
-   - Key architectural features:
-       - **Data Catalog Integration**: 
-           - Glue database is pre-configured to work with our S3 data lake
-           - Supports both batch and streaming analytics (we will do both later)
-           - Will enable schema discovery and ETL job creation (which we will do later)
-       
-       - **Warehouse Configuration**:
-           - Redshift cluster sized appropriately for workshop loads
-           - VPC security groups allow necessary access
-           - Set up for both direct queries and ETL operations
 
 ```{note}
-🏗️ This foundation sets us up for both batch and real-time analytics. The combination of Glue (for ETL and cataloging) and Redshift (for warehousing) provides a robust platform for deriving insights from our weather data.
-
-🔐 While this setup uses simplified security for workshop purposes (public access, basic credentials), production environments should implement:
-- Private subnets with NAT Gateways
-- AWS Secrets Manager for credentials
-- More restrictive security group rules
-- Enhanced VPC endpoint policies
+🏗️ This foundation sets us up for both batch and real-time analytics. The combination of Glue (for ETL and cataloguing) and Redshift (for warehousing) provides a robust platform for deriving insights from our weather data.
 ```
 
-Now that you understand how data flows through the system - from collection through streaming and into storage - you're ready to build the analytics capabilities in the next task! You'll create crawlers to catalog this data, develop ETL jobs to transform it, and ultimately load it into Redshift for analysis.
+Now that you understand how data flows through the system, from collection through streaming and into storage, you're ready to build the analytics capabilities in the next task! You'll create crawlers to catalogue this data, develop ETL jobs to transform it, and ultimately load it into Redshift for analysis.
 
 ```{note}
-🪟 Keep the CloudFormation Outputs tab open as you continue working - you'll frequently refer back to these resources throughout the workshop.
+🪟 Keep the CloudFormation Outputs tab open as you continue working, you may frequently refer back to these resources throughout the workshop.
 ```
 
 ## 🔎 Task 3: Data Lake Exploration with Glue and Athena
 
-> We've been asked to create a dashboard of... updated.. real time up 
-
-> Remember to make point can now stream into Redshift https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion.html
-
-> In this task, we'll first use AWS Glue to automatically discover and catalog our data structure, then use Athena to query this cataloged data. This represents best practice for data lake exploration, ensuring consistent schema management across your analytics services.
+> As part of our wind farm prototype, the maintenance team needs to analyse both real-time and historical temperature patterns at each turbine location. They need to know when temperatures approach critical thresholds (like 35°C) that could affect turbine performance, while also understanding longer-term temperature trends to optimize maintenance schedules. In this task, we'll use AWS Glue to automatically discover and catalogue our streaming temperature data, then use Athena to analyse it. Below is an excellent diagram from AWS about how crawled and catalgoued data can then be used in an ETL pipeline. We will do all of this!
 
 ![glue](https://docs.aws.amazon.com/images/glue/latest/dg/images/HowItWorks-overview.png)
 
-> Image from: https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html
+> *Image from: https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html*
 
 
 ### 📋 Set Up Glue Crawler:
@@ -564,7 +571,7 @@ Now that you understand how data flows through the system - from collection thro
    ![GlueRoleSelect](./images/GlueRoleSelect.png)<br>
    
 ```{note}
-🔐 The CloudFormation template already created this role with appropriate permissions for the crawler to access S3 and create catalog entries.
+🔐 The CloudFormation template already created this role with appropriate permissions for the crawler to access S3 and create Data Catalog entries.
 ```
 - **Step 4 Set output and scheduling**:
    - Target Database: Select `weather_analytics_dev_db`
@@ -580,12 +587,11 @@ Now that you understand how data flows through the system - from collection thro
 ### 🏃‍♂️ Run the Crawler:
 
 1. **Start Crawler**:
-   - Ensuring your new crawler is showing..
    - Click `Run crawler`
    - Wait for completion (usually around 2 minutes)
 
 2. **Verify Results and Edit Schema**:
-   - From the left hand navigation menu, expand `Data Catalog` and click on `Tables`, then select the table name created by the carwerly you implicity named with the `raw_` prefix eealire that should be called `raw_weather_data`
+   - From the left hand navigation menu, expand `Data Catalog` and click on `Tables`, then select the table name created by the Crawler you prefixed earlier with `raw_` and should be called `raw_weather_data`
    - Click on the table to examine its schema
    ![GlueTableSchema](./images/GlueTableSchema.png)<br>
    - At the top right of the Schema click `Edit schemas as JSON` and for the two fields of `measurement_time` and `collection_time` modify the type from `string` to `timestamp` then click `Save as new table version`.
@@ -619,20 +625,20 @@ Now that you understand how data flows through the system - from collection thro
     - Click on the `Editor` tab of Athena.
     - Look at the top right of the screen and note the default `primary` workgroup is selected. We will use this for our workshop.
     - Looking on the left-hand side, for `Data source` and note that `AwsDataCatalog` is selected by default, and below that `catalogue` is none.
-    - Also, note that Athena has detected and selected the Glue database called `weather-analytics_dev_db` that was created by the CloudFormation template and is in our `AwsDataCatalog`, .
+    - Also, note that Athena has detected and selected the Glue database called `weather-analytics_dev_db` that was created by the CloudFormation template and is in our `AwsDataCatalog`.
     - Finally, look bottom left in the `Tables` section where the table `raw_weather_data` we created with the Glue Crawler can be seen ready to query!
     - ![AthenaEditor](./images/AthenaEditor.png)
 
 ```{note}
-📚 In production environments, creating separate workgroups is recommended. This allows for:
+📚 In production environments, creating separate workgroups is recommended by AWS. This allows for:
 
 -   Cost tracking and control
 -   Team-specific configurations
 -   Usage attribution
 
-The default settings you see are for the 'primary' workgroup.
+The default settings you see are for the `primary` workgroup.
 
--   `AwsDataCatalog` is the system Athena uses to organize metadata. You can think of it as the root of your data organization.
+-   `AwsDataCatalog` is the system Athena uses to organise metadata. You can think of it as the root of your data organisation.
 -   A catalog is a group of databases within the `AwsDataCatalog`. We are using the `AwsDataCatalog` with no sub-catalogs.
 -   Athena has selected the `weather-analytics_dev_db` database because it is the only database in the `AwsDataCatalog`.
 
@@ -642,7 +648,7 @@ To learn more see: https://docs.aws.amazon.com/athena/latest/ug/data-sources-glu
 ### 📊 Inspect Your Weather Data:
 
 1. **Basic Data Exploration**:
-    - A quick way to quickly query the data in Athena is to click on the three dots to the right of a table then select `Preview Table`. This auto-genartes and runs working SQL to view the first 10 rows of the table. 
+    - To quickly query the data in Athena, click on the three dots to the right of a table then select `Preview Table`. This auto-generates and runs working SQL to view the first 10 rows of the table. 
     ![AthenaPreviewTable](./images/AthenaPreviewTable.png)
     - Or paste the code below into the query pane and click `Run`.
 
@@ -666,11 +672,11 @@ LIMIT 30;
 ```
    - Notice how we have:
      - Multiple rows with the same temperature and measurement_time
-     - Different collection_times for the same reading
+     - Different `collection_times` for the same reading
      - Weather readings that update every 15 minutes
 
 2. **Create a Clean View**:
-   - Let's create a view that handles deduplication:
+   - Let's create a view in Athena that removes this deduplication:
 
 ```{code-block} sql
 CREATE OR REPLACE VIEW clean_weather_data AS
@@ -703,7 +709,7 @@ GROUP BY
 ```
 
 3. **Verify the View**:
-   - Let's check our view is working as expected:
+   - Let's check our view is working as expected. Does this return de-duplicated data for you?
 
 ```{code-block} sql
 SELECT *
@@ -712,7 +718,7 @@ ORDER BY city, measurement_time DESC
 LIMIT 10;
 ```
 
-### 📈 Analyze Clean Data:
+### 📈 Analyse Clean Data:
 
 1. **Temperature Trends**:
    - Now we can write cleaner, more intuitive queries:
@@ -882,7 +888,7 @@ Try writing queries to answer these questions:
    - Use appropriate data types and compression
 
 2. **Monitor Query Metrics**:
-   - Click "Recent queries" to view:
+   - Click `Recent queries` to view:
      - Data scanned per query
      - Execution time
      - Cost implications
@@ -895,68 +901,86 @@ Try writing queries to answer these questions:
 
 ### Streaming, real time or near real time? What's the difference?
 
+While our focus today is on streaming data processing, it's important to understand the key differences between streaming, real-time, and near real-time processing to make informed architectural decisions.
 
-```{note}
-While our focus today is on ...
-```
-````{dropdown} For more detail on ...., click here
-In this workshop, ..
-````
+In this workshop, we've built what's technically a near real-time system, not a true real-time system. Here's why:
 
-```{admonition} Question
-Can you remember the difference between A and B?
-```
-`````{hint}
-:class: dropdown
-Think about ....
-````{dropdown} For the solution, click here
-The answer is ....
-````
-`````
+1. Real-time Processing:
+   - Processing happens immediately as data arrives (microseconds to milliseconds)
+   - No batching or buffering
+   - Examples: Emergency systems, automated trading platforms
+   - Typically requires specialised hardware and software
 
-### Another topic
+2. Near Real-time Processing (Our Weather Pipeline):
+   - Short delays are acceptable (seconds to minutes)
+   - Uses buffering (our Kinesis streams)
+   - Balances responsiveness with system efficiency
+   - More cost-effective and easier to maintain
 
+3. Stream Processing:
+   - Continuous processing of unbounded data
+   - Can be either real-time or near real-time
+   - Focuses on data flow rather than timing
+   - Our pipeline is an example of near real-time stream processing
 
----
+Our architecture introduces several deliberate delays:
+- Lambda function runs every minute
+- Kinesis Firehose buffers for 60 seconds (or 64mb)
+- Glue crawler runs on demand or scheduled
+These delays make the system more robust and cost-effective while still meeting business needs.
+
+### Evaluating Your Architecture Choice
+
+When deciding between batch and streaming for your own projects, consider:
+
+#### Business Requirements
+- What's the maximum acceptable delay?
+- Is the extra complexity of streaming justified?
+- What's the cost-benefit tradeoff?
+
+#### Technical Considerations
+- Data volume and velocity
+- Processing complexity
+- Existing infrastructure
+- Team expertise
+
+#### Maintenance Overhead
+- Monitoring requirements
+- Error handling complexity
+- Operational costs
 
 ### This afternoon - reflecting on your project
 
-With this morning's workshop exercise completed, you have now explored key processes for...
+This afternoon, we will consider how your organisation or project and its potential use cases might benefit from streaming architectures. Consider:
 
-This afternoon, we will consider how your project and its potential ...
+- Could streaming solve any current data freshness challenges?
+- Would near real-time processing provide business value?
+- How might you adapt today's patterns for your specific needs?
 
-```{note}
+---
+
 🎉 Congratulations - you've completed today's main exercise! 
 
-Now that you've explored your weather data lake with Athena, if your up for the going further exercises, you're ready to move on to more advanced analytics using AWS Glue and Redshift. One task is to :
-- Create and run Glue crawlers
-- Build ETL jobs for data transformation
-- Load processed data into Redshift for high-performance querying
+Now that you've explored your weather data lake with Athena, if you're up for the going further exercises, you're ready to move on to more advanced analytics. Below are three optional exercises that extend what you've learned. Choose any that:
 
-```{note}
-🗒️ Keep your Athena queries handy - you'll use them to validate your ETL results and compare query performance between Athena and Redshift.
-```
-
-Below are three optional exercises that extend what you've learned. Choose any that:
 - Are relevant to your current role
 - Match your project's needs
 - Interest you technically
 
 Even if you don't complete them, consider reviewing what they cover in your own time, they demonstrate common patterns you might need later in your data engineering career.
 
-
 ## 🚀 Going Further
 
 ### **🎼 Going Further 1:** Orchestrated pipeline to write to Redshift
 
-> So far we have crawled the data being streamed into S3 on-demand. A data analyst has asked for a table in Redshift they can explore and connect to PowerBI that is regularly updated with temperature readings. In this exercise we will create the target table in Redshift, then create a Glue visual ETL job that Extracts, Transforms and Loads the table from the Glue database to the Redshfit table. We query Redshift and visualise temperature over time. Finally, we orchestrate the full process by using AWS Glue `Workflows (orchestration)` to regularly run our S3 crawler (created in the main exercise), followed by the visual ETL.
+> Our wind farm operators need their temperature data accessible for maintenance planning and turbine performance analysis. While our streaming pipeline continuously collects data in S3, the team wants an automatically refreshing Redshift table they can connect to PowerBI for ongoing temperature monitoring. In this exercise, we'll create this analytics pipeline by building a specialised Redshift table, developing a Glue visual ETL job to process the temperature readings, setting up temperature trend visualisation, and orchestrating regular data refresh using AWS Glue Workflows to coordinate crawling and ETL processes.
 
 #### 🎯 Create target table in Redshift
 
 1. **Connect to Redshift database**:
    - In the search bar at the top, search for `Redshift` and open in a new tab.
-   - You will several `Access denied..` messages you can safely ignore (they are explained in the note below).
-   - Click on the only Redshfit cluster listed called `weather-stream`.
+   - You will see several `Access denied..` messages you can safely ignore (they are explained in the note below).
+   - Click on the only Redshiit cluster listed called `weather-stream`.
    - Click on the `Query data` dropdown (that is on the top right) then select `Query in query editor`.
    - Click `Connect to database` then in the `Database name` box enter `weather` and for the `Database user` enter `corndeladmin`, then click `Connect`.
     ![RedshfitDatabaseConnect](./images/RedshfitDatabaseConnect.png)
@@ -1001,7 +1025,7 @@ SORTKEY(window_start_time, city);
    - From `Database` select `weather-analytics_dev_db`.
    - From `Table` select `raw_weather_data` (this is the table you created in the main exercise of this workshop by crawling the S3 data lake).
    ![VisualETL_Source](./images/VisualETL_Source.png)
-   - So that this ETL has permission to access our data source, click on the `Job details` tab and for the `IAM Role` drop-down select `weather-analytics-glue-role-dev`. Also change `Requested number of workers` from the default `10` to `2`. This means our job will use less DPUs and not reach the "A Cloud Guru" DPU limit that has been set as quickly.
+   - So that this ETL has permission to access our data source, click on the `Job details` tab and for the `IAM Role` drop-down select `weather-analytics-glue-role-dev`. Also change `Requested number of workers` from the default `10` to `2`. This means our job will use less DPUs and take longer to reach the "A Cloud Guru" DPU limit.
    ![VisualETL_Role](./images/VisualETL_Role.png)
    - On the top left edit the name of the ETL to `ETL_job`, then on the top right click `Save`.
 
@@ -1057,25 +1081,25 @@ FROM deduplicated_data
    - In the `Targets` tab click on `Amazon Redshift`.
    - In the pane to the right, from the `Redshift connection` select `weather-analytics-redshift-connection-dev`.
    - For the `Schema` select `public`.
-   - For the `Table` select `real_time_weather_stats` (this is the table you created in an earlier step in Redshfit).
+   - For the `Table` select `real_time_weather_stats` (this is the table you created in an earlier step in Redshift).
    - For `Handling of data and target table` select `TRUNCATE`.
    - Finally click `Save` and then `Run` to start your ETL job.
-   - From the gren message at the top click on `Run details` to monitor your job run. It will take around four minutes to complete and for its `Run status` to change from `Running` to `Succeeded`.
+   - From the green message at the top you can click on `Run details` to monitor your job run. It will take around four minutes to complete and for its `Run status` to change from `Running` to `Succeeded`.
 ![VisualETL_Redshift](./images/VisualETL_Redshift.png)<br>
 
 ####  📈 Inspect and visualise Redshift target table
 
 1. **Inspect data in target table**:
-   - Go to the browswer tab for Redshift you had open earlier and the Query Editor.
-   - Use the plus icon to open a new blank query window and paste the SQL code below then click `Run` to inspect the raw data in the target table.
+   - Go to the the browser tab for Redshift you had open earlier and use the Query Editor.
+   - Use the plus icon to open a new blank query window and paste the SQL code from below, then click `Run` to inspect the raw data in the target table.
 
 ```{code-block} sql
 SELECT *
 FROM real_time_weather_stats;
 ```
 
-1. **Visualise London temperature over time**:
-   - Use the plus icon to open a new blank query window and paste the SQL code below then click `Run`.
+2. **Visualise London temperature over time**:
+   - Use the plus icon to open another new blank query window and paste the SQL code below then click `Run`.
    - In the `Query results` pane click `Visualise`.
    - Select `Chart type` as `Bar`.
    - Select `X axis` as `minutessincemidnight`.
@@ -1097,7 +1121,7 @@ ORDER BY window_start_time;
 #### 🎼 Orchestrate the entire process!
 
 1. **Create and run orchesterated workflow**:
-   - Go to the browswer tab for Glue you had open earlier.
+   - Go to the browser tab for Glue you had open earlier.
    - In the left hand menu click on `Workflows (orchestration)`.
    - Click `Add workflow` and name it `weather_workflow` then click `Create workflow`.
    - Click on `weather_workflow` then `Add trigger` then `Add new`.
@@ -1116,17 +1140,17 @@ ORDER BY window_start_time;
     ![Workflow_Canvas](./images/Workflow_Canvas.png)<br>
 
 1. **Monitor workflow**:
-   - In the left hand menu of glue click on `workflows (orchestration).
+   - In the left hand menu of glue click on `Workflows (orchestration)`.
    - Click on the workflow `weather_workflow`.
    - Click on the `History` tab.
    - Select the `Workflow run ID` with the status `Running` then click `View run details`.
-   - When this triggers you should see the nodes incrementally chaning from `Not Started` to `🔁 Running` then `✅ Succeeded`.
+   - When this triggers you should see the nodes incrementally changing from `Not Started` to `🔁 Running` then `✅ Succeeded`.
     ![Workflow_Monitor](./images/Workflow_Monitor.png)<br>
-    - when all noes are at `✅ Succeeded` status, return to redshift and re-run your plot code from the previous task to confirm new data has arrived into the target table by comparing this plot to your previous plot.
+    - When all nodes are at `✅ Succeeded` status, return to Redshift and re-run your plot code from the previous task to confirm new data has arrived into the target table by comparing this plot to your previous plot!
     ![Redshift_NewPlot](./images/Redshift_NewPlot.png)<br>
 
 ```{Note}
-⛔ At this point or soon after, your ACG sandbox may shut down due to exceeding Glue DPU (Data Processing Unit) limits. You’ll receive an email titled “Your Hands-On Lab or Cloud Playground has been shut down,” explaining the suspension due to excessive DPU usage.
+⛔ At this point or soon after, your ACG sandbox may shut down due to exceeding Glue DPU (Data Processing Unit) limits. You’ll receive an email titled "Your Hands-On Lab or Cloud Playground has been shut down" explaining the suspension due to excessive DPU usage.
 
 AWS Glue jobs, being Spark-based, provision distributed computing environments even for small tasks, which can quickly hit ACG's limits designed to prevent runaway costs. This restriction is a helpful reminder of resource management in data processing.
 
@@ -1135,12 +1159,12 @@ If your sandbox is suspended, don’t worry, this is part of learning to use pow
 
 ### **📝 Going Further 2:** Data architecture diagram
 
-> So far, we’ve used many AWS services in a deliberate sequence. If you had to explain this architecture to a colleague, they might lose track when you describe all the different AWS services and how they interact. This is where architecture diagrams become essential—not just a nice-to-have. They facilitate clear and transparent discussions with various colleagues, whether to address the security of what you’re building, collaborate, or consider changes to the architecture. These changes might involve using different services, transitioning to another cloud platform like Azure or GCP, or adopting a new streaming framework like Kafka.
+> So far, we’ve used many AWS services in a deliberate sequence. If you had to explain this architecture to a colleague, they might lose track when you describe all the different AWS services and how they interact. This is where architecture diagrams become essential, not just a nice-to-have. They help you  have clear and transparent discussions with various colleagues, whether to address the security of what you’re building, collaborate, or consider changes to the architecture. These changes might involve using different services, transitioning to another cloud platform like Azure or GCP, or adopting a new streaming framework like Kafka.
 
 ![Workshop_09_architecture.drawio](./images/Workshop_09_architecture.drawio.png)<br>
 
 ```{note}
-🗺️This is also an excellent opportunity to practice creating clear and visually appealing architecture diagrams. These diagrams are not only helpful for explaining your current work but could also form part of your project, including as an appendix in your project evaluation report for the End Point Assessment. Additionally, when answering questions about your project to provide verbal evidence for pass descriptors, a clear architecture diagram can be an invaluable tool. It gives you a strong visual aid to screen share, discuss, and use as a reference point to demonstrate your knowledge and skills gained during the apprenticeship.
+🗺️This is also an excellent opportunity to practice creating clear and visually appealing architecture diagrams. These diagrams are not only helpful for explaining your current work but could also form part of your project, including as an appendix in your project evaluation report for your End Point Assessment. Additionally, when answering questions about your project to provide verbal evidence for Pass Descriptors, a clear architecture diagram gives you a strong visual aid to screen share, discuss, and use as a reference point to demonstrate your knowledge and skills gained during the apprenticeship!
 ```
 
 #### AWS Architecture Icons and Guidance
@@ -1152,22 +1176,22 @@ If your sandbox is suspended, don’t worry, this is part of learning to use pow
 #### Drawing and diagramming tools
 
 1. **Create workshop diagram**:
-   - Scroll down the web page `https://aws.amazon.com/architecture/icons/` to the section `Drawing and diagramming tools` and note the different tools AWS reccomends.
-   - We suggest starting with Draw.io as its free, simple to use and can be used to create professional diagrams in AWS, Azure, GCP, IBM Cloud, and on-premises architectures: `https://app.diagrams.net/`
+   - Scroll down the web page `https://aws.amazon.com/architecture/icons/` to the section `Drawing and diagramming tools` and note the different tools AWS recommends.
+   - We suggest starting with `Draw.io` as its free, simple to use and can be used to create professional diagrams in AWS, Azure, GCP, IBM Cloud, and on-premises architectures: `https://app.diagrams.net/`
    - Select where to save your diagram (or decide later)
    ![SaveDiagrams](./images/SaveDiagrams.png)<br>
    - Then select `File / New...` and click the `Blank Diagram` icon followed by clicking `Cloud` in the sidebar, then `Create`.
    ![drawio_blank](./images/drawio_blank.png)<br>
-   - To find the AWS icons that represent this architecture you can scroll down on the left hand side pallete and expand different AWS resource categories such as `AWS / Analytics` in which you will find Kinesis.
+   - To find the AWS icons that represent this architecture you can scroll down on the left hand side palette and expand different AWS resource categories such as `AWS / Analytics` in which you will find Kinesis.
    ![drawio_pallette](./images/drawio_pallette.png)<br>
-   - A faster way to find the icon you need is to use search at the top. For instance, searching for `Kinesis data stream` returns two icons shown below. You can mouse over over an icon to see how it is described. To determine which icon is the current official icon for that service, in the AWS PowerPoint file you downloaded earlier, search for the same words to see which icon is the current accepted one to use that matches to one of the choices in draw.io.
+   - A faster way to find the icon you need is to use search at the top. For instance, searching for `Kinesis data stream` returns two icons shown below. You can "mouse over" over an icon to see how it is described. To determine which icon is the current official icon for that service, in the AWS PowerPoint file you downloaded earlier, search for the same words to see which icon is the current accepted one to use that matches to one of the choices in draw.io.
    ![drawio_search](./images/drawio_search.png)<br>
-   - Now see if you can re-create the workshop architecture diagram shown above. Would you re-create it exactly or could you improve the diagram to look similar to an official AWS diagram like the example below? You can search for diagrams here: https://aws.amazon.com/architecture/reference-architecture-diagrams
+   - Now see if you can re-create the workshop architecture diagram shown above. Would you re-create it exactly? Or could you improve the diagram to look similar to an official AWS diagram like the example below? You can search for diagrams here: https://aws.amazon.com/architecture/reference-architecture-diagrams
    ![AWS_reference_architecture](./images/AWS_reference_architecture.png)<br>
    
 ### **➡️ Going Further 3:** Direct Streaming
 
-> In this final going further let's explore alternative patterns where we are more direct and see that we can potentially, using AWS Glue, stream directly from our Amazon Kinesis Data Stream into a Redshift table, or stream directly from Redshift itself and not use Glue at all. In this fast exercise we simply preview the data directly streamed in Glue, but then spend most of our time reflecting on the different possible patterns and why you may prefer one over the other depending on business needs.
+> While our current pipeline effectively collects and processes turbine temperature data, let's explore more direct streaming approaches that could reduce latency. We'll examine how AWS Glue can stream data straight from our Kinesis stream to Redshift, eliminating intermediate storage steps, and even look at Redshift's native streaming capabilities. Through this exploration, we'll evaluate which streaming pattern best serves our wind farm's need for rapid temperature monitoring, weighing factors like data freshness requirements, system complexity, and maintenance overhead.
 
 ![Workshop_09_architecture_going_further_direct_streaming.drawio](./images/Workshop_09_architecture_going_further_direct_streaming.drawio.png)<br>
 
@@ -1178,29 +1202,34 @@ If your sandbox is suspended, don’t worry, this is part of learning to use pow
    - From the left hand menu, from under `ELT jobs` click on `Visual ETL` the click `Visual ETL`.
     - On the top left edit the name of the ETL to `Streaming`, then on the top right click `Save`.
    - From the `Sources` menu click on `Amazon Kinesis` then click on the node itself on the canvas to reveal the properties of the node ot the right.
-   - From `Stream name` select `weather-analytics-stream-dev` which is the Amazon Kinesisi data stream (Broker) that the lambda function (Producer) writes to every 60 seconds.
+   - From `Stream name` select `weather-analytics-stream-dev` which is the Amazon Kinesis data stream (Broker) that the lambda function (Producer) writes to every 60 seconds.
    ![GlueStream](./images/GlueStream.png)<br>
    - So that this ETL has permission to access our Kinesis data stream, click on the `Job details` tab and for the `IAM Role` drop-down select `weather-analytics-glue-role-dev`. Also change `Worker type` to the lower spec `G 1X`.
    ![GlueStreamJobDetails](./images/GlueStreamJobDetails.png)<br>
 
-3. **Create Glue Visual ETL with data source and SQL transform**:
+2. **Create Glue Visual ETL with data source and SQL transform**:
    - Return to the `Visual` tab and you should soon see a `Data preview` of that source data
    ![GlueStreamSourcePreview](./images/GlueStreamSourcePreview.png)<br>
-   - Behind the Data preview tab is an `Output Schema` tab. This is the schema of the data that will output from this node into the next node of the exercise. Note that all types are correct but not the timesampe fields.
+   - Behind the Data preview tab is an `Output Schema` tab. This is the schema of the data that will output from this node into the next node of the exercise. Note that all types are correct but not the two timestamp fields.
    ![GlueStreamSourceSchema](./images/GlueStreamSourceSchema.png)<br>
-   - To address this, let's add a node after the source node to map the ..click the blue circle with a plus to add another node to the ETL.
-   - In the `Transforms` tab click on `Changes Schema`.
-   - Select the `Change Schema` node so that its properites show to the right. Correct the two data timestamp data types and drop the final field. After these changes the Data preview should automatically update and show you the data in its new schema, and update the Output schema. 
+   - To address this, let's add a node after the source node to correct the schema. Click the blue circle with a plus to add another node to the ETL.
+   - In the `Transforms` tab click on `Change Schema`.
+   - Select the `Change Schema` node so that its properties show to the right. Correct the two data timestamp data types and drop the final field. After these changes the Data preview should automatically update and show you the data in its new schema, and update the Output schema. 
    ![GlueStreamChangeSchema](./images/GlueStreamChangeSchema.png)<br>
    - Just like in the first going further exercise where we wrote to Redshift we could create a Redshfit table to match our schema and select Redshift as the targer.
    ![GlueStreamTarget](./images/GlueStreamTarget.png)<br>
 
 3. **Finalising this direct streaming pattern**:   
-    - In this direct streaming example we would still have duplications, think about how you could use both a SQL tranforms node and MERGE when you write to Redshift to handle potential duplicatoins. Click below to reveal a hint, then expand further for a fuller suggested answer.....
+    - In this direct streaming example we would still have duplications, think about how you could use both a SQL tranforms node and in the Target node to write to Redshift, use MERGE to handle potential duplications? For example, you could use a SQL transform node to deduplicate readings by grouping them by city and measurement time, then use Redshift's MERGE statement in the target node to intelligently update existing records or insert new ones, ensuring wind farm operators see accurate temperature data without duplicates while maintaining the low latency benefits of direct streaming.
 
 4. **Direct streaming into Redshift**:   
-    - A recent addition to Redshift is streaming direct https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion.html
-    - In this example https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion-example-station-data.html
+    - A newly released feature allows streaming data directly from Kinesis into Redshift using "materialized views", potentially eliminating the need for Glue ETL entirely. This offers even lower latency for temperature monitoring, though it requires careful consideration of data consistency and error handling. You can learn more about this approach in the Redshift documentation at: https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-streaming-ingestion.html
+
+```{note}
+⚠️ While direct streaming offers lower latency, it provides fewer safeguards against data inconsistencies compared to our original architecture. The intermediate S3 storage and Glue-managed ETL process gives us a reliable backup of raw data, easier debugging capabilities, and more robust error handling. These could well be important considerations when monitoring expenisve equipment like wind turbines where accurate temperature data directly impacts operational safety and maintenance decisions.
+```
+
+
    
 
 
