@@ -332,14 +332,9 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cost-management-best-practices">Cost Management Best Practices:</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapping-up-and-reflecting-on-your-project">Wrapping Up and Reflecting on Your Project</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-real-time-or-near-real-time-what-s-the-difference">Streaming, real time or near real time? What’s the difference?</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluating-your-architecture-choice">Evaluating Your Architecture Choice</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#business-requirements">Business Requirements</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#technical-considerations">Technical Considerations</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#maintenance-overhead">Maintenance Overhead</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapping-up-and-understanding-real-time-vs-near-real-time-streaming">Wrapping Up and Understanding Real-Time vs Near Real-Time Streaming</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-architecture-near-real-time-implementation">Current Architecture: Near Real-Time Implementation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#real-time-processing">Real-Time Processing</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#this-afternoon-reflecting-on-your-project">This afternoon - reflecting on your project</a></li>
 </ul>
 </li>
@@ -1404,82 +1399,85 @@ This workshop covers multiple AWS data engineering tools that represent common a
 </div>
 </section>
 </section>
-<section id="wrapping-up-and-reflecting-on-your-project">
-<h2>Wrapping Up and Reflecting on Your Project<a class="headerlink" href="#wrapping-up-and-reflecting-on-your-project" title="Link to this heading">#</a></h2>
-<section id="streaming-real-time-or-near-real-time-what-s-the-difference">
-<h3>Streaming, real time or near real time? What’s the difference?<a class="headerlink" href="#streaming-real-time-or-near-real-time-what-s-the-difference" title="Link to this heading">#</a></h3>
-<p>While our focus today is on streaming data processing, it’s important to understand the key differences between streaming, real-time, and near real-time processing to make informed architectural decisions.</p>
-<p>In this workshop, we’ve built what’s technically a near real-time system, not a true real-time system. Here’s why:</p>
+<section id="wrapping-up-and-understanding-real-time-vs-near-real-time-streaming">
+<h2>Wrapping Up and Understanding Real-Time vs Near Real-Time Streaming<a class="headerlink" href="#wrapping-up-and-understanding-real-time-vs-near-real-time-streaming" title="Link to this heading">#</a></h2>
+<p>Our workshop has demonstrated near real-time streaming, but let’s understand how this differs from true real-time processing and how we could modify our architecture for real-time needs.</p>
+<section id="current-architecture-near-real-time-implementation">
+<h3>Current Architecture: Near Real-Time Implementation<a class="headerlink" href="#current-architecture-near-real-time-implementation" title="Link to this heading">#</a></h3>
+<p>Our current pipeline introduces several intentional delays:</p>
 <ol class="arabic simple">
-<li><p>Real-time Processing:</p>
+<li><p>Lambda function collects data every 60 seconds from the weather API</p></li>
+<li><p>Kinesis Data Streams acts as a buffer, holding records for up to 24 hours</p></li>
+<li><p>Kinesis Firehose manages the delivery of data to S3:</p>
 <ul class="simple">
-<li><p>Processing happens immediately as data arrives (microseconds to milliseconds)</p></li>
-<li><p>No batching or buffering</p></li>
-<li><p>Examples: Emergency systems, automated trading platforms</p></li>
-<li><p>Typically requires specialised hardware and software</p></li>
+<li><p>Writes occur when either condition is first met:</p>
+<ul>
+<li><p>60 seconds have elapsed since last write, OR</p></li>
+<li><p>64 MB of data has accumulated</p></li>
 </ul>
 </li>
-<li><p>Near Real-time Processing (Our Weather Pipeline):</p>
-<ul class="simple">
-<li><p>Short delays are acceptable (seconds to minutes)</p></li>
-<li><p>Uses buffering (our Kinesis streams)</p></li>
-<li><p>Balances responsiveness with system efficiency</p></li>
-<li><p>More cost-effective and easier to maintain</p></li>
+<li><p>In our case, with small temperature readings, the 60-second timer typically triggers first</p></li>
 </ul>
 </li>
-<li><p>Stream Processing:</p>
+<li><p>Glue crawler keeps our data catalog updated:</p>
 <ul class="simple">
-<li><p>Continuous processing of unbounded data</p></li>
-<li><p>Can be either real-time or near real-time</p></li>
-<li><p>Focuses on data flow rather than timing</p></li>
-<li><p>Our pipeline is an example of near real-time stream processing</p></li>
+<li><p>Main exercise: Manual runs as needed</p></li>
+<li><p>Going Further exercise: Automated 10-minute schedule as part of the orchestrated workflow</p></li>
+</ul>
+</li>
+<li><p>End-to-end timing:</p>
+<ul class="simple">
+<li><p>~2-3 minutes from collection until data is available in S3 for Athena queries</p></li>
+<li><p>If completing the Going Further exercise, both the data catalog and Redshift table refresh every 10 minutes through the orchestrated workflow
+This creates a near real-time system where temperature data is typically available for analysis within a few minutes of collection, with regular refreshes of our analytical views (Redshift) every 10 minutes if using the orchestrated workflow.</p></li>
 </ul>
 </li>
 </ol>
-<p>Our architecture introduces several deliberate delays:</p>
-<ul class="simple">
-<li><p>Lambda function runs every minute</p></li>
-<li><p>Kinesis Firehose buffers for 60 seconds (or 64mb)</p></li>
-<li><p>Glue crawler runs on demand or scheduled
-These delays make the system more robust and cost-effective while still meeting business needs.</p></li>
-</ul>
 </section>
-<section id="evaluating-your-architecture-choice">
-<h3>Evaluating Your Architecture Choice<a class="headerlink" href="#evaluating-your-architecture-choice" title="Link to this heading">#</a></h3>
-<p>When deciding between batch and streaming for your own projects, consider:</p>
-<section id="business-requirements">
-<h4>Business Requirements<a class="headerlink" href="#business-requirements" title="Link to this heading">#</a></h4>
+<section id="real-time-processing">
+<h3>Real-Time Processing<a class="headerlink" href="#real-time-processing" title="Link to this heading">#</a></h3>
+<p>To achieve real-time processing we could modify our architecture in several ways including:</p>
+<ol class="arabic simple">
+<li><p><strong>Use Kinesis Data Analytics with Apache Flink</strong>:</p>
 <ul class="simple">
-<li><p>What’s the maximum acceptable delay?</p></li>
-<li><p>Is the extra complexity of streaming justified?</p></li>
-<li><p>What’s the cost-benefit tradeoff?</p></li>
+<li><p>Process data directly in the stream using continuous SQL queries</p></li>
+<li><p>React immediately to critical temperature thresholds</p></li>
+<li><p>Filter, aggregate and analyse data in-motion</p></li>
+<li><p>You could start to explore this yourself by going to the Kinesis Data stream, and from the tab called <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">analytics</span> <span class="pre">-</span> <span class="pre">new</span></code> launch true real time data analytics with Apache Flink. Find out more here: <a class="reference external" href="https://docs.aws.amazon.com/managed-flink/latest/java/how-notebook.html">https://docs.aws.amazon.com/managed-flink/latest/java/how-notebook.html</a>
+<img alt="ApacheFlink" src="_images/ApacheFlink.png" /><br></p></li>
 </ul>
-</section>
-<section id="technical-considerations">
-<h4>Technical Considerations<a class="headerlink" href="#technical-considerations" title="Link to this heading">#</a></h4>
+</li>
+<li><p><strong>Lambda Stream Processing</strong>:</p>
 <ul class="simple">
-<li><p>Data volume and velocity</p></li>
-<li><p>Processing complexity</p></li>
-<li><p>Existing infrastructure</p></li>
-<li><p>Team expertise</p></li>
+<li><p>Configure Lambda to trigger on every record</p></li>
+<li><p>Remove the one-minute collection interval</p></li>
+<li><p>Process each temperature reading as it arrives</p></li>
+<li><p>Enable immediate alerts and actions</p></li>
 </ul>
-</section>
-<section id="maintenance-overhead">
-<h4>Maintenance Overhead<a class="headerlink" href="#maintenance-overhead" title="Link to this heading">#</a></h4>
+</li>
+</ol>
+<p>The choice between real-time and near real-time depends on your specific needs. For instance with this workshop scenario:</p>
+<p>Real-Time Processing (milliseconds):</p>
 <ul class="simple">
-<li><p>Monitoring requirements</p></li>
-<li><p>Error handling complexity</p></li>
-<li><p>Operational costs</p></li>
+<li><p>Critical temperature thresholds requiring immediate shutdown</p></li>
+<li><p>Emergency cooling system activation</p></li>
+<li><p>Live turbine control adjustments</p></li>
 </ul>
-</section>
+<p>Near Real-Time Processing (seconds/minutes):</p>
+<ul class="simple">
+<li><p>General temperature monitoring</p></li>
+<li><p>Maintenance scheduling</p></li>
+<li><p>Performance optimisation</p></li>
+<li><p>Historical analysis</p></li>
+</ul>
 </section>
 <section id="this-afternoon-reflecting-on-your-project">
 <h3>This afternoon - reflecting on your project<a class="headerlink" href="#this-afternoon-reflecting-on-your-project" title="Link to this heading">#</a></h3>
-<p>This afternoon, we will consider how your organisation or project and its potential use cases might benefit from streaming architectures. Consider:</p>
+<p>This afternoon, we will consider how your organisation or project and its potential use cases that might benefit from streaming architectures. Consider:</p>
 <ul class="simple">
 <li><p>Could streaming solve any current data freshness challenges?</p></li>
 <li><p>Would near real-time processing provide business value?</p></li>
-<li><p>How might you adapt today’s patterns for your specific needs?</p></li>
+<li><p>How might you adapt any of today’s patterns for your specific needs?</p></li>
 </ul>
 <hr class="docutils" />
 <p>🎉 Congratulations - you’ve completed today’s main exercise!</p>
@@ -1884,14 +1882,9 @@ These delays make the system more robust and cost-effective while still meeting 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cost-management-best-practices">Cost Management Best Practices:</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapping-up-and-reflecting-on-your-project">Wrapping Up and Reflecting on Your Project</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-real-time-or-near-real-time-what-s-the-difference">Streaming, real time or near real time? What’s the difference?</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluating-your-architecture-choice">Evaluating Your Architecture Choice</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#business-requirements">Business Requirements</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#technical-considerations">Technical Considerations</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#maintenance-overhead">Maintenance Overhead</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapping-up-and-understanding-real-time-vs-near-real-time-streaming">Wrapping Up and Understanding Real-Time vs Near Real-Time Streaming</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-architecture-near-real-time-implementation">Current Architecture: Near Real-Time Implementation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#real-time-processing">Real-Time Processing</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#this-afternoon-reflecting-on-your-project">This afternoon - reflecting on your project</a></li>
 </ul>
 </li>

@@ -897,65 +897,64 @@ Try writing queries to answer these questions:
 💰 Athena pricing is based on data scanned. Well-structured queries on partitioned data help minimise costs. The partitioning scheme we implemented (by city and date) helps optimise both query performance and cost.
 ```
 
-## Wrapping Up and Reflecting on Your Project
+## Wrapping Up and Understanding Real-Time vs Near Real-Time Streaming
 
-### Streaming, real time or near real time? What's the difference?
+Our workshop has demonstrated near real-time streaming, but let's understand how this differs from true real-time processing and how we could modify our architecture for real-time needs.
 
-While our focus today is on streaming data processing, it's important to understand the key differences between streaming, real-time, and near real-time processing to make informed architectural decisions.
+### Current Architecture: Near Real-Time Implementation 
+Our current pipeline introduces several intentional delays:
 
-In this workshop, we've built what's technically a near real-time system, not a true real-time system. Here's why:
+1. Lambda function collects data every 60 seconds from the weather API
+2. Kinesis Data Streams acts as a buffer, holding records for up to 24 hours
+3. Kinesis Firehose manages the delivery of data to S3:
+   - Writes occur when either condition is first met:
+     - 60 seconds have elapsed since last write, OR
+     - 64 MB of data has accumulated
+   - In our case, with small temperature readings, the 60-second timer typically triggers first
+4. Glue crawler keeps our data catalog updated:
+   - Main exercise: Manual runs as needed
+   - Going Further exercise: Automated 10-minute schedule as part of the orchestrated workflow
+5. End-to-end timing:
+   - ~2-3 minutes from collection until data is available in S3 for Athena queries
+   - If completing the Going Further exercise, both the data catalog and Redshift table refresh every 10 minutes through the orchestrated workflow
+This creates a near real-time system where temperature data is typically available for analysis within a few minutes of collection, with regular refreshes of our analytical views (Redshift) every 10 minutes if using the orchestrated workflow.
 
-1. Real-time Processing:
-   - Processing happens immediately as data arrives (microseconds to milliseconds)
-   - No batching or buffering
-   - Examples: Emergency systems, automated trading platforms
-   - Typically requires specialised hardware and software
+### Real-Time Processing
+To achieve real-time processing we could modify our architecture in several ways including:
 
-2. Near Real-time Processing (Our Weather Pipeline):
-   - Short delays are acceptable (seconds to minutes)
-   - Uses buffering (our Kinesis streams)
-   - Balances responsiveness with system efficiency
-   - More cost-effective and easier to maintain
+1. **Use Kinesis Data Analytics with Apache Flink**:
+   - Process data directly in the stream using continuous SQL queries
+   - React immediately to critical temperature thresholds
+   - Filter, aggregate and analyse data in-motion
+   - You could start to explore this yourself by going to the Kinesis Data stream, and from the tab called `Data analytics - new` launch true real time data analytics with Apache Flink. Find out more here: https://docs.aws.amazon.com/managed-flink/latest/java/how-notebook.html
+   ![ApacheFlink](./images/ApacheFlink.png)<br>  
 
-3. Stream Processing:
-   - Continuous processing of unbounded data
-   - Can be either real-time or near real-time
-   - Focuses on data flow rather than timing
-   - Our pipeline is an example of near real-time stream processing
+2. **Lambda Stream Processing**:
+   - Configure Lambda to trigger on every record
+   - Remove the one-minute collection interval
+   - Process each temperature reading as it arrives
+   - Enable immediate alerts and actions
 
-Our architecture introduces several deliberate delays:
-- Lambda function runs every minute
-- Kinesis Firehose buffers for 60 seconds (or 64mb)
-- Glue crawler runs on demand or scheduled
-These delays make the system more robust and cost-effective while still meeting business needs.
+The choice between real-time and near real-time depends on your specific needs. For instance with this workshop scenario:
 
-### Evaluating Your Architecture Choice
+Real-Time Processing (milliseconds):
+- Critical temperature thresholds requiring immediate shutdown
+- Emergency cooling system activation
+- Live turbine control adjustments
 
-When deciding between batch and streaming for your own projects, consider:
-
-#### Business Requirements
-- What's the maximum acceptable delay?
-- Is the extra complexity of streaming justified?
-- What's the cost-benefit tradeoff?
-
-#### Technical Considerations
-- Data volume and velocity
-- Processing complexity
-- Existing infrastructure
-- Team expertise
-
-#### Maintenance Overhead
-- Monitoring requirements
-- Error handling complexity
-- Operational costs
+Near Real-Time Processing (seconds/minutes):
+- General temperature monitoring
+- Maintenance scheduling
+- Performance optimisation
+- Historical analysis
 
 ### This afternoon - reflecting on your project
 
-This afternoon, we will consider how your organisation or project and its potential use cases might benefit from streaming architectures. Consider:
+This afternoon, we will consider how your organisation or project and its potential use cases that might benefit from streaming architectures. Consider:
 
 - Could streaming solve any current data freshness challenges?
 - Would near real-time processing provide business value?
-- How might you adapt today's patterns for your specific needs?
+- How might you adapt any of today's patterns for your specific needs?
 
 ---
 
