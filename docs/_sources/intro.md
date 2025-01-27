@@ -101,11 +101,11 @@ This workshop aligns with several IFATE Data Engineer Pass Descriptors: https://
     🔻<br>
     **➡️➡️➡️ 2. BROKER:** Kinesis Data Stream buffers real-time data<br>
     🔻<br>
-    **📩 3. CONSUMER:** Kinesis Firehose manages delivery<br>
+    **📩 3. DELIVERY:** Kinesis Firehose manages delivery<br>
     🔻<br>
-    **🪣 4. STORAGE:** S3 data lake with smart partitioning<br>
+    **🪣 4. SINK/STORAGE:** S3 data lake with smart partitioning<br>
     🔻<br>
-    **📈 5. ANALYTICS/SERVING:** Athena for querying, Redshift for warehousing<br>
+    **📈 5. PROCESSING/ANALYTICS:** Glue for processing, Athena for querying, Redshift for warehousing<br>
     
     - In Going Further, there is an exercise to automate and orchestrate this entire flow through Glue Workflows, demonstrating how to coordinate data ingestion, transformation, and loading processes in a systematic way. Note we will consider orchestration practically and in more detail in Workshop 10.
 
@@ -232,11 +232,11 @@ Learn more about CloudFormation templates here: https://docs.aws.amazon.com/AWSC
 🔻<br>
 **➡️➡️➡️ 2. BROKER:** Kinesis Data Stream buffers real-time data<br>
 🔻<br>
-**📩 3. CONSUMER:** Kinesis Firehose manages delivery<br>
+**📩 3. DELIVERY:** Kinesis Firehose manages delivery<br>
 🔻<br>
-**🪣 4. STORAGE:** S3 data lake with smart partitioning<br>
+**🪣 4. SINK/STORAGE:** S3 data lake with smart partitioning<br>
 🔻<br>
-**📈 5. ANALYTICS/SERVING:** Athena for querying, Redshift for warehousing<br>
+**📈 5. PROCESSING/ANALYTICS:** Glue for processing, Athena for querying, Redshift for warehousing<br>
 
 ### ✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):
 
@@ -436,7 +436,7 @@ For example, in a real wind farm deployment, each turbine would likely push its 
  ⌚`Trim horizon` works because it shows all records in the stream's 24-hour retention window, letting you see historical data. `Latest` might not show records immediately because it only shows data that arrives after you start viewing. Since our Lambda writes once per minute, you might need to wait for the next data collection cycle to see new records.
 ```
 
-### 📩 3 CONSUMER: Examine the Data Transformation (Kinesis Firehose):
+### 📩 3 DELIVERY: Examine how data is delivered to the sink (Kinesis Firehose):
   - From your CloudFormation `Outputs` tab, locate `KinesisFirehoseURL` and open in a new tab.
     - Kinesis Firehose acts as our delivery service, taking data from the Kinesis stream and preparing it for long-term storage in S3. Let's explore its key configurations:
         - Click on the `weather-analytics-firehose-dev` delivery stream
@@ -468,7 +468,7 @@ For example, in a real wind farm deployment, each turbine would likely push its 
 🗂️ The dynamic partitioning structure provides efficient querying later. By organising data by city and time components, we can quickly locate specific data subsets without scanning the entire dataset. For example, finding all London temperatures for a specific month becomes a targeted operation.
 ```
 
-### 📂 4 STORAGE: Inspect the Data Lake (S3):
+### 📂 4 SINK/STORAGE: Inspect the Data Lake (S3):
    - From your CloudFormation `Outputs` tab, locate `DataLakeBucketURL` and open in a new tab. 
 
    - This S3 bucket serves as our data lake, providing long-term storage of our weather data in an organised and cost-effective way. Let's explore its structure:
@@ -504,8 +504,8 @@ For example, in a real wind farm deployment, each turbine would likely push its 
 🎯 The partitioned structure isn't just for organisation, it enables targeted data access. When you later query this data with Athena or process it with Glue, it can efficiently access specific time periods or locations without scanning the entire dataset.
 ```
 
-### 📈 5 ANALYTICS / SERVING: Preview the Analytics Foundation:
-   - Let's explore the analytical and data serving layer that will help us derive insights from our weather data. We'll examine both components:
+### 📈 5 PROCESSING / ANALYTICS: Preview the Analytics Foundation:
+   - Let's now explore the processing and analytical layer that will help us derive insights from our weather data. We'll examine both components:
        - AWS Glue for data cataloguing and ETL
        - Amazon Redshift for data warehousing
    
@@ -1190,7 +1190,7 @@ If your sandbox is suspended, don’t worry, this is part of learning to use pow
    
 ### **➡️ Going Further 3:** Direct Streaming
 
-> While our current pipeline effectively collects and processes turbine temperature data, let's explore more direct streaming approaches that could reduce latency. We'll examine how AWS Glue can stream data straight from our Kinesis stream to Redshift, eliminating intermediate storage steps, and even look at Redshift's native streaming capabilities. Through this exploration, we'll evaluate which streaming pattern best serves our wind farm's need for rapid temperature monitoring, weighing factors like data freshness requirements, system complexity, and maintenance overhead.
+> Our current pipeline efficiently collects and processes turbine temperature data, but we can explore direct streaming approaches to reduce latency and improve data freshness. These approaches include consuming data directly from the broker (AWS Kinesis Data Streams) using AWS Glue or streaming it straight into Redshift, bypassing the intermediate S3 storage layer. We'll also examine Redshift's native materialized view streaming capabilities. This section will guide you through these options and help evaluate the best pattern for rapid and reliable temperature monitoring, balancing factors like data consistency, operational complexity, and maintenance needs.
 
 ![Workshop_09_architecture_going_further_direct_streaming.drawio](./images/Workshop_09_architecture_going_further_direct_streaming.drawio.png)<br>
 

@@ -315,9 +315,9 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-2-explore-and-understand-your-streaming-application-so-far">🗺️ Task 2: Explore and understand your streaming application so far</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#producer-explore-the-data-producer-lambda-function">✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#broker-view-data-in-the-data-stream-kinesis">➡️➡️➡️ 2 BROKER: View data in the Data Stream (Kinesis):</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#consumer-examine-the-data-transformation-kinesis-firehose">📩 3 CONSUMER: Examine the Data Transformation (Kinesis Firehose):</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#storage-inspect-the-data-lake-s3">📂 4 STORAGE: Inspect the Data Lake (S3):</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytics-serving-preview-the-analytics-foundation">📈 5 ANALYTICS / SERVING: Preview the Analytics Foundation:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#delivery-examine-how-data-is-delivered-to-the-sink-kinesis-firehose">📩 3 DELIVERY: Examine how data is delivered to the sink (Kinesis Firehose):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sink-storage-inspect-the-data-lake-s3">📂 4 SINK/STORAGE: Inspect the Data Lake (S3):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-analytics-preview-the-analytics-foundation">📈 5 PROCESSING / ANALYTICS: Preview the Analytics Foundation:</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-3-data-lake-exploration-with-glue-and-athena">🔎 Task 3: Data Lake Exploration with Glue and Athena</a><ul class="nav section-nav flex-column">
@@ -453,11 +453,11 @@ This workshop covers multiple AWS data engineering tools that represent common a
 🔻<br>
 <strong>➡️➡️➡️ 2. BROKER:</strong> Kinesis Data Stream buffers real-time data<br>
 🔻<br>
-<strong>📩 3. CONSUMER:</strong> Kinesis Firehose manages delivery<br>
+<strong>📩 3. DELIVERY:</strong> Kinesis Firehose manages delivery<br>
 🔻<br>
-<strong>🪣 4. STORAGE:</strong> S3 data lake with smart partitioning<br>
+<strong>🪣 4. SINK/STORAGE:</strong> S3 data lake with smart partitioning<br>
 🔻<br>
-<strong>📈 5. ANALYTICS/SERVING:</strong> Athena for querying, Redshift for warehousing<br></p>
+<strong>📈 5. PROCESSING/ANALYTICS:</strong> Glue for processing, Athena for querying, Redshift for warehousing<br></p>
 <ul class="simple">
 <li><p class="sd-card-text">In Going Further, there is an exercise to automate and orchestrate this entire flow through Glue Workflows, demonstrating how to coordinate data ingestion, transformation, and loading processes in a systematic way. Note we will consider orchestration practically and in more detail in Workshop 10.</p></li>
 </ul>
@@ -598,11 +598,11 @@ This workshop covers multiple AWS data engineering tools that represent common a
 🔻<br>
 <strong>➡️➡️➡️ 2. BROKER:</strong> Kinesis Data Stream buffers real-time data<br>
 🔻<br>
-<strong>📩 3. CONSUMER:</strong> Kinesis Firehose manages delivery<br>
+<strong>📩 3. DELIVERY:</strong> Kinesis Firehose manages delivery<br>
 🔻<br>
-<strong>🪣 4. STORAGE:</strong> S3 data lake with smart partitioning<br>
+<strong>🪣 4. SINK/STORAGE:</strong> S3 data lake with smart partitioning<br>
 🔻<br>
-<strong>📈 5. ANALYTICS/SERVING:</strong> Athena for querying, Redshift for warehousing<br></p>
+<strong>📈 5. PROCESSING/ANALYTICS:</strong> Glue for processing, Athena for querying, Redshift for warehousing<br></p>
 <section id="producer-explore-the-data-producer-lambda-function">
 <h3>✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):<a class="headerlink" href="#producer-explore-the-data-producer-lambda-function" title="Link to this heading">#</a></h3>
 <ul class="simple">
@@ -816,8 +816,8 @@ This workshop covers multiple AWS data engineering tools that represent common a
 <p>⌚<code class="docutils literal notranslate"><span class="pre">Trim</span> <span class="pre">horizon</span></code> works because it shows all records in the stream’s 24-hour retention window, letting you see historical data. <code class="docutils literal notranslate"><span class="pre">Latest</span></code> might not show records immediately because it only shows data that arrives after you start viewing. Since our Lambda writes once per minute, you might need to wait for the next data collection cycle to see new records.</p>
 </div>
 </section>
-<section id="consumer-examine-the-data-transformation-kinesis-firehose">
-<h3>📩 3 CONSUMER: Examine the Data Transformation (Kinesis Firehose):<a class="headerlink" href="#consumer-examine-the-data-transformation-kinesis-firehose" title="Link to this heading">#</a></h3>
+<section id="delivery-examine-how-data-is-delivered-to-the-sink-kinesis-firehose">
+<h3>📩 3 DELIVERY: Examine how data is delivered to the sink (Kinesis Firehose):<a class="headerlink" href="#delivery-examine-how-data-is-delivered-to-the-sink-kinesis-firehose" title="Link to this heading">#</a></h3>
 <ul>
 <li><p>From your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab, locate <code class="docutils literal notranslate"><span class="pre">KinesisFirehoseURL</span></code> and open in a new tab.</p>
 <ul>
@@ -865,8 +865,8 @@ This workshop covers multiple AWS data engineering tools that represent common a
 <p>🗂️ The dynamic partitioning structure provides efficient querying later. By organising data by city and time components, we can quickly locate specific data subsets without scanning the entire dataset. For example, finding all London temperatures for a specific month becomes a targeted operation.</p>
 </div>
 </section>
-<section id="storage-inspect-the-data-lake-s3">
-<h3>📂 4 STORAGE: Inspect the Data Lake (S3):<a class="headerlink" href="#storage-inspect-the-data-lake-s3" title="Link to this heading">#</a></h3>
+<section id="sink-storage-inspect-the-data-lake-s3">
+<h3>📂 4 SINK/STORAGE: Inspect the Data Lake (S3):<a class="headerlink" href="#sink-storage-inspect-the-data-lake-s3" title="Link to this heading">#</a></h3>
 <ul>
 <li><p>From your CloudFormation <code class="docutils literal notranslate"><span class="pre">Outputs</span></code> tab, locate <code class="docutils literal notranslate"><span class="pre">DataLakeBucketURL</span></code> and open in a new tab.</p></li>
 <li><p>This S3 bucket serves as our data lake, providing long-term storage of our weather data in an organised and cost-effective way. Let’s explore its structure:</p>
@@ -916,10 +916,10 @@ This workshop covers multiple AWS data engineering tools that represent common a
 <p>🎯 The partitioned structure isn’t just for organisation, it enables targeted data access. When you later query this data with Athena or process it with Glue, it can efficiently access specific time periods or locations without scanning the entire dataset.</p>
 </div>
 </section>
-<section id="analytics-serving-preview-the-analytics-foundation">
-<h3>📈 5 ANALYTICS / SERVING: Preview the Analytics Foundation:<a class="headerlink" href="#analytics-serving-preview-the-analytics-foundation" title="Link to this heading">#</a></h3>
+<section id="processing-analytics-preview-the-analytics-foundation">
+<h3>📈 5 PROCESSING / ANALYTICS: Preview the Analytics Foundation:<a class="headerlink" href="#processing-analytics-preview-the-analytics-foundation" title="Link to this heading">#</a></h3>
 <ul>
-<li><p>Let’s explore the analytical and data serving layer that will help us derive insights from our weather data. We’ll examine both components:</p>
+<li><p>Let’s now explore the processing and analytical layer that will help us derive insights from our weather data. We’ll examine both components:</p>
 <ul class="simple">
 <li><p>AWS Glue for data cataloguing and ETL</p></li>
 <li><p>Amazon Redshift for data warehousing</p></li>
@@ -1755,7 +1755,7 @@ This creates a near real-time system where temperature data is typically availab
 <section id="going-further-3-direct-streaming">
 <h3><strong>➡️ Going Further 3:</strong> Direct Streaming<a class="headerlink" href="#going-further-3-direct-streaming" title="Link to this heading">#</a></h3>
 <blockquote>
-<div><p>While our current pipeline effectively collects and processes turbine temperature data, let’s explore more direct streaming approaches that could reduce latency. We’ll examine how AWS Glue can stream data straight from our Kinesis stream to Redshift, eliminating intermediate storage steps, and even look at Redshift’s native streaming capabilities. Through this exploration, we’ll evaluate which streaming pattern best serves our wind farm’s need for rapid temperature monitoring, weighing factors like data freshness requirements, system complexity, and maintenance overhead.</p>
+<div><p>Our current pipeline efficiently collects and processes turbine temperature data, but we can explore direct streaming approaches to reduce latency and improve data freshness. These approaches include consuming data directly from the broker (AWS Kinesis Data Streams) using AWS Glue or streaming it straight into Redshift, bypassing the intermediate S3 storage layer. We’ll also examine Redshift’s native materialized view streaming capabilities. This section will guide you through these options and help evaluate the best pattern for rapid and reliable temperature monitoring, balancing factors like data consistency, operational complexity, and maintenance needs.</p>
 </div></blockquote>
 <p><img alt="Workshop_09_architecture_going_further_direct_streaming.drawio" src="_images/Workshop_09_architecture_going_further_direct_streaming.drawio.png" /><br></p>
 <section id="stream-directly-in-glue">
@@ -1865,9 +1865,9 @@ This creates a near real-time system where temperature data is typically availab
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-2-explore-and-understand-your-streaming-application-so-far">🗺️ Task 2: Explore and understand your streaming application so far</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#producer-explore-the-data-producer-lambda-function">✨ 1 PRODUCER: Explore the Data Producer (Lambda Function):</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#broker-view-data-in-the-data-stream-kinesis">➡️➡️➡️ 2 BROKER: View data in the Data Stream (Kinesis):</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#consumer-examine-the-data-transformation-kinesis-firehose">📩 3 CONSUMER: Examine the Data Transformation (Kinesis Firehose):</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#storage-inspect-the-data-lake-s3">📂 4 STORAGE: Inspect the Data Lake (S3):</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytics-serving-preview-the-analytics-foundation">📈 5 ANALYTICS / SERVING: Preview the Analytics Foundation:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#delivery-examine-how-data-is-delivered-to-the-sink-kinesis-firehose">📩 3 DELIVERY: Examine how data is delivered to the sink (Kinesis Firehose):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sink-storage-inspect-the-data-lake-s3">📂 4 SINK/STORAGE: Inspect the Data Lake (S3):</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-analytics-preview-the-analytics-foundation">📈 5 PROCESSING / ANALYTICS: Preview the Analytics Foundation:</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#task-3-data-lake-exploration-with-glue-and-athena">🔎 Task 3: Data Lake Exploration with Glue and Athena</a><ul class="nav section-nav flex-column">
@@ -1931,7 +1931,7 @@ By Corndel
 
   <p class="copyright">
     
-      © Copyright 2024.
+      © Copyright 2025.
       <br/>
     
   </p>
