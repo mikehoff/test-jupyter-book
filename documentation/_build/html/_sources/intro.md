@@ -923,11 +923,21 @@ This creates a near real-time system where temperature data is typically availab
 To achieve real-time processing we could modify our architecture in several ways including:
 
 1. **Use Kinesis Data Analytics with Apache Flink**:
-   - Process data directly in the stream using continuous SQL queries
-   - React immediately to critical temperature thresholds
-   - Filter, aggregate and analyse data in-motion
-   - You could start to explore this yourself by going to the Kinesis Data stream, and from the tab called `Data analytics - new` launch true real time data analytics with Apache Flink. Find out more here: https://docs.aws.amazon.com/managed-flink/latest/java/how-notebook.html
-   ![ApacheFlink](./images/ApacheFlink.png)<br>  
+  - Process data directly in the stream using continuous SQL queries 
+  - React immediately to critical temperature thresholds
+  - Filter, aggregate and analyse data in-motion
+  - Here is an example tumbling window query analogous to Azure Stream Analytics tumbling windows covered in Module 9.3 Streaming tools and frameworks:
+  
+  ```sql
+  SELECT TUMBLE_START(measurement_time, INTERVAL '15' MINUTES) as window_start,
+         city,
+         AVG(DISTINCT temperature) as avg_temperature
+  FROM weather_source
+  GROUP BY TUMBLE(measurement_time, INTERVAL '15' MINUTES), city;
+  ```
+- Note: Using DISTINCT in the aggregation ensures we don't skew averages by counting the same temperature multiple times, as our Lambda polls every minute but the weather API only updates every 15 minutes
+- You could start to explore this yourself by going to the Kinesis Data stream, and from the tab called `Data analytics - new` launch true real time data analytics with Apache Flink. Find out more here: https://docs.aws.amazon.com/managed-flink/latest/java/how-notebook.html
+  ![ApacheFlink](./images/ApacheFlink.png)<br>
 
 2. **Lambda Stream Processing**:
    - Configure Lambda to trigger on every record

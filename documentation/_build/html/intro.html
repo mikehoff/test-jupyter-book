@@ -1438,15 +1438,27 @@ This creates a near real-time system where temperature data is typically availab
 <h3>Real-Time Processing<a class="headerlink" href="#real-time-processing" title="Link to this heading">#</a></h3>
 <p>To achieve real-time processing we could modify our architecture in several ways including:</p>
 <ol class="arabic simple">
-<li><p><strong>Use Kinesis Data Analytics with Apache Flink</strong>:</p>
+<li><p><strong>Use Kinesis Data Analytics with Apache Flink</strong>:</p></li>
+</ol>
 <ul class="simple">
 <li><p>Process data directly in the stream using continuous SQL queries</p></li>
 <li><p>React immediately to critical temperature thresholds</p></li>
 <li><p>Filter, aggregate and analyse data in-motion</p></li>
+<li><p>Here is an example tumbling window query analogous to Azure Stream Analytics tumbling windows covered in Module 9.3 Streaming tools and frameworks:</p></li>
+</ul>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="n">TUMBLE_START</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">,</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;15&#39;</span><span class="w"> </span><span class="n">MINUTES</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">window_start</span><span class="p">,</span>
+<span class="w">       </span><span class="n">city</span><span class="p">,</span>
+<span class="w">       </span><span class="k">AVG</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">temperature</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_temperature</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">weather_source</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">TUMBLE</span><span class="p">(</span><span class="n">measurement_time</span><span class="p">,</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;15&#39;</span><span class="w"> </span><span class="n">MINUTES</span><span class="p">),</span><span class="w"> </span><span class="n">city</span><span class="p">;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Note: Using DISTINCT in the aggregation ensures we don’t skew averages by counting the same temperature multiple times, as our Lambda polls every minute but the weather API only updates every 15 minutes</p></li>
 <li><p>You could start to explore this yourself by going to the Kinesis Data stream, and from the tab called <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">analytics</span> <span class="pre">-</span> <span class="pre">new</span></code> launch true real time data analytics with Apache Flink. Find out more here: <a class="reference external" href="https://docs.aws.amazon.com/managed-flink/latest/java/how-notebook.html">https://docs.aws.amazon.com/managed-flink/latest/java/how-notebook.html</a>
 <img alt="ApacheFlink" src="_images/ApacheFlink.png" /><br></p></li>
 </ul>
-</li>
+<ol class="arabic simple" start="2">
 <li><p><strong>Lambda Stream Processing</strong>:</p>
 <ul class="simple">
 <li><p>Configure Lambda to trigger on every record</p></li>
