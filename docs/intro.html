@@ -1459,6 +1459,31 @@ This creates a near real-time system where temperature data is typically availab
 <img alt="ApacheFlink" src="_images/ApacheFlink.png" /><br></p></li>
 </ul>
 <ol class="arabic simple" start="2">
+<li><p><strong>Firehose Lambda Transformation</strong>:</p></li>
+</ol>
+<ul class="simple">
+<li><p>Configure Firehose to invoke a Lambda function for data transformation</p></li>
+<li><p>Lambda processes batches of records before they reach S3</p></li>
+<li><p>Transform data in-flight with up to 5-minute processing window</p></li>
+<li><p>Enable data cleaning, aggregation, or enrichment</p></li>
+<li><p>Useful for deduplicating temperature readings that are collected every minute but only update every 15 minutes</p></li>
+<li><p>Find out more here: <a class="reference external" href="https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html">https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html</a></p></li>
+</ul>
+<p>The choice between real-time and near real-time depends on your specific needs. For instance with this workshop scenario:</p>
+<p>Real-Time Processing (milliseconds):</p>
+<ul class="simple">
+<li><p>Critical temperature thresholds requiring immediate shutdown</p></li>
+<li><p>Emergency cooling system activation</p></li>
+<li><p>Live turbine control adjustments</p></li>
+</ul>
+<p>Near Real-Time Processing (seconds/minutes):</p>
+<ul class="simple">
+<li><p>General temperature monitoring</p></li>
+<li><p>Maintenance scheduling</p></li>
+<li><p>Performance optimisation</p></li>
+<li><p>Historical analysis</p></li>
+</ul>
+<ol class="arabic simple" start="2">
 <li><p><strong>Lambda Stream Processing</strong>:</p>
 <ul class="simple">
 <li><p>Configure Lambda to trigger on every record</p></li>
