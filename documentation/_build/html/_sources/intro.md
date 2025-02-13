@@ -940,32 +940,20 @@ To achieve real-time processing we could modify our architecture in several ways
   ![ApacheFlink](./images/ApacheFlink.png)<br>
 
 2. **Firehose Lambda Transformation**:
-  - Configure Firehose to invoke a Lambda function for data transformation
-  - Lambda processes batches of records before they reach S3
-  - Transform data in-flight with up to 5-minute processing window
-  - Enable data cleaning, aggregation, or enrichment
-  - Useful for deduplicating temperature readings that are collected every minute but only update every 15 minutes
-  - Find out more here: https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
+    - Configure Firehose to invoke a Lambda function for data transformation
+    - Lambda processes batches of records before they reach S3
+    - Transform data in-flight with up to 5-minute processing window
+    - Enable data cleaning, aggregation, or enrichment
+    - Useful for deduplicating temperature readings that are collected every minute but only update every 15 minutes
+    - Find out more here: https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
 
-The choice between real-time and near real-time depends on your specific needs. For instance with this workshop scenario:
-
-Real-Time Processing (milliseconds):
-- Critical temperature thresholds requiring immediate shutdown
-- Emergency cooling system activation
-- Live turbine control adjustments
-
-Near Real-Time Processing (seconds/minutes):
-- General temperature monitoring
-- Maintenance scheduling
-- Performance optimisation
-- Historical analysis
-
-2. **Lambda Stream Processing**:
+3. **Lambda Stream Processing**:
    - Configure Lambda to trigger on every record
    - Remove the one-minute collection interval
    - Process each temperature reading as it arrives
    - Enable immediate alerts and actions
 
+```{note}
 The choice between real-time and near real-time depends on your specific needs. For instance with this workshop scenario:
 
 Real-Time Processing (milliseconds):
@@ -978,6 +966,7 @@ Near Real-Time Processing (seconds/minutes):
 - Maintenance scheduling
 - Performance optimisation
 - Historical analysis
+```
 
 ### This afternoon - reflecting on your project
 
