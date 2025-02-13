@@ -12,7 +12,7 @@ kernelspec:
 
 # Data Engineer Workshop 9: Advanced Stream Processing Pipelines
 
-## Introduction
+## Introduction to the Workshop
 
 ### 🧱 Building on Previous Workshops: From On-Demand to Batch and Streaming
 
